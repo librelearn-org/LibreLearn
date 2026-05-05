@@ -33,7 +33,9 @@ export const learnRouting = {
                 vraag: item.vraag,
                 antwoord: item.antwoord
               }))
-            }
+            },
+            fromLanguage: input.fromLanguage as string,
+            toLanguage: input.toLanguage as string
           },
           include: { listItems: true }
         })
