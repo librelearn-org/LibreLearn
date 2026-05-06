@@ -1,0 +1,1 @@
+LearnLib is los bruikbaar. Aleen zit het in de zelfde repo als openlearn omdat ik heb geen zin het op npm te zitten.

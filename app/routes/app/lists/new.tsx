@@ -105,7 +105,6 @@ export default function newList({ loaderData }: Route.ComponentProps) {
             setSaveState("saved");
         },
         onError: () => setSaveState("error"),
-
     });
 
     const handleSave = () => {

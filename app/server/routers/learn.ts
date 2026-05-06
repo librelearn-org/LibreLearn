@@ -167,6 +167,11 @@ export const learnRouting = {
         },
         include: {
           listSessionItems: true,
+          list: {
+            include: {
+              listItems: true
+            }
+          }
         }
       })
       return session
@@ -215,5 +220,31 @@ export const learnRouting = {
         }
       })
       return updated
+    }),
+  getLearnSession: protectedProcedure
+    .input(
+      z.uuid()
+    ).query(async ({ input, ctx }) => {
+      const session = await ctx.prisma.listSession.findFirst({
+        where: {
+          id: input
+        },
+        include: {
+          listSessionItems: {
+            include: {
+              listSessionItemAnswerHistories: true
+            }
+          },
+          list: {
+            include: {
+              listItems: true
+            }
+          }
+        }
+      })
+      if (session?.userId !== ctx.user.id && ctx.user.role !== "admin") {
+        throw new Error("You do not have permission to view this session")
+      }
+      return session
     })
 } satisfies TRPCRouterRecord

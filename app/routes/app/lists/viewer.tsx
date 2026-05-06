@@ -32,6 +32,7 @@ export default function Component({ loaderData }: Route.ComponentProps) {
                     <Button onClick={() => { nav("/app/list/new/" + loaderData.id) }}><Pencil /></Button>
                 }
             </ListItem>
+            <Button onClick={() => { nav("/app/learn/" + loaderData.id + "/testing") }}>TEST</Button>
             <LearnListItems data={loaderData.listItems.map((value) => { return { from: value.vraag, to: value.antwoord } })} />
         </div>
     );

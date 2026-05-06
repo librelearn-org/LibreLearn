@@ -901,6 +901,8 @@ describe("tRPC endpoints (integration)", () => {
               listItems: {
                 create: [{ vraag: "vraag", antwoord: "antwoord" }],
               },
+              fromLanguage: TaalSlugEnum.EN,
+              toLanguage: TaalSlugEnum.NL,
             },
             include: { listItems: true },
           });
@@ -956,6 +958,8 @@ describe("tRPC endpoints (integration)", () => {
               listItems: {
                 create: [{ vraag: "vraag", antwoord: "antwoord" }],
               },
+              fromLanguage: TaalSlugEnum.EN,
+              toLanguage: TaalSlugEnum.NL,
             },
             include: { listItems: true },
           });
@@ -992,6 +996,8 @@ describe("tRPC endpoints (integration)", () => {
             listItems: {
               create: [{ vraag: "vraag1", antwoord: "antwoord1" }],
             },
+            fromLanguage: TaalSlugEnum.EN,
+            toLanguage: TaalSlugEnum.NL,
           },
           include: { listItems: true },
         });
@@ -1004,6 +1010,8 @@ describe("tRPC endpoints (integration)", () => {
             listItems: {
               create: [{ vraag: "vraag2", antwoord: "antwoord2" }],
             },
+            fromLanguage: TaalSlugEnum.EN,
+            toLanguage: TaalSlugEnum.NL,
           },
           include: { listItems: true },
         });
@@ -1029,6 +1037,8 @@ describe("tRPC endpoints (integration)", () => {
               listItems: {
                 create: [{ vraag: "vraag", antwoord: "antwoord" }],
               },
+              fromLanguage: TaalSlugEnum.EN,
+              toLanguage: TaalSlugEnum.NL,
             },
             include: { listItems: true },
           });
@@ -1060,6 +1070,8 @@ describe("tRPC endpoints (integration)", () => {
             data: {
               name: `Empty List-${Date.now()}`,
               ownerId: user.id,
+              fromLanguage: TaalSlugEnum.EN,
+              toLanguage: TaalSlugEnum.NL,
             },
           });
           createdListIds.add(createdList.id);
@@ -1083,6 +1095,8 @@ describe("tRPC endpoints (integration)", () => {
               listItems: {
                 create: [{ vraag: "vraag", antwoord: "antwoord" }],
               },
+              fromLanguage: TaalSlugEnum.EN,
+              toLanguage: TaalSlugEnum.NL,
             },
             include: { listItems: true },
           });
@@ -1120,6 +1134,8 @@ describe("tRPC endpoints (integration)", () => {
               listItems: {
                 create: [{ vraag: "vraag", antwoord: "antwoord" }],
               },
+              fromLanguage: TaalSlugEnum.EN,
+              toLanguage: TaalSlugEnum.NL,
             },
             include: { listItems: true },
           });
@@ -1152,6 +1168,84 @@ describe("tRPC endpoints (integration)", () => {
               antwoord: "antwoord",
             })
           ).rejects.toBeInstanceOf(TRPCError);
+        });
+      });
+
+      describe("getlearnSession", () => {
+        it("retrieves a learn session with learn.getLearnSession", async () => {
+          const user = await createTestUser();
+
+          const createdList = await prisma.list.create({
+            data: {
+              name: `Topwoorden-${Date.now()}`,
+              ownerId: user.id,
+              listItems: {
+                create: [{ vraag: "vraag", antwoord: "antwoord" }],
+              },
+              fromLanguage: TaalSlugEnum.EN,
+              toLanguage: TaalSlugEnum.NL,
+            },
+            include: { listItems: true },
+          });
+          createdListIds.add(createdList.id);
+
+          const { caller } = makeCaller({ id: user.id, email: user.email, name: user.name });
+          const session = await caller.learn.startLearnSession({ listId: createdList.id });
+
+          const fetched = await caller.learn.getLearnSession(session.id);
+          expect(fetched?.id).toBe(session.id);
+          expect(fetched?.listSessionItems.length).toBe(1);
+        });
+        it("prevents retrieving learn sessions not belonging to user with learn.getLearnSession", async () => {
+          const user1 = await createTestUser();
+          const user2 = await createTestUser();
+
+          const createdList = await prisma.list.create({
+            data: {
+              name: `Topwoorden-${Date.now()}`,
+              ownerId: user1.id,
+              listItems: {
+                create: [{ vraag: "vraag", antwoord: "antwoord" }],
+              },
+              fromLanguage: TaalSlugEnum.EN,
+              toLanguage: TaalSlugEnum.NL,
+            },
+            include: { listItems: true },
+          });
+          createdListIds.add(createdList.id);
+
+          const caller1 = makeCaller({ id: user1.id, email: user1.email, name: user1.name }).caller;
+          const caller2 = makeCaller({ id: user2.id, email: user2.email, name: user2.name }).caller;
+          const session = await caller1.learn.startLearnSession({ listId: createdList.id });
+
+          await expect(caller2.learn.getLearnSession(session.id)).rejects.toBeInstanceOf(TRPCError);
+        });
+
+        it("allow admins to get other users learn sessions with learn.getLearnSession", async () => {
+          const user = await createTestUser();
+          const admin = await createTestUser(true);
+
+          const createdList = await prisma.list.create({
+            data: {
+              name: `Topwoorden-${Date.now()}`,
+              ownerId: user.id,
+              listItems: {
+                create: [{ vraag: "vraag", antwoord: "antwoord" }],
+              },
+              fromLanguage: TaalSlugEnum.EN,
+              toLanguage: TaalSlugEnum.NL,
+            },
+            include: { listItems: true },
+          });
+          createdListIds.add(createdList.id);
+
+          const callerUser = makeCaller({ id: user.id, email: user.email, name: user.name }).caller;
+          const callerAdmin = makeCaller({ id: admin.id, email: admin.email, name: admin.name }).caller;
+          const session = await callerUser.learn.startLearnSession({ listId: createdList.id });
+
+          const fetchedByAdmin = await callerAdmin.learn.getLearnSession(session.id);
+          expect(fetchedByAdmin?.id).toBe(session.id);
+          expect(fetchedByAdmin?.listSessionItems.length).toBe(1);
         });
       });
     });

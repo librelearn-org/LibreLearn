@@ -18,7 +18,8 @@ export default [
             route(":listId", "routes/app/lists/viewer.tsx"),
             route("new/:listId", "routes/app/lists/new.tsx"),
             route("beta", "routes/app/lists/betaUiLinker.tsx"),
-        ])
+        ]),
+        route("learn/:listId/:mode", "routes/app/learn.tsx"),
     ]),
 
     ...prefix("auth", [
