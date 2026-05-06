@@ -34,7 +34,7 @@ export default function Learn({ loaderData: sessionBASE }: Route.ComponentProps)
         }
     });
     const learnTool = useMemo(
-        () => new learnLibReact(sessionBASE!.list.listItems, {}),
+        () => new learnLibReact(sessionBASE!.listSessionItems, {}),
         [sessionBASE]
     );
     const [state, setState] = useState(learnTool.getState());
@@ -47,6 +47,8 @@ export default function Learn({ loaderData: sessionBASE }: Route.ComponentProps)
         <div>
             <h1>Learn</h1>
             <pre>{JSON.stringify(state, null, 2)}</pre>
+            <button onClick={() => learnTool.reshuffle()}>Reshuffle</button>
+            <p>{JSON.stringify(state.lijst[state.wachtrij[0]])}</p>
         </div>
     );
 }

@@ -230,6 +230,7 @@ model ListSessionItem {
   vraag                          String
   antwoord                       String
   listSessionItemAnswerHistories ListSessionItemAnswerHistory[]
+  roundCount                     Int                            @default(0)
 }
 
 model ListSessionItemAnswerHistory {

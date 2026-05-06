@@ -14,7 +14,8 @@ export type LijstItem = {
     listSessionItem?: any,
     listSessionItemId?: any,
     id?: string
-  }[]
+  }[],
+  roundCount: number,
   id?: string // een voorstel voor de interne id van de lijst
 
   // ts blij houden

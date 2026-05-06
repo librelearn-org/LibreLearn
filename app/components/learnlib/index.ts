@@ -65,4 +65,35 @@ export default class learnLibReact {
     };
     this.notifyStateChange();
   };
+  private checkAwnser(antwoord: string): boolean {
+    const currentItemId = this.wachtrij[0];
+    const currentItem = this.lijst[currentItemId];
+    if (!currentItem) {
+      throw new Error("Er is geen current item in de antwoord functie. knap!");
+    }
+    // TODO: hier de config gebruiken om strengheid van het nakijken te bepalen
+    return antwoord === currentItem.antwoord;
+  }
+
+  public antwoord(antwoord: string, overRuleCorrect?: boolean) {
+    const currentItemId = this.wachtrij[0];
+    const currentItem = this.lijst[currentItemId];
+    if (!currentItem) {
+      throw new Error("Er is geen current item in de antwoord functie. knap!");
+    }
+    const isCorrect = antwoord === currentItem.antwoord;
+    currentItem.listSessionItemAnswerHistories?.push({
+      antwoord,
+      goed: this.checkAwnser(antwoord) || overRuleCorrect || false,
+      round: currentItem.roundCount || 0,
+    });
+    // we verwijderen het item uit de wachtrij
+    this.wachtrij.shift();
+    // als het fout was, dan pushen we het item terug in de wachtrij
+    if (!isCorrect) {
+      this.wachtrij.push(currentItemId);
+    }
+    currentItem.roundCount = (currentItem.roundCount || 0) + 1;
+    this.notifyStateChange();
+  };
 };
