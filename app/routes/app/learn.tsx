@@ -5,6 +5,7 @@ import { useMutation } from "@tanstack/react-query";
 import { useTRPC } from "~/utils/trpc/react";
 import { useEffect, useMemo, useState } from "react";
 import learnLibReact from "~/components/learnlib";
+import { Button } from "~/components/button/button";
 
 export async function loader(loaderArgs: Route.LoaderArgs) {
     const uuid = loaderArgs.params.listId;
@@ -34,7 +35,7 @@ export default function Learn({ loaderData: sessionBASE }: Route.ComponentProps)
         }
     });
     const learnTool = useMemo(
-        () => new learnLibReact(sessionBASE!.listSessionItems, {}),
+        () => new learnLibReact(sessionBASE!.listSessionItems),
         [sessionBASE]
     );
     const [state, setState] = useState(learnTool.getState());
@@ -43,12 +44,23 @@ export default function Learn({ loaderData: sessionBASE }: Route.ComponentProps)
         learnTool.setStateUpdater(setState);
     }, [learnTool]);
 
+
     return (
         <div>
-            <h1>Learn</h1>
-            <pre>{JSON.stringify(state, null, 2)}</pre>
-            <button onClick={() => learnTool.reshuffle()}>Reshuffle</button>
-            <p>{JSON.stringify(state.lijst[state.wachtrij[0]])}</p>
+            {state.wachtrij.length === 0 ? (
+                <p>Je hebt alles geleerd! Gefeliciteerd!</p>
+            ) : (
+
+                <>
+                    <h1>Learn</h1>
+                    <p>{state.lijst[state.wachtrij[0]].vraag}</p>
+                    <p>{state.lijst[state.wachtrij[0]].antwoord}</p>
+                    <Button onClick={() => learnTool.antwoord(state.lijst[state.wachtrij[0]].antwoord, true)}>Goed Antwoord</Button>
+                    <Button onClick={() => learnTool.antwoord("aygefuyogaeywgu", false)}>Fout Antwoord</Button>
+
+                    <Button onClick={() => learnTool.reshuffle()}>Reshuffle</Button>
+                </>
+            )}
         </div>
     );
 }
