@@ -6,6 +6,8 @@ import { useTRPC } from "~/utils/trpc/react";
 import { useEffect, useMemo, useState } from "react";
 import learnLibReact from "~/components/learnlib";
 import { Button } from "~/components/button/button";
+import "~/components/text-field/text-field.css";
+
 
 export async function loader(loaderArgs: Route.LoaderArgs) {
     const uuid = loaderArgs.params.listId;
@@ -34,6 +36,7 @@ export default function Learn({ loaderData: sessionBASE }: Route.ComponentProps)
             console.log("yipie! sync at " + new Date().toISOString());
         }
     });
+    const [userAnswer, setUserAnswer] = useState("");
     const learnTool = useMemo(
         () => new learnLibReact(sessionBASE!.listSessionItems),
         [sessionBASE]
@@ -48,18 +51,28 @@ export default function Learn({ loaderData: sessionBASE }: Route.ComponentProps)
     return (
         <div>
             {state.wachtrij.length === 0 ? (
-                <p>Je hebt alles geleerd! Gefeliciteerd!</p>
-            ) : (
-
                 <>
+                    <p>Je hebt alles geleerd! Gefeliciteerd!</p>
+                    <Button onClick={() => learnTool.reshuffle()}>Opnieuw leren</Button>
+                </>
+            ) : (
+                <div className="p-4 m-4">
                     <h1>Learn</h1>
                     <p>{state.lijst[state.wachtrij[0]].vraag}</p>
                     <p>{state.lijst[state.wachtrij[0]].antwoord}</p>
+                    <input
+                        type="text"
+                        onChange={(e) => setUserAnswer(e.target.value)}
+                        placeholder={"Typ hier je antwoord..."}
+                        className="text-field1 w-full"
+                        disabled={false}
+                    />
+                    <Button onClick={() => learnTool.antwoord(userAnswer)}>Antwoord (eerlijk)</Button>
                     <Button onClick={() => learnTool.antwoord(state.lijst[state.wachtrij[0]].antwoord, true)}>Goed Antwoord</Button>
                     <Button onClick={() => learnTool.antwoord("aygefuyogaeywgu", false)}>Fout Antwoord</Button>
 
                     <Button onClick={() => learnTool.reshuffle()}>Reshuffle</Button>
-                </>
+                </div>
             )}
         </div>
     );

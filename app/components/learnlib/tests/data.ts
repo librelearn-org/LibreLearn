@@ -1,65 +1,35 @@
 import type { Lijst } from "../types";
 // NIET VERANDEREN!!
 // dit veranderen kan de tests kapot maken 
-export const testlijst: Lijst = [
-  {
-    vraag: "testtestlala",
-    antwoord: "antwoord",
-    id: "customId",
-    goedFoutLijst: []
-  },
-  {
-    vraag: "testtest",
-    antwoord: "antwoord2",
-    id: "item2",
-    goedFoutLijst: []
-  },
-  {
-    vraag: "Wat is de hoofdstad van Nederland?",
-    antwoord: "Amsterdam",
-    id: "geo1",
-    goedFoutLijst: []
-  },
-  {
-    vraag: "2 + 2",
-    antwoord: "4",
-    id: "math1",
-    goedFoutLijst: []
-  },
-  {
-    vraag: "Noem een programmeertaal die in de browser draait",
-    antwoord: "JavaScript",
-    id: "prog1",
-    goedFoutLijst: []
-  },
-  {
-    vraag: "HTML staat voor?",
-    antwoord: "HyperText Markup Language",
-    id: "web1",
-    goedFoutLijst: []
-  },
-  {
-    vraag: "CSS wordt gebruikt voor?",
-    antwoord: "Styling",
-    id: "web2",
-    goedFoutLijst: []
-  },
-  {
-    vraag: "TypeScript is een superset van?",
-    antwoord: "JavaScript",
-    id: "prog2",
-    goedFoutLijst: []
-  },
-  {
-    vraag: "Hoeveel continenten zijn er?",
-    antwoord: "7",
-    id: "geo2",
-    goedFoutLijst: []
-  },
-  {
-    vraag: "Wat is de kleur van de lucht bij helder weer?",
-    antwoord: "Blauw",
-    id: "alg1",
-    goedFoutLijst: []
-  }
-];
+export const testlijst: Lijst = id: 'de57a593-646f-47b7-9439-a0702bf2f1cc',
+  name: 'awe',
+    ownerId: '30c72b06-ccd5-48b5-ab46-4fd988292d86',
+      language: 'nl',
+        fromLanguage: 'en',
+          toLanguage: 'en',
+            listItems: [
+              {
+                id: '80ddacf8-3406-46a7-ae1b-fad7c5f2ef17',
+                vraag: 'fawe',
+                antwoord: 'awef',
+                listId: 'de57a593-646f-47b7-9439-a0702bf2f1cc'
+              },
+              {
+                id: '630a7911-92de-4c07-901f-10ca8c8a409c',
+                vraag: '1',
+                antwoord: '1',
+                listId: 'de57a593-646f-47b7-9439-a0702bf2f1cc'
+              },
+              {
+                id: 'da05db8e-20a7-4ed8-abfd-a1e88cb4fa74',
+                vraag: '2',
+                antwoord: '2',
+                listId: 'de57a593-646f-47b7-9439-a0702bf2f1cc'
+              },
+              {
+                id: '8097efd0-a342-4f50-9995-002681ad7f7e',
+                vraag: 'test',
+                antwoord: 'test / geen test (wel een test)',
+                listId: 'de57a593-646f-47b7-9439-a0702bf2f1cc'
+              }
+            ],

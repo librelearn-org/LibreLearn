@@ -77,15 +77,11 @@ export default class learnLibReact {
     });
     this.notifyStateChange();
   };
-  private checkAwnser(antwoordUNSAFE: string): boolean {
-    const currentItemId = this.wachtrij[0];
-    const currentItem = this.lijst[currentItemId];
-    const goedAntwoord = currentItem.antwoord.toLowerCase().trim();
+  private checkAwnser(qestion: string, antwoordUNSAFE: string): boolean {
+    const goedAntwoord = qestion.toLowerCase().trim();
     let antwoord = antwoordUNSAFE.toLowerCase().trim();
+    console.log("checking answer", { goedAntwoord, antwoord });
     let isCorrect: boolean = false;
-    if (!currentItem) {
-      throw new Error("Er is geen current item in de antwoord functie. knap!");
-    }
     if (this.config.fuckFransen) {
       // dit is wrm antwoord schrijfbaar is 
       antwoord = antwoord
@@ -99,16 +95,20 @@ export default class learnLibReact {
       // gebruik recursie.
       const mogelijkeAntwoorden = goedAntwoord.split(" / ");
       for (let mogelijkAntwoord of mogelijkeAntwoorden) {
-        if (this.checkAwnser(mogelijkAntwoord)) {
-          return true;
+        if (this.checkAwnser(mogelijkAntwoord, antwoord)) {
+          isCorrect = true;
+          console.log("checking alternative answers, is correct?", isCorrect);
+          break;
         }
       }
     }
     // als we er hier nog niet uit zijn, dan checken we of het aan () ligt
     if (this.config.optioneleAntwoordDelen && goedAntwoord.includes("(")) {
       // regex D:
-      this.checkAwnser(goedAntwoord.replace(/\(.*?\)/g, ""));
+      isCorrect = this.checkAwnser(goedAntwoord.replace(/\(.*?\)/g, "").replace(/\s+/g, "").trim(), antwoord);
+      console.log("checking optional parts, is correct?", isCorrect);
     }
+    console.log("antwoord is", isCorrect ? "goed" : "fout");
     return isCorrect;
   }
 
@@ -118,13 +118,13 @@ export default class learnLibReact {
     if (!currentItem) {
       throw new Error("Er is geen current item in de antwoord functie. knap!");
     }
-    const isCorrect = antwoord === currentItem.antwoord;
+    const isCorrect = this.checkAwnser(currentItem.antwoord.toLowerCase().trim(), antwoord) || overRuleCorrect || false;
     if (currentItem.listSessionItemAnswerHistories === undefined) {
       currentItem.listSessionItemAnswerHistories = [];
     }
     currentItem.listSessionItemAnswerHistories.push({
       antwoord,
-      goed: this.checkAwnser(antwoord) || overRuleCorrect || false,
+      goed: isCorrect,
       round: currentItem.roundCount || 0,
     });
     console.log("listSessionItemAnswerHistories", currentItem.listSessionItemAnswerHistories);
