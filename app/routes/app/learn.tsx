@@ -70,7 +70,6 @@ export default function Learn({ loaderData: sessionBASE }: Route.ComponentProps)
                     <Button onClick={() => learnTool.antwoord(userAnswer)}>Antwoord (eerlijk)</Button>
                     <Button onClick={() => learnTool.antwoord(state.lijst[state.wachtrij[0]].antwoord, true)}>Goed Antwoord</Button>
                     <Button onClick={() => learnTool.antwoord("aygefuyogaeywgu", false)}>Fout Antwoord</Button>
-
                     <Button onClick={() => learnTool.reshuffle()}>Reshuffle</Button>
                 </div>
             )}

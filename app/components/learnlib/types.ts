@@ -23,15 +23,16 @@ export type LijstItem = {
   listSessionId?: any,
 }
 export type LearnConfig = {
-  staAlternatieveAntwoordenToe?: boolean
-  multikeuzeWisselAlternatieveAntwoordenAf?: boolean
+  staAlternatieveAntwoordenToe?: boolean // `antwoord een / antwoord twee` syntax
+  multikeuzeWisselAlternatieveAntwoordenAf?: boolean // wisle bij meerkeuze vragen met de vorige syntax de antwoorden af
   gebruikAlternatieveVragenAfwisselendWanneerBeschikbaar?: boolean,
   gebruikSeed?: string, // anders random
   fuckFransen?: boolean, // handig voor grieks of als je geen zin hebt om het te leren
   dislectieVrindeleik?: boolean, // maakt `é -> ee` en `è -> e` etc // TODO: dit werkt nog niet!!
   optioneleAntwoordDelen?: boolean, // maakt het dat delen van antwoorden optioneel zijn, dus alles wat in `(...)` staat.
+  enkelWoordAlternatieveAntwoorden?: boolean, // `woord/anderwoord` syntax
 }
-export const defaultLearnConfig: LearnConfig = {
+export let defaultLearnConfig: LearnConfig = {
   staAlternatieveAntwoordenToe: true,
   multikeuzeWisselAlternatieveAntwoordenAf: true,
   gebruikAlternatieveVragenAfwisselendWanneerBeschikbaar: true,

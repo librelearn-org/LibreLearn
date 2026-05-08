@@ -78,12 +78,15 @@ export default class learnLibReact {
     this.notifyStateChange();
   };
   private checkAwnser(qestion: string, antwoordUNSAFE: string): boolean {
-    const goedAntwoord = qestion.toLowerCase().trim();
+    let goedAntwoord = qestion.toLowerCase().trim();
     let antwoord = antwoordUNSAFE.toLowerCase().trim();
     console.log("checking answer", { goedAntwoord, antwoord });
     let isCorrect: boolean = false;
     if (this.config.fuckFransen) {
       // dit is wrm antwoord schrijfbaar is 
+      goedAntwoord = goedAntwoord
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "");
       antwoord = antwoord
         .normalize("NFD")
         .replace(/[\u0300-\u036f]/g, "");
@@ -94,6 +97,7 @@ export default class learnLibReact {
     if (this.config.staAlternatieveAntwoordenToe && goedAntwoord.includes(" / ")) {
       // gebruik recursie.
       const mogelijkeAntwoorden = goedAntwoord.split(" / ");
+      console.log("checking alternative answers", mogelijkeAntwoorden);
       for (let mogelijkAntwoord of mogelijkeAntwoorden) {
         if (this.checkAwnser(mogelijkAntwoord, antwoord)) {
           isCorrect = true;
@@ -105,7 +109,11 @@ export default class learnLibReact {
     // als we er hier nog niet uit zijn, dan checken we of het aan () ligt
     if (this.config.optioneleAntwoordDelen && goedAntwoord.includes("(")) {
       // regex D:
-      isCorrect = this.checkAwnser(goedAntwoord.replace(/\(.*?\)/g, "").replace(/\s+/g, "").trim(), antwoord);
+      const antwoordZonderOptioneel = goedAntwoord.replace(/\([^)]*\)/g, "").trim();
+      const antwoordMetOptioneel = goedAntwoord.replace(/[()]/g, "").trim();
+      if (antwoord === antwoordZonderOptioneel || antwoord === antwoordMetOptioneel) {
+        isCorrect = true;
+      }
       console.log("checking optional parts, is correct?", isCorrect);
     }
     console.log("antwoord is", isCorrect ? "goed" : "fout");
