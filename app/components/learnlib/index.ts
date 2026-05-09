@@ -116,6 +116,26 @@ export default class learnLibReact {
       }
       console.log("checking optional parts, is correct?", isCorrect);
     }
+    if (!isCorrect && this.config.enkelWoordAlternatieveAntwoorden) {
+      // eerst splitten naar woorden
+      console.log("checking single word alternatives...");
+      const antwoordWoorden = goedAntwoord.split(" ");
+      console.log("antwoord woorden", antwoordWoorden);
+      // nu gaan we elk woord checken voor een `/`
+      antwoordWoorden.forEach((woord, index) => {
+        if (woord.includes("/")) {
+          const mogelijkeWoorden = woord.split("/");
+          mogelijkeWoorden.forEach((mogelijkWoord) => {
+            // nu zijn we in alle opties van dit specifieke woord, we checken of een van deze opties in het goed antwoord zit
+            let mogelijkAntwoord = [...antwoordWoorden];
+            mogelijkAntwoord[index] = mogelijkWoord;
+            const mogelijkAntwoordStr = mogelijkAntwoord.join(" ");
+            this.checkAwnser(mogelijkAntwoordStr, antwoord) && (isCorrect = true);
+            console.log("checking single word alternatives, is correct?", isCorrect);
+          });
+        }
+      });
+    }
     console.log("antwoord is", isCorrect ? "goed" : "fout");
     return isCorrect;
   }

@@ -38,5 +38,6 @@ export let defaultLearnConfig: LearnConfig = {
   gebruikAlternatieveVragenAfwisselendWanneerBeschikbaar: true,
   fuckFransen: false,
   dislectieVrindeleik: false,
-  optioneleAntwoordDelen: true
+  optioneleAntwoordDelen: true,
+  enkelWoordAlternatieveAntwoorden: true,
 }

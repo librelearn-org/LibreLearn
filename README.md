@@ -22,6 +22,15 @@ A foss alternaitve for WRTS (Studygo), quizlet and others.
 
 Thanks to @unbravechimp for making the very nice subject icons used in the forum!
 
+## Contributing
+
+Contributions are very welcome! If you want to contribute, please open an issue or a pull request. I will try to review and merge as soon as possible.
+You can find things to do by:
+
+- asking in the discord server
+- looking at the issues
+- searching for "TODO" in the codebase (ITS IN DUTCH SORRY)
+
 ## AI declaration
 
 I used copilot for help with CSS and Tailwind because I hate CSS. I also sometimes asked it for help when stuff just randomly brakes and I have no idea why. I also use github copilot auto complete. And help with the readme.
