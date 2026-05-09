@@ -1,4 +1,4 @@
-"client only";
+// TODO: dit loskoppelen van react, het zou moeten werken aleen de namen van wat dingen moeten anders
 import { defaultLearnConfig, type LearnConfig, type Lijst, type LijstItem } from "./types";
 import { shuffle } from "./helpers"
 
