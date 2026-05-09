@@ -1,4 +1,3 @@
-// TODO: dit loskoppelen van react, het zou moeten werken aleen de namen van wat dingen moeten anders
 import { defaultLearnConfig, type LearnConfig, type Lijst, type LijstItem } from "./types";
 import { shuffle } from "./helpers"
 
@@ -8,11 +7,11 @@ export interface LearnLibState {
   config: LearnConfig;
 }
 
-export default class learnLibReact {
+export default class learnLib {
   private lijst: Record<string, LijstItem> = {};
   private wachtrij: string[] = [];
   private config: LearnConfig = {};
-  private stateUpdater: ((state: LearnLibState) => void) | null = null;
+  private subscriber: ((state: LearnLibState) => void) | null = null;
 
   constructor(lijst: Lijst, config?: LearnConfig) {
     lijst.forEach((value: LijstItem) => {
@@ -29,22 +28,21 @@ export default class learnLibReact {
     shuffle(this.wachtrij);
   };
 
-  // Bind state setter from useState hook
-  public setStateUpdater(updater: (state: LearnLibState) => void) {
-    this.stateUpdater = updater;
+  public setSubscriber(updater: (state: LearnLibState) => void) {
+    this.subscriber = updater;
     this.notifyStateChange();
   };
 
   // Internal method to notify state changes
   private notifyStateChange() {
-    if (this.stateUpdater) {
+    if (this.subscriber) {
       console.log("notifying state change...");
       console.log("state:", {
         lijst: this.lijst,
         wachtrij: this.wachtrij,
         config: this.config,
       });
-      this.stateUpdater({
+      this.subscriber({
         lijst: this.lijst,
         wachtrij: this.wachtrij,
         config: this.config,
@@ -77,6 +75,7 @@ export default class learnLibReact {
     });
     this.notifyStateChange();
   };
+
   private checkAwnser(qestion: string, antwoordUNSAFE: string): boolean {
     let goedAntwoord = qestion.toLowerCase().trim();
     let antwoord = antwoordUNSAFE.toLowerCase().trim();
@@ -140,13 +139,13 @@ export default class learnLibReact {
     return isCorrect;
   }
 
-  public antwoord(antwoord: string, overRuleCorrect?: boolean) {
+  public antwoord(antwoord: string, forceCorrect?: boolean) {
     const currentItemId = this.wachtrij[0];
     const currentItem = this.lijst[currentItemId];
     if (!currentItem) {
       throw new Error("Er is geen current item in de antwoord functie. knap!");
     }
-    const isCorrect = this.checkAwnser(currentItem.antwoord.toLowerCase().trim(), antwoord) || overRuleCorrect || false;
+    const isCorrect = this.checkAwnser(currentItem.antwoord.toLowerCase().trim(), antwoord) || forceCorrect || false;
     if (currentItem.listSessionItemAnswerHistories === undefined) {
       currentItem.listSessionItemAnswerHistories = [];
     }

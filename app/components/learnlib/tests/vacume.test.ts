@@ -1,6 +1,6 @@
 // TODO: echte test harnes maken!! dit is sketch.
 import { expect, test, describe, it } from "bun:test";
-import learnLibReact from "..";
+import learnLib from "..";
 import { testlijst } from "./data";
 import assert from "node:assert";
 import { defaultLearnConfig } from "../types";

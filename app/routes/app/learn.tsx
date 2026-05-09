@@ -4,7 +4,7 @@ import { caller } from "~/utils/trpc/server.server";
 import { useMutation } from "@tanstack/react-query";
 import { useTRPC } from "~/utils/trpc/react";
 import { useEffect, useMemo, useState } from "react";
-import learnLibReact from "~/components/learnlib";
+import learnLib from "~/components/learnlib";
 import { Button } from "~/components/button/button";
 import "~/components/text-field/text-field.css";
 
@@ -38,13 +38,13 @@ export default function Learn({ loaderData: sessionBASE }: Route.ComponentProps)
     });
     const [userAnswer, setUserAnswer] = useState("");
     const learnTool = useMemo(
-        () => new learnLibReact(sessionBASE!.listSessionItems),
+        () => new learnLib(sessionBASE!.listSessionItems),
         [sessionBASE]
     );
     const [state, setState] = useState(learnTool.getState());
 
     useEffect(() => {
-        learnTool.setStateUpdater(setState);
+        learnTool.setSubscriber(setState);
     }, [learnTool]);
 
 
