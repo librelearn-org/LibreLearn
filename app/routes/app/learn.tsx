@@ -4,7 +4,7 @@ import { caller } from "~/utils/trpc/server.server";
 import { useMutation } from "@tanstack/react-query";
 import { useTRPC } from "~/utils/trpc/react";
 import { useEffect, useMemo, useState } from "react";
-import learnLib from "~/components/learnlib";
+import learnLib from "@siemsiem/learnlib";
 import { Button } from "~/components/button/button";
 import "~/components/text-field/text-field.css";
 
@@ -67,9 +67,9 @@ export default function Learn({ loaderData: sessionBASE }: Route.ComponentProps)
                         className="text-field1 w-full"
                         disabled={false}
                     />
-                    <Button onClick={() => learnTool.antwoord(userAnswer)}>Antwoord (eerlijk)</Button>
-                    <Button onClick={() => learnTool.antwoord(state.lijst[state.wachtrij[0]].antwoord, true)}>Goed Antwoord</Button>
-                    <Button onClick={() => learnTool.antwoord("aygefuyogaeywgu", false)}>Fout Antwoord</Button>
+                    <Button onClick={() => learnTool.answer(userAnswer)}>Antwoord (eerlijk)</Button>
+                    <Button onClick={() => learnTool.answer(state.lijst[state.wachtrij[0]].antwoord, true)}>Goed Antwoord</Button>
+                    <Button onClick={() => learnTool.answer("aygefuyogaeywgu", false)}>Fout Antwoord</Button>
                     <Button onClick={() => learnTool.reshuffle()}>Reshuffle</Button>
                 </div>
             )}
