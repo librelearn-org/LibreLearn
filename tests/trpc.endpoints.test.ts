@@ -913,6 +913,62 @@ describe("tRPC endpoints (integration)", () => {
       })
     })
 
+    describe("userForumBan", () => {
+      it("allows admins to ban users from the forum", async () => {
+        const admin = await createTestUser(true);
+        const user = await createTestUser();
+        const { caller } = makeCaller({ id: admin.id, email: admin.email, name: admin.name });
+
+        await caller.forum.userForumBan({ userId: user.id, ban: true });
+
+        const updatedUser = await prisma.user.findUnique({ where: { id: user.id } });
+        expect(updatedUser?.forumBanned).toBe(true);
+      });
+
+      it("allows admin to provide a reason when banning users from the forum", async () => {
+        const admin = await createTestUser(true);
+        const user = await createTestUser();
+        const { caller } = makeCaller({ id: admin.id, email: admin.email, name: admin.name });
+
+        const reason = "Inappropriate behavior";
+        await caller.forum.userForumBan({ userId: user.id, ban: true, banReason: reason });
+
+        const updatedUser = await prisma.user.findUnique({ where: { id: user.id } });
+        expect(updatedUser?.forumBanned).toBe(true);
+        expect(updatedUser?.banReason).toBe(reason);
+      });
+
+      it("allows admins to unban users from the forum", async () => {
+        const admin = await createTestUser(true);
+        const user = await createTestUser();
+        await prisma.user.update({
+          where: { id: user.id },
+          data: { forumBanned: true },
+        });
+        const { caller } = makeCaller({ id: admin.id, email: admin.email, name: admin.name });
+
+        await caller.forum.userForumBan({ userId: user.id, ban: false });
+
+        const updatedUser = await prisma.user.findUnique({ where: { id: user.id } });
+        expect(updatedUser?.forumBanned).toBe(false);
+      });
+
+      it("banned users cannot access forum endpoints", async () => {
+        const admin = await createTestUser(true);
+        const user = await createTestUser();
+        const { caller: adminCaller } = makeCaller({ id: admin.id, email: admin.email, name: admin.name });
+        await adminCaller.forum.userForumBan({ userId: user.id, ban: true });
+
+        const { caller } = makeCaller({ id: user.id, email: user.email, name: user.name });
+        await expect(caller.forum.getPosts({})).rejects.toBeInstanceOf(TRPCError);
+        await expect(caller.forum.makePost({
+          title: "Should not work",
+          content: "Because the user is banned",
+          subject: "js",
+        })).rejects.toBeInstanceOf(TRPCError);
+      });
+    })
+
   });
 
   describe("learn", () => {

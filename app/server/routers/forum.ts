@@ -397,4 +397,46 @@ export const forumRouter = {
             },
         }
     }),
+
+    userForumBan: veryProtectedProcedure.input(
+        z.object({
+            userId: z.uuid(),
+            ban: z.boolean(),
+            banReason: z.string().max(500).optional()
+        })
+    ).mutation(async ({ input, ctx }) => {
+        await ctx.prisma.user.update({
+            where: {
+                id: input.userId
+            },
+            data: {
+                forumBanned: input.ban,
+                banReason: input.banReason ?? undefined
+            }
+        })
+
+        if (input.ban) {
+            await sendMessageToDiscord({
+                title: 'User Forum Banned',
+                description: `User with ID ${input.userId} was forum banned by ${ctx.user.name}.`,
+                color: 0xFF0000, // rood
+                author: {
+                    name: ctx.user.name
+                },
+                timestamp: new Date().toISOString(),
+            })
+        } else {
+            await sendMessageToDiscord({
+                title: 'User Forum Unbanned',
+                description: `User with ID ${input.userId} was forum unbanned by ${ctx.user.name}.`,
+                author: {
+                    name: ctx.user.name
+                },
+                color: 0x00FF00, // groen
+                timestamp: new Date().toISOString(),
+            })
+        }
+
+        return { success: true }
+    })
 }
