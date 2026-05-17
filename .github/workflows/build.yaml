@@ -1,5 +1,5 @@
 # RUNS ON GITEA AND GITHUB
-name: build-test
+name: Build Test
 on: [push, pull_request]
 jobs:
     build:
