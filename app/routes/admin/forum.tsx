@@ -68,6 +68,29 @@ export default function ForumHome({ loaderData: { forumPostsPreload, forumReplie
         })
     )
 
+    const banUserMutation = useMutation(
+        trpc.forum.userForumBan.mutationOptions({
+            onMutate: () => {
+                setMutationError(null);
+                setIsForumMutationHappening(true);
+            },
+            onError: (err) => {
+                setMutationError(getErrorMessage(err));
+            },
+            onSettled: async (_data, _error) => {
+                setIsForumMutationHappening(false);
+                await queryClient.invalidateQueries({
+                    queryKey: trpc.forum.forumReviewQueue.queryKey(reviewQueueInput),
+                    exact: true
+                });
+                await queryClient.invalidateQueries({
+                    queryKey: trpc.forum.forumReplyReviewQueue.queryKey(reviewQueueInput),
+                    exact: true
+                });
+            }
+        })
+    )
+
     const approvePostMutation = useMutation(
         trpc.forum.forumReviewApprove.mutationOptions({
             onMutate: () => {
@@ -109,6 +132,7 @@ export default function ForumHome({ loaderData: { forumPostsPreload, forumReplie
                 {forumPosts?.map((post) => (
                     <ListItem adminColors={true} image={getSubjectBySlug(post.subject as TaalSlugEnum)?.icon} key={post.id} linkTo={`/app/forum/${post.id}`} title={post.title} subtitle={`By ${post.author.name} on ${new Date(post.createdAt).toLocaleDateString()}`}>
                         <div className="flex flex-row flex-wrap gap-2" onClick={(event) => event.stopPropagation()}>
+                            <Button variant="secondary" onClick={() => { banUserMutation.mutate({ userId: post.author.id, ban: true }) }} disabled={isForumMutationHappening}>Forum ban</Button>
                             <Button variant="secondary" onClick={() => { deletePostMutation.mutate({ type: "POST", id: post.id }) }} disabled={isForumMutationHappening}>Remove</Button>
                             <Button variant="secondary" onClick={() => { approvePostMutation.mutate({ type: "POST", id: post.id }) }} disabled={isForumMutationHappening}>Approve</Button>
                         </div>
@@ -126,6 +150,7 @@ export default function ForumHome({ loaderData: { forumPostsPreload, forumReplie
                         subtitle={`By ${reply.author.name} on ${new Date(reply.createdAt).toLocaleDateString()} in ${reply.post.title}`}
                     >
                         <div className="flex flex-row flex-wrap gap-2" onClick={(event) => event.stopPropagation()}>
+                            <Button variant="secondary" onClick={() => { banUserMutation.mutate({ userId: reply.author.id, ban: true }) }} disabled={isForumMutationHappening}>Forum ban</Button>
                             <Button variant="secondary" onClick={() => { deletePostMutation.mutate({ type: "REPLY", id: reply.id }) }} disabled={isForumMutationHappening}>Remove</Button>
                             <Button variant="secondary" onClick={() => { approvePostMutation.mutate({ type: "REPLY", id: reply.id }) }} disabled={isForumMutationHappening}>Approve</Button>
                         </div>

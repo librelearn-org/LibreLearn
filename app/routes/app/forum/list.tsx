@@ -27,7 +27,6 @@ export default function ForumHome({ loaderData: { forum: forumPosts, user: user 
   const queryClient = useQueryClient();
   const getPostsInput = {};
 
-  const [isForumMutationHappening, setIsForumMutationHappening] = useState(false);
 
   const { data: forum, isLoading, error } = useQuery(
     trpc.forum.getPosts.queryOptions(getPostsInput, {
@@ -38,6 +37,9 @@ export default function ForumHome({ loaderData: { forum: forumPosts, user: user 
     })
   )
   const forumErrorMessage = error ? getErrorMessage(error, "errors.api.forumLoad") : null;
+
+
+  const [isForumMutationHappening, setIsForumMutationHappening] = useState(false);
 
   const deletePostMutation = useMutation(
     trpc.forum.deleteItem.mutationOptions({
@@ -71,7 +73,14 @@ export default function ForumHome({ loaderData: { forum: forumPosts, user: user 
       )}
       <ListContainer className="w-full max-w ">
         {forum?.map((post) => (
-          <ListItem className="mx-5" image={getSubjectBySlug(post.subject as TaalSlugEnum)?.icon} key={post.id} linkTo={`/app/forum/${post.id}`} title={post.title} subtitle={`By ${post.author.name} on ${new Date(post.createdAt).toLocaleDateString()}`}>
+          <ListItem
+            className="mx-5"
+            image={getSubjectBySlug(post.subject as TaalSlugEnum)?.icon} 
+            key={post.id}
+            linkTo={`/app/forum/${post.id}`} 
+            title={post.title}
+            subtitle={`By ${post.author.name} on ${new Date(post.createdAt).toLocaleDateString()}`}
+          >
             {((user?.id || "this is not a valid uuid") === post.authorId || user?.role == "admin") && (
               <Button onClick={() => { deletePostMutation.mutate({ type: "POST", id: post.id }) }} disabled={isForumMutationHappening} variant="secondary"><Trash /></Button>
             )}
