@@ -3,6 +3,8 @@ import { TRPCError } from '@trpc/server'
 import { z } from 'zod'
 import { protectedProcedure, publicProcedure, veryProtectedProcedure } from '~/server/trpc'
 import { TaalSlugEnum } from '~/components/Icons'
+import { sendMessageToDiscord } from '~/utils/discord.server'
+import { send } from 'vite'
 
 export const forumRouter = {
     getPosts: publicProcedure
@@ -240,37 +242,15 @@ export const forumRouter = {
                             id: input.id
                         }
                     })
-                    const webhookUrl = process.env.DC_WEBHOOK_URL
-                    if (!webhookUrl) {
-                        console.warn('No webhook url configured')
-                        return { success: false, message: 'No webhook url configured' }
-                    }
-                    let content = ''
-                    if (process.env.DC_WEBHOOK_PING_PPL === 'true') {
-                        content += `KIJK LOGS! <@1491883464918700033>!`
-                    } else {
-                        content += 'we zijn aan het testen...'
-                    }
-                    const response = await fetch(webhookUrl, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
+                    sendMessageToDiscord({
+                        title: 'Forum Post Deleted by Admin: ' + post.title,
+                        color: 16711680,
+                        description: post.content,
+                        timestamp: new Date().toISOString(),
+                        author: {
+                            name: ctx.user.name
                         },
-                        body: JSON.stringify({
-                            content,
-                            embeds: [{
-                                title: 'Forum Post Deleted by Admin: ' + post.title,
-                                description: post.content,
-                                timestamp: new Date().toISOString(),
-                                author: {
-                                    name: ctx.user.name
-                                },
-                            }]
-                        })
                     })
-                    if (!response.ok) {
-                        console.error('Failed to send webhook', await response.text())
-                    }
                 }
                 await ctx.prisma.forumVote.deleteMany({
                     where: {
@@ -400,6 +380,13 @@ export const forumRouter = {
             ctx.prisma.forumPostReply.deleteMany({}),
             ctx.prisma.forumPost.deleteMany({}),
         ])
+
+        sendMessageToDiscord({
+            title: 'Forum Nuked',
+            description: `The forum was nuked by ${ctx.user.name}. Deleted ${deletedPosts.count} posts, ${deletedReplies.count} replies and ${deletedVotes.count} votes.`,
+            color: 0xFF0000,
+            timestamp: new Date().toISOString(),
+        })
 
         return {
             success: true,

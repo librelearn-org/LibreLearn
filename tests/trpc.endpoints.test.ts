@@ -885,6 +885,34 @@ describe("tRPC endpoints (integration)", () => {
       });
     })
 
+    describe("nuke", () => {
+      it("allows admins to nuke the forum with forum.nukeForum", async () => {
+        const admin = await createTestUser(true);
+        const { caller } = makeCaller({ id: admin.id, email: admin.email, name: admin.name });
+
+        const post = await prisma.forumPost.create({
+          data: {
+            title: `post-${Date.now()}`,
+            content: "Body",
+            subject: "js",
+            authorId: admin.id,
+          },
+        });
+        createdPostIds.add(post.id);
+
+        await caller.forum.nukeForum();
+
+        const deletedPost = await prisma.forumPost.findUnique({ where: { id: post.id } });
+        expect(deletedPost).toBeNull();
+      });
+      
+      it("prevents non-admins from nuking the forum with forum.nukeForum", async () => {
+        const user = await createTestUser();
+        const { caller } = makeCaller({ id: user.id, email: user.email, name: user.name });
+        await expect(caller.forum.nukeForum()).rejects.toBeInstanceOf(TRPCError);
+      })
+    })
+
   });
 
   describe("learn", () => {
