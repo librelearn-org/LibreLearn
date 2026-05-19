@@ -58,8 +58,8 @@ export default function Learn({ loaderData: sessionBASE }: Route.ComponentProps)
             ) : (
                 <div className="p-4 m-4">
                     <h1>Learn</h1>
-                    <p>{state.lijst[state.wachtrij[0]].vraag}</p>
-                    <p>{state.lijst[state.wachtrij[0]].antwoord}</p>
+                    <p>{state.currentItem?.vraag}</p>
+                    <p>{state.currentItem?.antwoord}</p>
                     <input
                         type="text"
                         onChange={(e) => setUserAnswer(e.target.value)}
@@ -68,7 +68,7 @@ export default function Learn({ loaderData: sessionBASE }: Route.ComponentProps)
                         disabled={false}
                     />
                     <Button onClick={() => learnTool.answer(userAnswer)}>Antwoord (eerlijk)</Button>
-                    <Button onClick={() => learnTool.answer(state.lijst[state.wachtrij[0]].antwoord, true)}>Goed Antwoord</Button>
+                    <Button onClick={() => learnTool.answer(userAnswer, true)}>Goed Antwoord</Button>
                     <Button onClick={() => learnTool.answer("aygefuyogaeywgu", false)}>Fout Antwoord</Button>
                     <Button onClick={() => learnTool.reshuffle()}>Reshuffle</Button>
                 </div>

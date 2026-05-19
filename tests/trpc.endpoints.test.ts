@@ -905,7 +905,7 @@ describe("tRPC endpoints (integration)", () => {
         const deletedPost = await prisma.forumPost.findUnique({ where: { id: post.id } });
         expect(deletedPost).toBeNull();
       });
-      
+
       it("prevents non-admins from nuking the forum with forum.nukeForum", async () => {
         const user = await createTestUser();
         const { caller } = makeCaller({ id: user.id, email: user.email, name: user.name });
@@ -1332,6 +1332,19 @@ describe("tRPC endpoints (integration)", () => {
           expect(fetchedByAdmin?.listSessionItems.length).toBe(1);
         });
       });
+    });
+  });
+
+  describe("admin", () => {
+
+    it("allows admins to get user profile with admin.getUserProfile", async () => {
+      const admin = await createTestUser(true);
+      const user = await createTestUser();
+      const { caller } = makeCaller({ id: admin.id, email: admin.email, name: admin.name });
+
+      const profile = await caller.admin.getUserProfile(user.id);
+      expect(profile?.id).toBe(user.id);
+      expect(profile?.email).toBe(user.email);
     });
   });
 });
