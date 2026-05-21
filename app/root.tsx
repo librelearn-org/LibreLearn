@@ -42,6 +42,7 @@ export function meta({ }: Route.MetaArgs) {
   return [
     { title: "Librelearn" },
     { name: "description", content: "Librelearn is een opensource alternative voor WRTS." },
+    { property: "og:image", content: "public/logos/LiL-VT-LONG-ICON-WITHBG.png" },
   ];
 }
 
