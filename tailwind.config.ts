@@ -22,7 +22,7 @@ export default {
           800: '#095a8d',
           900: '#084b74',
         },
-        openlearn: {
+        librelearn: {
           50: "#CDFFE5",
           75: "#9FFFD3",
           100: "#70FEC0",
@@ -56,11 +56,11 @@ export default {
   },
   plugins: [
     plugin(({ addBase, theme }) => {
-      const openlearn = theme('colors.openlearn') as Record<string, string>
+      const librelearn = theme('colors.librelearn') as Record<string, string>
       addBase({
         ':root': Object.fromEntries(
-          Object.entries(openlearn).map(([key, value]) => [
-            `--color-openlearn-${key}`,
+          Object.entries(librelearn).map(([key, value]) => [
+            `--color-librelearn-${key}`,
             value,
           ])
         ),

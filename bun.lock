@@ -3,7 +3,7 @@
   "configVersion": 1,
   "workspaces": {
     "": {
-      "name": "openlearn",
+      "name": "librelearn",
       "dependencies": {
         "@better-auth/oauth-provider": "1.4.15",
         "@prisma/adapter-pg": "7.2.0",
@@ -11,7 +11,7 @@
         "@react-router/fs-routes": "7.12.0",
         "@react-router/node": "7.12.0",
         "@react-router/serve": "7.12.0",
-        "@siemsiem/learnlib": "1.1.0",
+        "@siemsiem/learnlib": "1.1.2",
         "@tanstack/react-query": "5.90.19",
         "@trpc/client": "11.8.1",
         "@trpc/server": "11.8.1",
@@ -333,7 +333,7 @@
 
     "@rollup/rollup-win32-x64-msvc": ["@rollup/rollup-win32-x64-msvc@4.60.4", "", { "os": "win32", "cpu": "x64" }, "sha512-QVTUovf40zgTqlFVrKA1uXMVvU2QWEFWfAH8Wdc48IxLvrJMQVMBRjuQyUpzZCDkakImib9eVazbWlC6ksWtJw=="],
 
-    "@siemsiem/learnlib": ["@siemsiem/learnlib@1.1.0", "", {}, "sha512-JF87BU5fOqUgx6ggd51+69SF5ch3NNntoMHfVBmjAarVEXqHXRQzdR4mYObmVX9nFNKnyT7XhOR5rzJDtcSllA=="],
+    "@siemsiem/learnlib": ["@siemsiem/learnlib@1.1.2", "", {}, "sha512-uO2mmWHqKLRmWWYfigVbqbpdMveM0VidQ11IVycS/nWLVSXzZP0ZnIFFIeEBM2GeRXe/3gy8GyAjxDcOrfEerw=="],
 
     "@standard-schema/spec": ["@standard-schema/spec@1.1.0", "", {}, "sha512-l2aFy5jALhniG5HgqrD6jXLi/rUWrKvqN/qJx6yoJsgKhblVd+iqqU4RCXavm/jPityDo5TCvKMnpjKnOriy0w=="],
 

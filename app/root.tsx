@@ -40,8 +40,8 @@ export async function loader() {
 
 export function meta({ }: Route.MetaArgs) {
   return [
-    { title: "Openlearn" },
-    { name: "description", content: "Openlearn is een opensource alternative voor WRTS." },
+    { title: "Librelearn" },
+    { name: "description", content: "Librelearn is een opensource alternative voor WRTS." },
   ];
 }
 

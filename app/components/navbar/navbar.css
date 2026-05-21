@@ -1,5 +1,5 @@
 .navbar {
-  background-color: var(--color-openlearn-800);
+  background-color: var(--color-librelearn-800);
   margin: 0.25rem;
   border-radius: 9999px;
   padding-left: 1rem;
@@ -8,7 +8,7 @@
   padding-bottom: 0.5rem;
   color: white;
   transition-duration: 150ms;
-  box-shadow: var(--color-openlearn-800) 0px 0px 24px;
+  box-shadow: var(--color-librelearn-800) 0px 0px 24px;
   display: flex;
   flex-direction: row;
   justify-content: left;
@@ -28,5 +28,5 @@ nav {
   top: 0;
   height: auto;
   padding: 0.25rem 0;
-  background: linear-gradient(180deg, var(--color-openlearn-900) 0%, rgba(255, 255, 255, 0) 100%);
+  background: linear-gradient(180deg, var(--color-librelearn-900) 0%, rgba(255, 255, 255, 0) 100%);
 }

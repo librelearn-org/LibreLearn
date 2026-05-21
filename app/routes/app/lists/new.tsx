@@ -138,7 +138,7 @@ export default function newList({ loaderData }: Route.ComponentProps) {
 
     return (
         <div className="flex flex-col gap-4">
-            <div className="flex flex-col gap-1 m-2 p-5 bg-openlearn-800 rounded-lg">
+            <div className="flex flex-col gap-1 m-2 p-5 bg-librelearn-800 rounded-lg">
                 <label>
                     <input
                         type="text"
@@ -233,7 +233,7 @@ export default function newList({ loaderData }: Route.ComponentProps) {
             </div>
             <div className="flex flex-col">
                 {listData.listItems.map((item, index) => (
-                    <div key={index} className="flex flex-row gap-2 m-2 p-5 bg-openlearn-800 rounded-lg">
+                    <div key={index} className="flex flex-row gap-2 m-2 p-5 bg-librelearn-800 rounded-lg">
                         <input
                             type="text"
                             value={item.vraag}

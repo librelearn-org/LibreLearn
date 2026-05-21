@@ -10,6 +10,7 @@ export default function Component() {
     const navigate = useNavigate();
 
     const nukeForum = useMutation(trpc.forum.nukeForum.mutationOptions());
+    const nukeNotYetUsedDBTables = useMutation(trpc.admin.nukeNotYetUsedDBTables.mutationOptions());
     return (
         <div className="flex flex-col items-center gap-4">
             <h1 className="font-bold " >Testing helper.</h1>
@@ -23,6 +24,9 @@ export default function Component() {
 
             <Button onClick={() => nukeForum.mutate()}>
                 NUKE FORUM!!!
+            </Button>
+            <Button onClick={() => nukeNotYetUsedDBTables.mutate()}>
+                Nuke unused DB tables (should be safe)
             </Button>
         </div>
     );

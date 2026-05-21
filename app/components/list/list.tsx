@@ -24,7 +24,7 @@ export const ListItem: React.FC<{
     if (adminColors) {
         cName = (cName || '') + ' bg-admin-800'
     } else {
-        cName = (cName || '') + ' bg-openlearn-800 '
+        cName = (cName || '') + ' bg-librelearn-800 '
     }
     return (
         <div className={" rounded-xl p-4 cursor-pointer " + cName} onClick={() => navigate(linkTo || '#')}>
@@ -57,7 +57,7 @@ export const LearnListItems: React.FC<{
     }[]
 }> = (data) => {
     return (
-        <div className="rounded-xl p-4 flex flex-col cursor-pointer bg-openlearn-800 m-4 w-[calc(100%-2rem)] box-border overflow-hidden min-w-0">
+        <div className="rounded-xl p-4 flex flex-col cursor-pointer bg-librelearn-800 m-4 w-[calc(100%-2rem)] box-border overflow-hidden min-w-0">
             <div className="flex items-center w-full min-w-0 gap-3">
                 <h1 className="font-bold truncate min-w-0 flex-1 text-center">From</h1>
                 <h1 className="font-bold truncate min-w-0 flex-1 text-center">To</h1>

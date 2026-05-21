@@ -21,23 +21,23 @@
 }
 
 .text-field1 {
-    background-color: var(--color-openlearn-800);
-    border-color: color-mix(in srgb, var(--color-openlearn-700) 75%, transparent);
-    box-shadow: 0px 4px color-mix(in srgb, var(--color-openlearn-900) 70%, transparent);
+    background-color: var(--color-librelearn-800);
+    border-color: color-mix(in srgb, var(--color-librelearn-700) 75%, transparent);
+    box-shadow: 0px 4px color-mix(in srgb, var(--color-librelearn-900) 70%, transparent);
 }
 
 .text-field1-large {
-    background-color: var(--color-openlearn-800);
-    border-color: color-mix(in srgb, var(--color-openlearn-700) 75%, transparent);
-    box-shadow: 0px 4px color-mix(in srgb, var(--color-openlearn-900) 70%, transparent);
+    background-color: var(--color-librelearn-800);
+    border-color: color-mix(in srgb, var(--color-librelearn-700) 75%, transparent);
+    box-shadow: 0px 4px color-mix(in srgb, var(--color-librelearn-900) 70%, transparent);
     border-radius: 1rem;
     min-height: 8rem;
     resize: vertical;
 }
 
 .text-field2 {
-    background-color: var(--color-openlearn-700);
-    border-color: color-mix(in srgb, var(--color-openlearn-600) 70%, transparent);
+    background-color: var(--color-librelearn-700);
+    border-color: color-mix(in srgb, var(--color-librelearn-600) 70%, transparent);
 }
 
 .text-field1::placeholder,
@@ -54,18 +54,18 @@
 }
 
 .text-field1:disabled {
-    background-color: color-mix(in srgb, var(--color-openlearn-800) 86%, black 14%);
+    background-color: color-mix(in srgb, var(--color-librelearn-800) 86%, black 14%);
     box-shadow: none;
 }
 
 .text-field1-large:disabled {
-    background-color: color-mix(in srgb, var(--color-openlearn-800) 86%, black 14%);
+    background-color: color-mix(in srgb, var(--color-librelearn-800) 86%, black 14%);
     box-shadow: none;
 }
 
 .text-field2:disabled {
-    background-color: color-mix(in srgb, var(--color-openlearn-700) 75%, black 25%);
-    border-color: color-mix(in srgb, var(--color-openlearn-600) 40%, transparent);
+    background-color: color-mix(in srgb, var(--color-librelearn-700) 75%, black 25%);
+    border-color: color-mix(in srgb, var(--color-librelearn-600) 40%, transparent);
     box-shadow: none;
 }
 
@@ -73,9 +73,9 @@
     width: 1.1rem;
     height: 1.1rem;
     border-radius: 9999px;
-    border: 1px solid color-mix(in srgb, var(--color-openlearn-600) 75%, white 25%);
-    background-color: var(--color-openlearn-800);
-    accent-color: var(--color-openlearn-600);
+    border: 1px solid color-mix(in srgb, var(--color-librelearn-600) 75%, white 25%);
+    background-color: var(--color-librelearn-800);
+    accent-color: var(--color-librelearn-600);
     cursor: pointer;
 }
 

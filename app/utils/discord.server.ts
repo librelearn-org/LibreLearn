@@ -68,7 +68,7 @@ export async function sendMessageToDiscord(embed: DiscordEmbed) {
         }
         let content = ''
         if (process.env.DC_WEBHOOK_PING_PPL === 'true') {
-            content += `KIJK LOGS! <@1491883464918700033>!`
+            content += `KIJK LOGS! <@&1491883346081615955>!`
         } else {
             content += 'we zijn aan het testen...'
         }

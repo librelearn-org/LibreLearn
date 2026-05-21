@@ -22,7 +22,7 @@ export default function Md({ content }: { content: string }) {
                 ol: ({ children }) => <ol className="list-decimal list-inside my-2">{children}</ol>,
                 li: ({ children }) => <li className="my-1">{children}</li>,
                 table: ({ children }) => <table className="table-auto w-full my-4 border-collapse border border-gray-300">{children}</table>,
-                thead: ({ children }) => <thead className=" bg-openlearn-700">{children}</thead>,
+                thead: ({ children }) => <thead className=" bg-librelearn-700">{children}</thead>,
                 tbody: ({ children }) => <tbody>{children}</tbody>,
                 tr: ({ children }) => <tr className="border border-gray-300">{children}</tr>,
                 th: ({ children }) => <th className="border border-gray-300 px-4 py-2 text-left">{children}</th>,

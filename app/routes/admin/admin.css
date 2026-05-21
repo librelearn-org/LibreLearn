@@ -1,14 +1,14 @@
 /* make darkmode super dark so its clear that its admin */
 .admin-layout {
-    --color-openlearn-900: #000000 !important;
-    --color-openlearn-800: #2a2a2a !important;
-    --color-openlearn-700: #3f3f3f !important;
-    --color-openlearn-600: #747474 !important;
-    --color-openlearn-500: #9c9c9c !important;
-    --color-openlearn-400: #a8a8a8 !important;
-    --color-openlearn-300: #b7b7b7 !important;
-    --color-openlearn-200: #dbeafe !important;
-    --color-openlearn-100: #eff6ff !important;
-    --color-openlearn-75: #f0f7ff !important;
-    --color-openlearn-50: #f8fafc !important;
+    --color-librelearn-900: #000000 !important;
+    --color-librelearn-800: #2a2a2a !important;
+    --color-librelearn-700: #3f3f3f !important;
+    --color-librelearn-600: #747474 !important;
+    --color-librelearn-500: #9c9c9c !important;
+    --color-librelearn-400: #a8a8a8 !important;
+    --color-librelearn-300: #b7b7b7 !important;
+    --color-librelearn-200: #dbeafe !important;
+    --color-librelearn-100: #eff6ff !important;
+    --color-librelearn-75: #f0f7ff !important;
+    --color-librelearn-50: #f8fafc !important;
 }

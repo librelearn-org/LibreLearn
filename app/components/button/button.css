@@ -1,7 +1,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Jua&display=swap');
 
 .button1 {
-    background-color: var(--color-openlearn-700);
+    background-color: var(--color-librelearn-700);
     margin: 0.25rem;
     border-radius: 9999px;
     padding-left: 1rem;
@@ -10,32 +10,32 @@
     padding-bottom: 0.5rem;
     color: white;
     transition-duration: 150ms;
-    box-shadow: 0px 9px var(--color-openlearn-800);
+    box-shadow: 0px 9px var(--color-librelearn-800);
 }
 
 /* radius van 9999 is crazy lmao kan dit niet beter */
 
 .button1:hover {
-    background-color: var(--color-openlearn-600);
+    background-color: var(--color-librelearn-600);
     transform: translate(0px, 7px);
-    box-shadow: 0px 2px var(--color-openlearn-800);
+    box-shadow: 0px 2px var(--color-librelearn-800);
 
     cursor: pointer;
 }
 
 .button1:disabled {
-    background-color: var(--color-openlearn-800);
+    background-color: var(--color-librelearn-800);
 
     cursor: not-allowed;
 }
 
 .button1:active {
     transform: translate(0px, 10px);
-    box-shadow: 0px 0px var(--color-openlearn-800);
+    box-shadow: 0px 0px var(--color-librelearn-800);
 }
 
 .button2 {
-    background-color: var(--color-openlearn-700);
+    background-color: var(--color-librelearn-700);
     margin: 0.25rem;
     border-radius: 9999px;
     padding-left: 1rem;
@@ -44,13 +44,13 @@
     padding-bottom: 0.5rem;
     color: white;
     transition-duration: 150ms;
-    /* box-shadow: 0px 9px var(--color-openlearn-800); */
+    /* box-shadow: 0px 9px var(--color-librelearn-800); */
 }
 
 .button2:hover {
-    background-color: var(--color-openlearn-600);
+    background-color: var(--color-librelearn-600);
     /* glow hover :eyes: */
-    box-shadow: var(--color-openlearn-700) 0px 0px 24px;
+    box-shadow: var(--color-librelearn-700) 0px 0px 24px;
     /* we maken de knop groter */
     transform: scale(1.1);
 
@@ -58,7 +58,7 @@
 }
 
 .button2:disabled {
-    background-color: var(--color-openlearn-800);
+    background-color: var(--color-librelearn-800);
 
     cursor: not-allowed;
 }

@@ -16,7 +16,7 @@
       "invcreds": "Invalid login credentials. Please try again.",
       "unknown": "An unknown error occurred. Please try again later.",
       "UserShort": "The username/email format is invalid. Try a different username or email.",
-      "noConnectedAccount": "No existing Openlearn account is connected to this provider.",
+      "noConnectedAccount": "No existing Librelearn account is connected to this provider.",
       "AccountDisabled": "This account has been permanently disabled due to a violation of our terms of use. Contact support@polarlearn.nl.",
       "ProviderDisabled": "This sign-in method is inactive. Please try another sign-in method.",
       "OauthError": "A problem occurred while using OAuth 2.1.",
@@ -82,7 +82,7 @@
     }
   },
   "startPage": {
-    "welcome": "Welkom to Openlearn!",
-    "description": "This is not the complete version of Openlearn yet. This is only the forum beta version."
+    "welcome": "Welkom to Librelearn!",
+    "description": "This is not the complete version of Librelearn yet. This is only the forum beta version."
   }
 }

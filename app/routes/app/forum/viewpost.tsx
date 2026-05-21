@@ -137,7 +137,7 @@ export default function Home({ loaderData: initialPost }: Route.ComponentProps) 
     return (
         <div className="flex flex-col items-center justify-start w-full p-0 m-0">
             <div className="w-full max-w flex flex-col gap-4 p-5">
-                <div className="flex flex-row bg-openlearn-800 rounded-2xl p-6">
+                <div className="flex flex-row bg-librelearn-800 rounded-2xl p-6">
                     <div className="flex flex-col gap-2 ">
                         <h1 className="text-3xl font-bold">{post.title}</h1>
                         <p className="text-neutral-300">
@@ -182,7 +182,7 @@ export default function Home({ loaderData: initialPost }: Route.ComponentProps) 
 
                 {replyview && (
                     <form
-                        className="flex flex-col gap-4 bg-openlearn-800 rounded-2xl p-6"
+                        className="flex flex-col gap-4 bg-librelearn-800 rounded-2xl p-6"
                         onSubmit={(event) => {
                             event.preventDefault();
                             if (!postId || !replyContent.trim()) {
@@ -223,7 +223,7 @@ export default function Home({ loaderData: initialPost }: Route.ComponentProps) 
                             swapSubtitleAndTitle={true}
                             markdown={true}
                         />
-                        // <div key={reply.id} className="bg-openlearn-800 rounded-2xl p-4">
+                        // <div key={reply.id} className="bg-librelearn-800 rounded-2xl p-4">
                         //     <div className="flex flex-wrap items-center justify-between gap-2">
                         //         <h3 className="font-semibold text-lg text-gray-100">{reply.author.name}</h3>
                         //         <p className="text-gray-300 text-sm">{new Date(reply.createdAt).toLocaleDateString()}</p>

@@ -3,7 +3,7 @@ import "../admin/admin.css"
 import { caller } from "~/utils/trpc/server.server";
 import { useMutation } from "@tanstack/react-query";
 import { useTRPC } from "~/utils/trpc/react";
-import { useEffect, useMemo, useState } from "react";
+import { use, useEffect, useMemo, useState } from "react";
 import learnLib from "@siemsiem/learnlib";
 import { Button } from "~/components/button/button";
 import "~/components/text-field/text-field.css";
@@ -30,7 +30,7 @@ export async function loader(loaderArgs: Route.LoaderArgs) {
 
 export default function Learn({ loaderData: sessionBASE }: Route.ComponentProps) {
     const trpc = useTRPC();
-    const updateSession = useMutation({
+    const updateSessionCloud = useMutation({
         ...trpc.learn.updateLearnSessionItem.mutationOptions(),
         onSuccess() {
             console.log("yipie! sync at " + new Date().toISOString());
@@ -47,32 +47,53 @@ export default function Learn({ loaderData: sessionBASE }: Route.ComponentProps)
         learnTool.setSubscriber(setState);
     }, [learnTool]);
 
+    useEffect(() => {
+        if (state.last == "") return;
+        const currentItem = state.lijst[state.last];
+        const currentItemHistory = currentItem.listSessionItemAnswerHistories![currentItem.listSessionItemAnswerHistories!.length - 1];
+        updateSessionCloud.mutate({
+            listSessionIdItem: state.lijst[state.last].id || "",
+            goed: currentItemHistory.goed,
+            round: currentItemHistory.round,
+            antwoord: currentItemHistory.antwoord,
+        });
+    }, [state.last]);
 
     return (
         <div>
-            {state.wachtrij.length === 0 ? (
-                <>
-                    <p>Je hebt alles geleerd! Gefeliciteerd!</p>
-                    <Button onClick={() => learnTool.reshuffle()}>Opnieuw leren</Button>
-                </>
-            ) : (
-                <div className="p-4 m-4">
-                    <h1>Learn</h1>
-                    <p>{state.currentItem?.vraag}</p>
-                    <p>{state.currentItem?.antwoord}</p>
-                    <input
-                        type="text"
-                        onChange={(e) => setUserAnswer(e.target.value)}
-                        placeholder={"Typ hier je antwoord..."}
-                        className="text-field1 w-full"
-                        disabled={false}
-                    />
-                    <Button onClick={() => learnTool.answer(userAnswer)}>Antwoord (eerlijk)</Button>
-                    <Button onClick={() => learnTool.answer(userAnswer, true)}>Goed Antwoord</Button>
-                    <Button onClick={() => learnTool.answer("aygefuyogaeywgu", false)}>Fout Antwoord</Button>
-                    <Button onClick={() => learnTool.reshuffle()}>Reshuffle</Button>
+            <div className="p-4 m-4 flex flex-col justify-center items-center">
+                <div className="bg-librelearn-800 p-4 rounded-lg w-sm justify-center items-center flex flex-col text-center">
+                    {state.wachtrij.length === 0 ? (
+                        <>
+                            <p>Je hebt alles geleerd! Gefeliciteerd!</p>
+                            <Button
+                                onClick={() => window.location.reload()}
+                                variant="secondary"
+                            >Opnieuw leren</Button>
+                        </>
+                    ) : (
+                        <>
+                            <p className="text-2xl mb-4">{state.lijst[state.wachtrij[0]].vraag}</p>
+                            <input
+                                type="text"
+                                value={userAnswer}
+                                onChange={(e) => setUserAnswer(e.target.value)}
+                                className="border p-2 rounded mb-4 w-full"
+                            />
+                            <Button
+                                onClick={() => {
+                                    learnTool.answer(userAnswer);
+                                    setUserAnswer("");
+                                }}
+                                variant="secondary"
+                            >
+                                Antwoord
+                            </Button>
+                        </>
+
+                    )}
                 </div>
-            )}
+            </div>
         </div>
     );
 }

@@ -4,7 +4,7 @@
 html,
 body {
   font-family: "Geist", sans-serif;
-  @apply bg-openlearn-900 text-neutral-100;
+  @apply bg-librelearn-900 text-neutral-100;
   margin: 0;
   padding: 0;
 }
@@ -15,9 +15,9 @@ body {
 
 .dark body {
   font-family: "Geist", sans-serif;
-  @apply bg-openlearn-900 text-neutral-100;
+  @apply bg-librelearn-900 text-neutral-100;
 }
 
 .glow-shadow {
-  box-shadow: var(--color-openlearn-700) 0px 0px 24px;
+  box-shadow: var(--color-librelearn-700) 0px 0px 24px;
 }
