@@ -26,6 +26,7 @@ export default function ForumHome({ loaderData: { forumPostsPreload, forumReplie
     const [isForumMutationHappening, setIsForumMutationHappening] = useState(false);
     const [mutationError, setMutationError] = useState<string | null>(null);
     const reviewQueueInput = undefined;
+    
 
     const { data: forumPosts, isLoading, error } = useQuery(
         trpc.forum.forumReviewQueue.queryOptions(reviewQueueInput, {

@@ -27,6 +27,7 @@ export async function loader(loaderArgs: Route.LoaderArgs) {
         const api = await caller(loaderArgs);
         const post = await api.forum.getSpecificPost({ postId });
 
+        console.log(post);
         if (!post) {
             return redirect('/app/forum');
         }

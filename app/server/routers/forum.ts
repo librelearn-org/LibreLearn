@@ -5,6 +5,7 @@ import { protectedProcedure, publicProcedure, veryProtectedProcedure } from '~/s
 import { TaalSlugEnum } from '~/components/Icons'
 import { sendMessageToDiscord } from '~/utils/discord.server'
 import { send } from 'vite'
+import config from "~/utils/config"
 
 export const forumRouter = {
     getPosts: publicProcedure
@@ -20,59 +21,48 @@ export const forumRouter = {
         )
         .query(async ({ input, ctx }) => {
             // we halen een config op waarin staat of we safeMode aan hebben staan
-            const safeMode = await ctx.prisma.config.findFirstOrThrow({
+            const safeModeDB = await ctx.prisma.config.findFirst({
                 where: {
                     key: 'safeMode'
                 }
             })
-            console.log('safeMode is', safeMode.value)
 
-            if (safeMode.value) {
-                return ctx.prisma.forumPost.findMany(
-                    {
-                        where: {
-                            subject: input.subject,
-                            authorId: input.authorId,
-                            hasBeenAdminChecked: true
-                        },
-                        take: input.take ?? 20,
-                        skip: input.skip ?? 0,
-                        orderBy: {
-                            createdAt: 'desc'
-                        },
-                        include: {
-                            author: {
-                                select: {
-                                    id: true,
-                                    name: true
-                                }
-                            },
-                        }
-                    }
-                )
+            let safeModeValue = undefined
+            if (safeModeDB) {
+                safeModeValue = safeModeDB.value
             } else {
-                return ctx.prisma.forumPost.findMany(
-                    {
-                        where: {
-                            subject: input.subject,
-                            authorId: input.authorId
-                        },
-                        take: input.take ?? 20,
-                        skip: input.skip ?? 0,
-                        orderBy: {
-                            createdAt: 'desc'
-                        },
-                        include: {
-                            author: {
-                                select: {
-                                    id: true,
-                                    name: true
-                                }
-                            },
-                        }
+                safeModeValue = config.defaults.forum.safeMode
+                await ctx.prisma.config.create({
+                    data: {
+                        key: 'safeMode',
+                        value: safeModeValue
                     }
-                )
+                })
             }
+
+            const posts = await ctx.prisma.forumPost.findMany({
+                where: {
+                    subject: input.subject,
+                    authorId: input.authorId,
+                    ...(safeModeValue ? { hasBeenAdminChecked: true } : {})
+                },
+                take: input.take ?? 20,
+                skip: input.skip ?? 0,
+                orderBy: {
+                    createdAt: 'desc'
+                },
+                include: {
+                    author: {
+                        select: {
+                            id: true,
+                            name: true
+                        }
+                    },
+                }
+            })
+
+            return posts
+
         }),
     makePost: protectedProcedure
         .input(
@@ -108,7 +98,7 @@ export const forumRouter = {
                     key: 'safeMode'
                 }
             })
-            const post = await ctx.prisma.forumPost.findUnique({
+            let post = await ctx.prisma.forumPost.findUnique({
                 // FIX DE FUCKING INTENDED BEHAVIOUR
                 where: (safeMode.value && !(ctx.user?.role == "admin")) ? { hasBeenAdminChecked: true, id: input.postId } : { id: input.postId },
 

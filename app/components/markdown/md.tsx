@@ -16,8 +16,9 @@ export default function Md({ content }: { content: string }) {
                 h5: ({ children }) => <h5 className="text-base font-bold mb-1">{children}</h5>,
                 h6: ({ children }) => <h6 className="text-sm font-bold mb-1">{children}</h6>,
                 blockquote: ({ children }) => <blockquote className="border-l-4 border-gray-300 pl-4 italic my-2">{children}</blockquote>,
-                a: ({ children, href }) => (config.allowForumLinks) ? <a href={href} className="text-blue-500 hover:underline">{children}</a> : <span>Link removed</span>,
-                img: ({ src, alt }) => (config.allowForumImages) ? <img src={src} alt={alt} /> : <span>Image removed</span>,
+                // TODO: instelbaar maken in db config, anders defaults
+                a: ({ children, href }) => (config.defaults.forum.allowForumLinks) ? <a href={href} className="text-blue-500 hover:underline">{children}</a> : <span>Link removed</span>,
+                img: ({ src, alt }) => (config.defaults.forum.allowForumImages) ? <img src={src} alt={alt} /> : <span>Image removed</span>,
                 ul: ({ children }) => <ul className="list-disc list-inside my-2">{children}</ul>,
                 ol: ({ children }) => <ol className="list-decimal list-inside my-2">{children}</ol>,
                 li: ({ children }) => <li className="my-1">{children}</li>,

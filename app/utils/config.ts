@@ -2,14 +2,25 @@ const config = {
     refetchTime: 1000 * 30,
     refetch: true,
     lang: 'en',
-    allowForumLinks: false,
-    allowForumImages: false,
+    defaults: {
+        forum: {
+            allowForumLinks: false,
+            allowForumImages: false,
+            safeMode: true,
+        }
+    }
 } as {
     refetchTime: number,
     refetch: boolean,
     lang: 'nl' | 'en',
-    allowForumLinks: boolean,
-    allowForumImages: boolean,
+    // this is configerable by the admins in the settings
+    defaults: {
+        forum: {
+            allowForumLinks: boolean,
+            allowForumImages: boolean,
+            safeMode: boolean,
+        }
+    }
 }
 
 export default config;

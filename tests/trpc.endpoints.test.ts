@@ -968,8 +968,8 @@ describe("tRPC endpoints (integration)", () => {
         })).rejects.toBeInstanceOf(TRPCError);
       });
     })
-
   });
+
 
   describe("learn", () => {
     describe("lists", () => {
