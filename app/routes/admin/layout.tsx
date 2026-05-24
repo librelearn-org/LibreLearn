@@ -70,13 +70,13 @@ export default function MyAppLayout() {
                     linkTo: '/admin/forum'
                 },
                 {
+                    title: "Users",
+                    linkTo: '/admin/users'
+                },
+                {
                     title: "test helper",
                     linkTo: '/admin/test'
                 },
-                {
-                    title: "Users",
-                    linkTo: '/admin/users'
-                }
             ]} />
             <div className="absolute bottom-4 left-4" >
                 <Button onClick={() => navigate('/app')}>
