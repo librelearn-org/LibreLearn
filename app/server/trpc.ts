@@ -60,6 +60,13 @@ const withResolvedUser = t.middleware(async ({ ctx, next, path }) => {
     if (!dbUser) {
         throw new TRPCError({ code: 'UNAUTHORIZED' })
     }
+    if (dbUser.role == "admin") {
+        return next({
+            ctx: {
+                user: dbUser
+            }
+        })
+    }
 
     if (path.startsWith('forum') && dbUser.forumBanned) {
         throw new TRPCError({ code: 'FORBIDDEN' })

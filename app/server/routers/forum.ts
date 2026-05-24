@@ -392,23 +392,38 @@ export const forumRouter = {
         z.object({
             userId: z.uuid(),
             ban: z.boolean(),
-            banReason: z.string().max(500).optional()
+            banReason: z.string().max(500).optional(),
+            banFull: z.boolean().default(false).optional()
         })
     ).mutation(async ({ input, ctx }) => {
-        await ctx.prisma.user.update({
-            where: {
-                id: input.userId
-            },
-            data: {
-                forumBanned: input.ban,
-                banReason: input.banReason ?? undefined
-            }
-        })
+        if (input.banFull) {
+            await ctx.prisma.user.update({
+                where: {
+                    id: input.userId
+                },
+                data: {
+                    banned: input.ban,
+                    banReason: input.banReason ?? undefined
+                }
+            })
+
+        } else {
+            await ctx.prisma.user.update({
+                where: {
+                    id: input.userId
+                },
+                data: {
+                    forumBanned: input.ban,
+                    banReason: input.banReason ?? undefined
+                }
+            })
+
+        }
 
         if (input.ban) {
             await sendMessageToDiscord({
-                title: 'User Forum Banned',
-                description: `User with ID ${input.userId} was forum banned by ${ctx.user.name}.`,
+                title: 'User Banned',
+                description: `User with ID ${input.userId} was forum or platform banned by ${ctx.user.name}.`,
                 color: 0xFF0000, // rood
                 author: {
                     name: ctx.user.name
@@ -417,8 +432,8 @@ export const forumRouter = {
             })
         } else {
             await sendMessageToDiscord({
-                title: 'User Forum Unbanned',
-                description: `User with ID ${input.userId} was forum unbanned by ${ctx.user.name}.`,
+                title: 'User Unbanned',
+                description: `User with ID ${input.userId} was forum or platform unbanned by ${ctx.user.name}.`,
                 author: {
                     name: ctx.user.name
                 },
