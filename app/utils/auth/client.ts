@@ -4,8 +4,6 @@ import { adminClient, genericOAuthClient, organizationClient, usernameClient } f
 export const authClient = createAuthClient({
     plugins: [
         genericOAuthClient(),
-        organizationClient(),
         adminClient(),
-        usernameClient(),
     ],
 })

@@ -10,7 +10,7 @@ const getFirstName = (name?: string | null) => {
 }
 
 export const auth = betterAuth({
-    appName: "OpenLearn",
+    appName: "Librelearn",
     secret: process.env.AUTH_SECRET,
 
     emailAndPassword: {
@@ -40,11 +40,6 @@ export const auth = betterAuth({
                     }),
                 }] : []
             ],
-        }),
-        organization({
-            allowUserToCreateOrganization: async (user) => {
-                return user.role === 'admin'
-            }
         }),
         admin(),
     ],
