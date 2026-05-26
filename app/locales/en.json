@@ -43,7 +43,6 @@
       "internal": "Something went wrong on our side. Please try again.",
       "network": "Could not reach the server. Check your connection and try again.",
       "generic": "Something went wrong. Please try again later.",
-      "forumLoad": "Could not load forum posts right now.",
       "reviewQueueLoad": "Could not load the moderation queue right now.",
       "createPost": "Could not create your post. Please try again.",
       "vote": "Could not save your vote. Please try again.",
@@ -62,27 +61,8 @@
     "natuurkunde": "Physics",
     "scheikunde": "Chemistry"
   },
-  "forum": {
-    "viewpost": {
-      "byOn": "By {{author}} on {{date}}",
-      "stats": "Votes: {{votes}} • {{replies}} replies",
-      "replyTitle": "{{name}} • on {{date}}",
-      "repliesTitle": "Replies",
-      "noReplies": "No replies.",
-      "placeholders": {
-        "reply": "Write your reply..."
-      },
-      "actions": {
-        "upvote": "Vote up",
-        "downvote": "Vote down",
-        "reply": "Reply",
-        "postReply": "Post reply",
-        "cancel": "Cancel"
-      }
-    }
-  },
   "startPage": {
     "welcome": "Welkom to Librelearn!",
-    "description": "This is not the complete version of Librelearn yet. This is only the forum beta version."
+    "description": "This is not the complete version of Librelearn yet. This is only the beta version."
   }
 }

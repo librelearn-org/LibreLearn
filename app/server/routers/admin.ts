@@ -13,10 +13,8 @@ export const adminRouter = {
           id: input
         },
         include: {
-          forumPosts: true,
           lists: true,
           accounts: true,
-          forumPostReplies: true,
         }
       });
       return user;

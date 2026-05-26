@@ -1,5 +1,4 @@
 import { useNavigate } from "react-router"
-import Md from "../markdown/md"
 export const ListContainer: React.FC<{ children: React.ReactNode, className?: string }> = ({ children, className }) => {
     return (
         <div className={"flex flex-col gap-2 w-full max-w-full overflow-x-hidden " + (className || "")} >
@@ -16,10 +15,9 @@ export const ListItem: React.FC<{
     image?: string,
     swapSubtitleAndTitle?: boolean,
     className?: string,
-    markdown?: boolean,
     adminColors?: boolean
 
-}> = ({ children, linkTo, title, subtitle, image, swapSubtitleAndTitle, className: cName, markdown, adminColors }) => {
+}> = ({ children, linkTo, title, subtitle, image, swapSubtitleAndTitle, className: cName, adminColors }) => {
     const navigate = useNavigate()
     if (adminColors) {
         cName = (cName || '') + ' bg-admin-800'
@@ -33,10 +31,7 @@ export const ListItem: React.FC<{
                 <div className="flex flex-row w-full">
                     <div className="flex flex-col flex-1">
                         {swapSubtitleAndTitle && <p className="text-gray-200 text-sm">{subtitle}</p>}
-                        {markdown ?
-                            <Md content={title} /> :
-                            <h1 className="font-semibold text-lg text-gray-100">{title}</h1>
-                        }
+                         <h1 className="font-semibold text-lg text-gray-100">{title}</h1>
                         {!swapSubtitleAndTitle && <p className="text-gray-200 text-sm">{subtitle}</p>}
                     </div>
 

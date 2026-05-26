@@ -66,10 +66,6 @@ export default function MyAppLayout() {
                     linkTo: '/admin'
                 },
                 {
-                    title: 'Forum safety',
-                    linkTo: '/admin/forum'
-                },
-                {
                     title: "Users",
                     linkTo: '/admin/users'
                 },

@@ -9,11 +9,6 @@ export default [
     route("/app", "routes/app/layout.tsx", [
         route("", "routes/app/home.tsx"),
 
-        ...prefix("forum", [
-            route("", "routes/app/forum/list.tsx"),
-            route("make", "routes/app/forum/makePost.tsx"),
-            route(":postId", "routes/app/forum/viewpost.tsx"),
-        ]),
         ...prefix("list", [
             route(":listId", "routes/app/lists/viewer.tsx"),
             route("new/:listId", "routes/app/lists/new.tsx"),
@@ -28,7 +23,6 @@ export default [
 
     route("/admin", "routes/admin/layout.tsx", [
         route("", "routes/admin/index.tsx"),
-        route("forum", "routes/admin/forum.tsx"),
         route("test", "routes/admin/testing.tsx"),
         route("users/:userId", "routes/admin/userview.tsx"),
         route("users", "routes/admin/users.tsx"),

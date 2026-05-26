@@ -68,10 +68,6 @@ const withResolvedUser = t.middleware(async ({ ctx, next, path }) => {
         })
     }
 
-    if (path.startsWith('forum') && dbUser.forumBanned) {
-        throw new TRPCError({ code: 'FORBIDDEN' })
-    }
-
     if (dbUser.banned) {
         throw new TRPCError({ code: 'FORBIDDEN' })
     }

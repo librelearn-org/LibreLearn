@@ -1,8 +1,3 @@
-
-
-> [!NOTE]
-> I have not yet implemented the learning part of the website, as of now it is only a forum. I will add the learning part later, but I wanted to get the forum out first so people can start using it and give feedback. and because I needed to ship for lockin sidequest.
-
 # Librelearn
 
 A foss alternaitve for WRTS (Studygo), quizlet and others.
@@ -20,7 +15,7 @@ A foss alternaitve for WRTS (Studygo), quizlet and others.
 
 ## Credits
 
-Thanks to @unbravechimp for making the very nice subject icons used in the forum!
+Thanks to @unbravechimp for making the very nice subject icons used in the lists!
 
 ## Contributing
 

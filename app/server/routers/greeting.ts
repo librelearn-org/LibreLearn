@@ -21,26 +21,6 @@ export const greetingRouter = {
     checkSession: protectedProcedure.query(async ({ ctx }) => {
         return ctx.user
     }),
-    getUserForumPosts: protectedProcedure
-        .input(
-            z.object({
-                take: z.number().min(1).max(100).optional(),
-                skip: z.number().min(0).optional()
-            })
-        )
-        .query(async ({ input, ctx }) => {
-            const posts = await ctx.prisma.forumPost.findMany({
-                where: {
-                    authorId: ctx.user.id
-                },
-                take: input.take ?? 20,
-                skip: input.skip ?? 0,
-                orderBy: {
-                    createdAt: 'desc'
-                }
-            })
-            return posts
-        }),
     adminLog: veryProtectedProcedure
         .input(
             z.object({

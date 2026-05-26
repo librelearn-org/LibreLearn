@@ -63,24 +63,5 @@
     "wiskunde": "Wiskunde",
     "natuurkunde": "Natuurkunde",
     "scheikunde": "Scheikunde"
-  },
-  "forum": {
-    "viewpost": {
-      "byOn": "Door {{author}} op {{date}}",
-      "stats": "Stemmen: {{votes}} • {{replies}} reacties",
-      "replyTitle": "{{name}} ・ om {{date}}",
-      "repliesTitle": "Reacties",
-      "noReplies": "Nog geen reacties.",
-      "placeholders": {
-        "reply": "Schrijf je reactie..."
-      },
-      "actions": {
-        "upvote": "Omhoog stemmen",
-        "downvote": "Omlaag stemmen",
-        "reply": "Reageren",
-        "postReply": "Reactie plaatsen",
-        "cancel": "Annuleren"
-      }
-    }
   }
 }
