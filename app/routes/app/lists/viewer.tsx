@@ -28,21 +28,21 @@ export async function loader(loaderArgs: Route.LoaderArgs) {
 export default function Component({ loaderData }: Route.ComponentProps) {
     const nav = useNavigate();
     const trpc = useTRPC();
-    const mkSessionMutation = useMutation(trpc.learn.startLearnSession.mutationOptions({
-        onSettled: (data) => {
-            // download the list as a json file
-            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(data));
-            const downloadAnchorNode = document.createElement('a');
-            downloadAnchorNode.setAttribute("href", dataStr);
-            downloadAnchorNode.setAttribute("download", loaderData.name + ".json");
-            document.body.appendChild(downloadAnchorNode); // required for firefox
-            downloadAnchorNode.click();
-            downloadAnchorNode.remove();
-        }
-    }))
-    function download() {
-        mkSessionMutation.mutate({ listId: loaderData.id })
-    }
+    // const mkSessionMutation = useMutation(trpc.learn.startLearnSession.mutationOptions({
+    //     onSettled: (data) => {
+    //         // download the list as a json file
+    //         const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(data));
+    //         const downloadAnchorNode = document.createElement('a');
+    //         downloadAnchorNode.setAttribute("href", dataStr);
+    //         downloadAnchorNode.setAttribute("download", loaderData.name + ".json");
+    //         document.body.appendChild(downloadAnchorNode); // required for firefox
+    //         downloadAnchorNode.click();
+    //         downloadAnchorNode.remove();
+    //     }
+    // }))
+    // function download() {
+    //     mkSessionMutation.mutate({ listId: loaderData.id })
+    // }
     return (
         <div>
             <ListItem title={loaderData.name} subtitle={loaderData.listItems.length + " items ・ by " + loaderData.owner.name} image={getSubjectBySlug(loaderData.language)?.icon} className="mx-4">
@@ -52,9 +52,9 @@ export default function Component({ loaderData }: Route.ComponentProps) {
             </ListItem>
             <Button onClick={() => { nav("/app/learn/" + loaderData.id + "/testing") }}>TEST</Button>
             <LearnListItems data={loaderData.listItems.map((value) => { return { from: value.vraag, to: value.antwoord } })} />
-            <Button onClick={download}>
+            {/* <Button onClick={download}>
                 Export for Stratus
-            </Button>
+            </Button> */}
         </div>
     );
 }
