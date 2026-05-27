@@ -15,7 +15,7 @@
     "test": "bun test"
   },
   "dependencies": {
-    "@better-auth/oauth-provider": "1.4.15",
+    "@better-auth/oauth-provider": "1.6.5",
     "@prisma/adapter-pg": "7.2.0",
     "@prisma/client": "7.2.0",
     "@react-router/fs-routes": "7.12.0",
