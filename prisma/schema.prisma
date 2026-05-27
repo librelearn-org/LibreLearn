@@ -8,24 +8,21 @@ datasource db {
 }
 
 model User {
-  id              String       @id
-  name            String
-  email           String
-  emailVerified   Boolean      @default(false)
-  image           String?
-  createdAt       DateTime     @default(now())
-  updatedAt       DateTime     @updatedAt
-  role            String?
-  banned          Boolean?     @default(false)
-  forumBanned     Boolean      @default(false)
-  banReason       String?
-  banExpires      DateTime?
-  sessions        Session[]
-  accounts        Account[]
-
-  // learn relations
-  listSessions ListSession[]
-  lists        list[]
+  id            String    @id
+  name          String
+  email         String
+  emailVerified Boolean   @default(false)
+  image         String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  role          String?
+  banned        Boolean?  @default(false)
+  forumBanned   Boolean   @default(false)
+  banReason     String?
+  banExpires    DateTime?
+  sessions      Session[]
+  accounts      Account[]
+  lists         list[]
 
   @@unique([email])
   @@map("user")
@@ -94,7 +91,6 @@ model list {
   id           String          @id @unique @default(uuid())
   name         String
   listItems    listItemSaved[]
-  listSessions ListSession[]
   owner        User            @relation(fields: [ownerId], references: [id])
   ownerId      String
   language     String          @default("NL")
@@ -109,33 +105,4 @@ model listItemSaved {
 
   list   list?   @relation(fields: [listId], references: [id])
   listId String?
-}
-
-model ListSession {
-  id               String            @id @unique @default(uuid())
-  list             list              @relation(fields: [listId], references: [id])
-  listId           String
-  user             User              @relation(fields: [userId], references: [id])
-  userId           String
-  createdAt        DateTime          @default(now())
-  listSessionItems ListSessionItem[]
-}
-
-model ListSessionItem {
-  id                             String                         @id @unique @default(uuid())
-  listSession                    ListSession                    @relation(fields: [listSessionId], references: [id])
-  listSessionId                  String
-  vraag                          String
-  antwoord                       String
-  listSessionItemAnswerHistories ListSessionItemAnswerHistory[]
-  roundCount                     Int                            @default(0)
-}
-
-model ListSessionItemAnswerHistory {
-  id                String          @id @unique @default(uuid())
-  round             Int
-  goed              Boolean
-  antwoord          String
-  listSessionItem   ListSessionItem @relation(fields: [listSessionItemId], references: [id])
-  listSessionItemId String
 }

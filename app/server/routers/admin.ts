@@ -20,9 +20,9 @@ export const adminRouter = {
       return user;
     }),
   nukeNotYetUsedDBTables: veryProtectedProcedure.mutation(async ({ ctx }) => {
-    await ctx.prisma.listSessionItemAnswerHistory.deleteMany({});
-    await ctx.prisma.listSessionItem.deleteMany({});
-    await ctx.prisma.listSession.deleteMany({});
+    // await ctx.prisma.listSessionItemAnswerHistory.deleteMany({});
+    // await ctx.prisma.listSessionItem.deleteMany({});
+    // await ctx.prisma.listSession.deleteMany({});
     sendMessageToDiscord({
       title: 'Admin Action: Nuke unused DB tables',
       description: `User ${ctx.user.name} (${ctx.user.id}) nuked the unused DB tables.`,

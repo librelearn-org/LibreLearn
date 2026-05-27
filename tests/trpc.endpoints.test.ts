@@ -64,7 +64,6 @@ async function createTestUser(admin?: boolean) {
 }
 
 async function cleanupArtifacts() {
-  const postIds = [...createdPostIds];
   const listIds = [...createdListIds];
   const userIds = [...createdUserIds];
 
@@ -75,68 +74,9 @@ async function cleanupArtifacts() {
       }
     }
   );
-
-  if (listIds.length > 0) {
-    await prisma.listSessionItemAnswerHistory.deleteMany({
-      where: {
-        listSessionItem: {
-          listSession: {
-            listId: { in: listIds },
-          },
-        },
-      },
-    });
-    await prisma.listSessionItem.deleteMany({
-      where: {
-        listSession: {
-          listId: { in: listIds },
-        },
-      },
-    });
-    await prisma.listSession.deleteMany({ where: { listId: { in: listIds } } });
-    await prisma.listItemSaved.deleteMany({ where: { listId: { in: listIds } } });
-    await prisma.list.deleteMany({ where: { id: { in: listIds } } });
-  }
+  await prisma.listItemSaved.deleteMany({ where: { listId: { in: listIds } } });
+  await prisma.list.deleteMany({ where: { id: { in: listIds } } });
   if (userIds.length > 0) {
-    await prisma.listSessionItemAnswerHistory.deleteMany({
-      where: {
-        OR: [
-          {
-            listSessionItem: {
-              listSession: { userId: { in: userIds } },
-            },
-          },
-          {
-            listSessionItem: {
-              listSession: {
-                list: { ownerId: { in: userIds } },
-              },
-            },
-          },
-        ],
-      },
-    });
-    await prisma.listSessionItem.deleteMany({
-      where: {
-        OR: [
-          { listSession: { userId: { in: userIds } } },
-          { listSession: { list: { ownerId: { in: userIds } } } },
-        ],
-      },
-    });
-    await prisma.listSession.deleteMany({
-      where: {
-        OR: [
-          { userId: { in: userIds } },
-          { list: { ownerId: { in: userIds } } },
-        ],
-      },
-    });
-    await prisma.listItemSaved.deleteMany({
-      where: {
-        list: { ownerId: { in: userIds } },
-      },
-    });
     await prisma.list.deleteMany({ where: { ownerId: { in: userIds } } });
     await prisma.user.deleteMany({ where: { id: { in: userIds } } });
   }
