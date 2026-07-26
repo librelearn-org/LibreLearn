@@ -17,7 +17,7 @@ import { TRPCReactProvider } from "~/utils/trpc/react";
 import type { Route } from "./+types/root";
 import "./app.css";
 import "beercss";
-import { AutoNavRail, BeerProviders, Nav, useDialog, type navItem } from "@siemsiem/beerreact";
+import { AutoNavRail, BeerProviders, Button, Nav, useDialog, type navItem } from "@siemsiem/beerreact";
 
 initI18n();
 
@@ -51,23 +51,32 @@ export function meta({ }: Route.MetaArgs) {
   ];
 }
 
-export function Layout({ children }: { children: React.ReactNode }) {
-  const data = useRouteLoaderData("root") as { lang: string, colorScheme: "light" | "dark" } | undefined;
-  const lang = data?.lang || config.lang;
+function RootContent({ children }: { children: React.ReactNode }) {
   const navigate = useNavigate();
   const location = useLocation();
-  const { pushDialog } = useDialog()
-
-  useEffect(() => {
-    initI18n(lang);
-  }, [lang]);
+  const { pushDialog } = useDialog();
 
   const helper = useCallback((v: navItem) => {
-    navigate(v.id);
-  }, [navigate]);
+    if (v.id === "new-dialog") {
+      pushDialog({
+        content: <><nav className="vertical no-space">
+          <div className="row center-align">
+            <h4>Nieuw</h4>
+          </div>
+          <Button variant="transparent" size="extra" icon="list" rounding="round" responsive={true} FAB={false}>Lijst</Button>
+          <Button variant="transparent" size="extra" icon="book" rounding="round" responsive={true} FAB={false}>Boek</Button>
+          <Button variant="transparent" size="extra" icon="group" rounding="round" responsive={true} FAB={false}>Klas</Button>
+        </nav></>,
+        // pos: ""
+      });
+      return;
+    } else {
+      navigate(v.id);
+    }
+  }, [navigate, pushDialog]);
 
   const big = useMemo(() => ({
-    id: "/app/new",
+    id: "new-dialog",
     icon: "add",
     text: "Nieuw",
     onClick: helper
@@ -107,6 +116,23 @@ export function Layout({ children }: { children: React.ReactNode }) {
   }), [location.pathname, mainOptions, big]);
 
   return (
+    <AutoNavRail key={location.pathname} navConfig={navConfig}>
+      <main>
+        {children}
+      </main>
+    </AutoNavRail>
+  );
+}
+
+export function Layout({ children }: { children: React.ReactNode }) {
+  const data = useRouteLoaderData("root") as { lang: string, colorScheme: "light" | "dark" } | undefined;
+  const lang = data?.lang || config.lang;
+
+  useEffect(() => {
+    initI18n(lang);
+  }, [lang]);
+
+  return (
     <html lang={lang} suppressHydrationWarning>
       <head>
         <meta charSet="utf-8" />
@@ -117,11 +143,11 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <Links />
       </head>
       <body className="dark" suppressHydrationWarning>
-        <AutoNavRail key={location.pathname} navConfig={navConfig} >
-          <main>
-            {children}
-          </main>
-        </AutoNavRail>
+        <TRPCReactProvider>
+          <BeerProviders>
+            <RootContent>{children}</RootContent>
+          </BeerProviders>
+        </TRPCReactProvider>
 
         <ScrollRestoration />
         <Scripts />
@@ -131,13 +157,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
 }
 
 export default function App() {
-  return (
-    <TRPCReactProvider>
-      <BeerProviders>
-        <Outlet />
-      </BeerProviders>
-    </TRPCReactProvider>
-  );
+  return <Outlet />;
 }
 
 export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
