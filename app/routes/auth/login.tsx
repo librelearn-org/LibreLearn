@@ -1,18 +1,13 @@
 import { authClient } from '~/utils/auth/client'
-import { Button } from '~/components/button/button'
+import { Button } from '@siemsiem/beerreact'
 import { KeyRound, LogIn, User } from 'lucide-react'
 import i18next from 'i18next'
 import zod from 'zod'
 import { Link, redirect, useNavigate, useSearchParams } from 'react-router'
 import { useEffect } from 'react'
-import { auth } from '~/utils/auth/server.server'
-import type { Route } from "./+types/login";
-
-export async function loader(loaderArgs: Route.LoaderArgs) {
-  const headers = new Headers(loaderArgs.request.headers)
-  const result = await auth.api.getSession({ headers })
-  const user = result?.user
-  if (user) {
+export async function clientLoader() {
+  const { data } = await authClient.getSession()
+  if (data?.user) {
     return redirect('/app')
   }
 }
@@ -62,7 +57,7 @@ export default function SignIn() {
   }, [])
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center p-4 gap-4 relative">
+    <div >
       <Button
         onClick={async () => {
           await authClient.signIn.social({

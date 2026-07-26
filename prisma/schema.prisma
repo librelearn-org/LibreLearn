@@ -106,3 +106,7 @@ model listItemSaved {
   list   list?   @relation(fields: [listId], references: [id])
   listId String?
 }
+
+model learnSessionContainer {
+  id String @id @unique @default(uuid())
+}

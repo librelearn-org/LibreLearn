@@ -1,23 +1,8 @@
-@import "tailwindcss";
-@config "../tailwind.config.ts";
-
 html,
 body {
   font-family: "Geist", sans-serif;
-  @apply bg-librelearn-900 text-neutral-100;
+  background-color: var(--color-librelearn-900);
+  color: var(--color-neutral-100);
   margin: 0;
   padding: 0;
-}
-
-.light body {
-  @apply bg-neutral-100 text-neutral-900;
-}
-
-.dark body {
-  font-family: "Geist", sans-serif;
-  @apply bg-librelearn-900 text-neutral-100;
-}
-
-.glow-shadow {
-  box-shadow: var(--color-librelearn-700) 0px 0px 24px;
 }

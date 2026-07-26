@@ -1,32 +1,28 @@
 import type { Route } from "./+types/home";
 import { authClient } from "~/utils/auth/client"
-import { auth } from '~/utils/auth/server.server'
 import { redirect, useNavigate } from "react-router";
 import { useTranslation } from "react-i18next";
-import "../admin/admin.css"
-import { Button } from "~/components/button/button";
+import { Button } from "@siemsiem/beerreact";
 
-export async function loader(loaderArgs: Route.LoaderArgs) {
-    const headers = new Headers(loaderArgs.request.headers)
-    const result = await auth.api.getSession({ headers })
-    const user = result?.user
-    if (!user) {
+export async function clientLoader() {
+    const { data } = await authClient.getSession()
+    if (!data?.user) {
         return redirect('/auth/login')
     }
-    return user
+    return data.user
 }
 
 export default function Home({ loaderData: user }: Route.ComponentProps) {
     const { t } = useTranslation();
     const navigate = useNavigate();
     return (
-        <div className="relative flex flex-col items-center justify-center min-h-screen min-w-screen">
-            <div className="flex flex-col items-center">
-                <div className="flex flex-col items-center gap-1">
-                    <h1 className="text-3xl font-bold">{t("startPage:welcome")}</h1>
-                    <p className="text-lg text-gray-300">{t("startPage:description")}</p>
+        <div >
+            <div >
+                <div >
+                    <h1 >{t("startPage:welcome")}</h1>
+                    <p >{t("startPage:description")}</p>
                     {(user.role && user.role.includes('admin')) &&
-                        <div className="admin-layout">
+                        <div >
                             <Button onClick={() => {
                                 navigate('/admin')
                             }}>

@@ -5,15 +5,19 @@ import {
   Outlet,
   Scripts,
   ScrollRestoration,
+  useLocation,
+  useNavigate,
   useRouteLoaderData,
 } from "react-router";
-import { useEffect } from "react";
+import { useCallback, useEffect, useMemo } from "react";
 import { initI18n } from "./i18n";
 import config from "~/utils/config";
 
 import { TRPCReactProvider } from "~/utils/trpc/react";
 import type { Route } from "./+types/root";
 import "./app.css";
+import "beercss";
+import { AutoNavRail, BeerProviders, Nav, useDialog, type navItem } from "@siemsiem/beerreact";
 
 initI18n();
 
@@ -30,11 +34,10 @@ export const links: Route.LinksFunction = () => [
   },
 ];
 
-export async function loader() {
+export async function clientLoader() {
   return {
-    lang: process.env.APP_LANG || config.lang,
-    colorScheme: "light" // Placeholder, later zal dit bepaald worden op basis van gebruikersinstellingen :)
-    // de placeholder zal niet mijn ogen branden dus ik vernander dit -siem
+    lang: config.lang,
+    colorScheme: "light" as const
   };
 }
 
@@ -51,13 +54,60 @@ export function meta({ }: Route.MetaArgs) {
 export function Layout({ children }: { children: React.ReactNode }) {
   const data = useRouteLoaderData("root") as { lang: string, colorScheme: "light" | "dark" } | undefined;
   const lang = data?.lang || config.lang;
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { pushDialog } = useDialog()
 
   useEffect(() => {
     initI18n(lang);
   }, [lang]);
 
+  const helper = useCallback((v: navItem) => {
+    navigate(v.id);
+  }, [navigate]);
+
+  const big = useMemo(() => ({
+    id: "/app/new",
+    icon: "add",
+    text: "Nieuw",
+    onClick: helper
+  }), [helper]);
+
+  const mainOptions = useMemo(() => [
+    {
+      id: "/app",
+      icon: "home",
+      text: "Home",
+      onClick: helper
+    },
+    {
+      id: "/app/dialogs",
+      icon: "chat_bubble",
+      text: "dialogs and toasts",
+      onClick: helper
+    },
+    {
+      id: "/app/testing",
+      icon: "experiment",
+      text: "Tests",
+      onClick: helper
+    }
+  ], [helper]);
+
+  const navConfig = useMemo(() => ({
+    pos: "left" as const,
+    InitialMenuOpen: true,
+
+    initialSelected: location.pathname,
+    selectedId: location.pathname,
+    items: mainOptions,
+    bigButton: big,
+    autoUpdateSelected: true,
+    allowSizeChange: false,
+  }), [location.pathname, mainOptions, big]);
+
   return (
-    <html lang={lang} className="h-full w-full">
+    <html lang={lang} suppressHydrationWarning>
       <head>
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -66,11 +116,12 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <Meta />
         <Links />
       </head>
-      <body className="h-full w-full">
-
-        <main className="w-full">
-          {children}
-        </main>
+      <body className="dark" suppressHydrationWarning>
+        <AutoNavRail key={location.pathname} navConfig={navConfig} >
+          <main>
+            {children}
+          </main>
+        </AutoNavRail>
 
         <ScrollRestoration />
         <Scripts />
@@ -82,7 +133,9 @@ export function Layout({ children }: { children: React.ReactNode }) {
 export default function App() {
   return (
     <TRPCReactProvider>
-      <Outlet />
+      <BeerProviders>
+        <Outlet />
+      </BeerProviders>
     </TRPCReactProvider>
   );
 }
@@ -104,11 +157,11 @@ export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
   }
 
   return (
-    <main className="h-full w-full flex flex-col itwems-center justify-center text-center">
+    <main >
       <h1>{message}</h1>
       <p>{details}</p>
       {stack && (
-        <pre className="w-full p-4 overflow-x-auto">
+        <pre >
           <code>{stack}</code>
         </pre>
       )}
