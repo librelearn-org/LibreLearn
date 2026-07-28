@@ -21,16 +21,10 @@ export default function Home({ loaderData: user }: Route.ComponentProps) {
                 <div >
                     <h1 >{t("startPage:welcome")}</h1>
                     <p >{t("startPage:description")}</p>
-                    {(user.role && user.role.includes('admin')) &&
-                        <div >
-                            <Button onClick={() => {
-                                navigate('/admin')
-                            }}>
-
-                                Admin
-                            </Button>
-                        </div>
-                    }
+                    <details>
+                        <summary>Meer info</summary>
+                        <p>{JSON.stringify(user)}</p>
+                    </details>
 
                 </div>
             </div>

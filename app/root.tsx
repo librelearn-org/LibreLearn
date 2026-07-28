@@ -16,7 +16,7 @@ import config from "~/utils/config";
 import { TRPCReactProvider } from "~/utils/trpc/react";
 import type { Route } from "./+types/root";
 import "./app.css";
-import "beercss";
+import ui from "beercss";
 import { AutoNavRail, BeerProviders, Button, Nav, useDialog, type navItem } from "@siemsiem/beerreact";
 
 initI18n();
@@ -63,7 +63,7 @@ function RootContent({ children }: { children: React.ReactNode }) {
           <div className="row center-align">
             <h4>Nieuw</h4>
           </div>
-          <Button variant="transparent" size="extra" icon="list" rounding="round" responsive={true} FAB={false}>Lijst</Button>
+          <Button variant="transparent" size="extra" icon="list" rounding="round" responsive={true} FAB={false} onClick={() => { navigate("/app/list/edit/new"); }}>Lijst</Button>
           <Button variant="transparent" size="extra" icon="book" rounding="round" responsive={true} FAB={false}>Boek</Button>
           <Button variant="transparent" size="extra" icon="group" rounding="round" responsive={true} FAB={false}>Klas</Button>
         </nav></>,
@@ -90,9 +90,9 @@ function RootContent({ children }: { children: React.ReactNode }) {
       onClick: helper
     },
     {
-      id: "/app/dialogs",
+      id: "/app/lists/mylists",
       icon: "chat_bubble",
-      text: "dialogs and toasts",
+      text: "Mijn lijsten",
       onClick: helper
     },
     {
@@ -130,6 +130,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     initI18n(lang);
+    ui("theme", "#076745");
   }, [lang]);
 
   return (

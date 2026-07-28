@@ -1,10 +1,6 @@
 const config = {
-    refetchTime: 1000 * 30,
-    refetch: true,
-    lang: 'en',
+    lang: 'nl',
 } as {
-    refetchTime: number,
-    refetch: boolean,
     lang: 'nl' | 'en',
 }
 

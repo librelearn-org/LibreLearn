@@ -22,6 +22,8 @@ beforeAll(async () => {
 });
 
 beforeEach(async () => {
+  const { setArtificialEndpointLag } = await import("~/server/trpc");
+  setArtificialEndpointLag(false);
   // Ensure every test starts from a clean DB and deterministic auth config.
   await cleanupArtifacts();
   process.env.AUTH_SECRET = TEST_AUTH_SECRET;
@@ -264,5 +266,22 @@ describe("tRPC endpoints (integration)", () => {
       expect(profile?.id).toBe(user.id);
       expect(profile?.email).toBe(user.email);
     });
+  });
+
+  describe("artificial lag", () => {
+    it("delays endpoint response by 10 seconds when flag is enabled", async () => {
+      const { setArtificialEndpointLag } = await import("~/server/trpc");
+      const { caller } = makeCaller();
+      setArtificialEndpointLag(true);
+      const start = Date.now();
+      try {
+        const res = await caller.user.hello();
+        const duration = Date.now() - start;
+        expect(res).toBe("hello world");
+        expect(duration).toBeGreaterThanOrEqual(9900);
+      } finally {
+        setArtificialEndpointLag(false);
+      }
+    }, 15000);
   });
 });

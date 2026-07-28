@@ -6,6 +6,11 @@ export default [
 
     route("/app", "routes/app/layout.tsx", [
         route("", "routes/app/home.tsx"),
+        ...prefix("lists", [
+            route("mylists", "routes/app/lists/mylists.tsx"),
+            route("edit/:listId", "routes/app/lists/new.tsx"),
+            route(":listId", "routes/app/lists/view.tsx")
+        ])
     ]),
 
     ...prefix("auth", [

@@ -79,8 +79,26 @@ const withResolvedUser = t.middleware(async ({ ctx, next, path }) => {
     })
 })
 
+// Artificial endpoint lag flag (disabled by default unless env var or setArtificialEndpointLag is enabled)
+export let ARTIFICIAL_ENDPOINT_LAG =
+    process.env.ARTIFICIAL_ENDPOINT_LAG === 'true' ||
+    process.env.ENABLE_ARTIFICIAL_LAG === 'true'
+
+export const setArtificialEndpointLag = (enabled: boolean) => {
+    ARTIFICIAL_ENDPOINT_LAG = enabled
+}
+
+const withArtificialLag = t.middleware(async ({ next }) => {
+    if (ARTIFICIAL_ENDPOINT_LAG || process.env.ARTIFICIAL_ENDPOINT_LAG === 'true' || process.env.ENABLE_ARTIFICIAL_LAG === 'true') {
+        await new Promise((resolve) => setTimeout(resolve, 10000))
+    }
+    return next()
+})
+
+export const baseProcedure = t.procedure.use(withArtificialLag)
+
 // Utility for a public procedure (doesn't require an autheticated user)
-export const publicProcedure = t.procedure.use(withResolvedUser)
+export const publicProcedure = baseProcedure.use(withResolvedUser)
 
 export const protectedProcedure = publicProcedure.use(async ({ ctx, next }) => {
     if (!ctx.user?.id) {
