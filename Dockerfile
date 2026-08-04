@@ -17,8 +17,9 @@ RUN bunx prisma generate
 RUN bun run build
 
 FROM oven/bun:1.3.10-alpine
-COPY ./package.json bun.lock prisma.config.ts /app/
+COPY ./package.json bun.lock prisma.config.ts tsconfig.json server.ts /app/
 COPY ./prisma /app/prisma
+COPY ./app /app/app
 COPY --from=production-dependencies-env /app/node_modules /app/node_modules
 COPY --from=build-env /app/build /app/build
 COPY --from=build-env /app/generated /app/generated
