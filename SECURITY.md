@@ -10,7 +10,7 @@ omdat we echt nog in een beta staat zijn.
 
 Maak een issue als het iets kleins is, dm me op discord of maar een github vuln dinges
 
-## Wat geld
+## Wat mag je melden
 
 Alle vulns behalven duidelijke AI slop of dingen die werken zoals ze horen.
 Niks met bruteforcen tho.

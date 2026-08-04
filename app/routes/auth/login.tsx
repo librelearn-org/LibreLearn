@@ -1,6 +1,5 @@
 import { authClient } from '~/utils/auth/client'
-import { Button } from '@siemsiem/beerreact'
-import { KeyRound, LogIn, User } from 'lucide-react'
+import { Button, Card } from '@siemsiem/beerreact'
 import i18next from 'i18next'
 import zod from 'zod'
 import { Link, redirect, useNavigate, useSearchParams } from 'react-router'
@@ -58,15 +57,20 @@ export default function SignIn() {
 
   return (
     <div >
-      <Button
-        onClick={async () => {
-          await authClient.signIn.social({
-            provider: 'Hackclub',
-            callbackURL: '/app',
-            errorCallbackURL: '/auth/login',
-          })
-        }}
-      >{i18next.t('auth:loginHC')}</Button>
+      <Card  align='center-align'>
+        
+        <h4>De Librelearn beta is helaas aleen voor mensen in HackClub</h4>
+        <Button
+          onClick={async () => {
+            await authClient.signIn.social({
+              provider: 'Hackclub',
+              callbackURL: '/app',
+              errorCallbackURL: '/auth/login',
+            })
+          }}
+        >{i18next.t('auth:loginHC')}</Button>
+      </Card>
+
     </div>
   )
 

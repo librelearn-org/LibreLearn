@@ -23,7 +23,9 @@ model User {
   sessions      Session[]
   accounts      Account[]
   lists         list[]
-
+  trueFlags     flag[] @relation("trueUser")
+  falseFlags flag[] @relation("falseUser")
+  
   @@unique([email])
   @@map("user")
 }
@@ -109,4 +111,22 @@ model listItemSaved {
 
 model learnSessionContainer {
   id String @id @unique @default(uuid())
+}
+
+model flag {
+  // de id is een door mens leesbare id bijv 26.08.02.AB.klas-or-group of 26.09.05.feat.dc-integration het vormaat is YY.MM.DD.feat/fix/AB.naam-van-flag
+  id String @id @unique 
+  startDate DateTime @default(now())
+  endDate DateTime?
+  closed Boolean @default(false)
+  closedTo Boolean?
+  
+
+  // voor nieuwe gebruikers en de initele toepassing van de flag
+  defaultValue Boolean @default(false)
+  trueChance Int @default(0)
+
+  // de gebruiker hun relatie met de flag
+  trueUser  User[] @relation("trueUser")
+  falseUser User[] @relation("falseUser")
 }

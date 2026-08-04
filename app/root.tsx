@@ -17,7 +17,7 @@ import { TRPCReactProvider } from "~/utils/trpc/react";
 import type { Route } from "./+types/root";
 import "./app.css";
 import ui from "beercss";
-import { AutoNavRail, BeerProviders, Button, Nav, useDialog, type navItem } from "@siemsiem/beerreact";
+import { AutoNavRail, BeerProviders, Button, Nav, NavBar, useDialog, type navItem } from "@siemsiem/beerreact";
 
 initI18n();
 
@@ -63,7 +63,7 @@ function RootContent({ children }: { children: React.ReactNode }) {
           <div className="row center-align">
             <h4>Nieuw</h4>
           </div>
-          <Button variant="transparent" size="extra" icon="list" rounding="round" responsive={true} FAB={false} onClick={() => { navigate("/app/list/edit/new"); }}>Lijst</Button>
+          <Button variant="transparent" size="extra" icon="list" rounding="round" responsive={true} FAB={false} onClick={() => { navigate("/app/lists/edit/new"); }}>Lijst</Button>
           <Button variant="transparent" size="extra" icon="book" rounding="round" responsive={true} FAB={false}>Boek</Button>
           <Button variant="transparent" size="extra" icon="group" rounding="round" responsive={true} FAB={false}>Klas</Button>
         </nav></>,
@@ -114,12 +114,20 @@ function RootContent({ children }: { children: React.ReactNode }) {
     autoUpdateSelected: true,
     allowSizeChange: false,
   }), [location.pathname, mainOptions, big]);
+  const navConfigBar = useMemo(() => ({
+    pos: "bottom" as const,
+    initialSelected: location.pathname,
+    selectedId: location.pathname,
+    items: mainOptions,
+    autoUpdateSelected: true,
+  }), [location.pathname, mainOptions, big]);
 
   return (
     <AutoNavRail key={location.pathname} navConfig={navConfig}>
       <main>
         {children}
       </main>
+      <NavBar {...navConfigBar}></NavBar>
     </AutoNavRail>
   );
 }
