@@ -1,9 +1,8 @@
 import { useTRPC } from "~/utils/trpc/react";
 import type { Route } from "./+types/new";
 import { useMutation } from "@tanstack/react-query";
-import { Button, Input as BeerInputRaw, type InputProps } from "@siemsiem/beerreact";
-import React from "react";
-const Input = BeerInputRaw as React.ComponentType<InputProps & React.InputHTMLAttributes<HTMLInputElement>>;
+import { Button, Input, type InputProps, Select, Flex, Card } from "@siemsiem/beerreact";
+import React, { useMemo } from "react";
 import { trpcClient } from "~/utils/trpc/client";
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router";
@@ -42,8 +41,8 @@ export async function clientLoader(loaderArgs: Route.LoaderArgs) {
         }
         listData = {
             ...result,
-            fromLanguage: result.language ?? "nl",
-            toLanguage: "en",
+            fromLanguage: result.fromLanguage ?? result.language ?? "nl",
+            toLanguage: result.toLanguage ?? "en",
         };
     } else {
         listData = {
@@ -139,37 +138,46 @@ export default function newList({ loaderData }: Route.ComponentProps) {
     }, [listData]);
 
     return (
-        <div className="flex flex-col gap-4">
-            <div className="flex flex-col gap-1 m-2 p-5 bg-openlearn-800 rounded-lg">
-                <label>
-                    <Input
-                        type="text"
-                        value={listData.name}
-                        placeholder="Name of the list"
-                        className="text-field1"
-                        onChange={(e) =>
-                            setListData((current) => ({
-                                ...current,
-                                name: e.target.value,
-                            }))
-                        }
-                    />
-                    <p>
-                        {saveState === "saving" && "Saving..."}
-                        {saveState === "saved" && "All changes saved"}
-                        {saveState === "error" && "Error saving changes"}
-                    </p>
-                </label>
-                <div className="flex flex-row gap-2">
-                    <label>
-                        Subject:
-                        <select
+        <div>
+            <Card>
+                <Flex directions="vertical">
+
+                    <Flex>
+                        <div className="max">
+
+                            <Input
+                                type="text"
+                                label="Naam"
+                                value={listData.name}
+                                onChange={(e) =>
+                                    setListData((current) => ({
+                                        ...current,
+                                        name: e.target.value,
+                                    }))
+                                }
+                                output={
+                                    saveState === "saving"
+                                        ? "Opslaan..."
+                                        : saveState === "saved"
+                                            ? "Opgeslagen!"
+                                            : saveState === "error"
+                                                ? "Error tijdens het opslaan!"
+                                                : undefined
+                                }
+                                invalid={saveState === "error"}
+                            />
+                        </div>
+                    </Flex>
+
+                    <Flex >
+                        <Select
+                            label="Vak:"
                             value={listData.language || "nl"}
                             onChange={(e) => {
                                 // we halen die shit op van een slug
                                 const taalData = getSubjectBySlug(e.target.value)
                                 // nu weten we ook hoe de andere 2 oelewapeprs moetne
-                                if (taalData) {
+                                if (taalData && taalData.slug !== listData.language) {
                                     setListData((current) => ({
                                         ...current,
                                         language: e.target.value,
@@ -191,11 +199,8 @@ export default function newList({ loaderData }: Route.ComponentProps) {
                                     {t(s.name)}
                                 </option>
                             ))}
-                        </select>
-                    </label>
-                    <label>
-                        From:
-                        <select
+                        </Select>
+                        <Select
                             value={listData.fromLanguage || "nl"}
                             onChange={(e) =>
                                 setListData((current) => ({
@@ -203,18 +208,15 @@ export default function newList({ loaderData }: Route.ComponentProps) {
                                     fromLanguage: e.target.value,
                                 }))
                             }
-                            className="text-field1"
+                            label="Van: "
                         >
                             {subjects.map((s) => (
                                 <option key={s.slug} value={s.slug}>
                                     {t(s.name)}
                                 </option>
                             ))}
-                        </select>
-                    </label>
-                    <label>
-                        To:
-                        <select
+                        </Select>
+                        <Select
                             value={listData.toLanguage || "en"}
                             onChange={(e) =>
                                 setListData((current) => ({
@@ -222,59 +224,67 @@ export default function newList({ loaderData }: Route.ComponentProps) {
                                     toLanguage: e.target.value,
                                 }))
                             }
-                            className="text-field1"
+                            label="Naar: "
                         >
                             {subjects.map((s) => (
                                 <option key={s.slug} value={s.slug}>
                                     {t(s.name)}
                                 </option>
                             ))}
-                        </select>
-                    </label>
-                </div>
-            </div>
-            <div className="flex flex-col">
+                        </Select>
+                    </Flex>
+                </Flex>
+
+            </Card>
+            <Card>
+
                 {listData.listItems.map((item, index) => (
-                    <div key={index} className="row no-space">
-                        <Input
-                            value={item.vraag}
-                            placeholder="Vraag"
-                            className="text-field1"
-                            onChange={(e) => {
-                                const newVraag = (e.target as HTMLInputElement).value;
-                                setListData((current) => {
-                                    const newListItems = [...current.listItems];
-                                    newListItems[index] = {
-                                        ...newListItems[index],
-                                        vraag: newVraag,
-                                    };
-                                    return {
-                                        ...current,
-                                        listItems: newListItems,
-                                    };
-                                });
-                            }}
-                        />
-                        <Input
-                            type="text"
-                            value={item.antwoord}
-                            placeholder="Antwoord"
-                            className="text-field1"
-                            onChange={(e) => {
-                                const newAntwoord = (e.target as HTMLInputElement).value;
-                                setListData((current) => {
-                                    const newListItems = [...current.listItems];
-                                    newListItems[index] = {
-                                        ...newListItems[index],
-                                        antwoord: newAntwoord,
-                                    };
-                                    return {
-                                        ...current,
-                                        listItems: newListItems,
-                                    };
-                                });
-                            }}
-                        />
+                    <nav key={index} className="row tiny-space">
+                        <div className="max">
+
+                            <Input
+                                value={item.vraag}
+                                placeholder="Vraag"
+                                onChange={(e) => {
+                                    const newVraag = (e.target as HTMLInputElement).value;
+                                    setListData((current) => {
+                                        const newListItems = [...current.listItems];
+                                        newListItems[index] = {
+                                            ...newListItems[index],
+                                            vraag: newVraag,
+                                        };
+                                        return {
+                                            ...current,
+                                            listItems: newListItems,
+                                        };
+                                    });
+                                }}
+                            />
+                        </div>
+                        <div className="max">
+
+                            <Input
+                                type="text"
+                                value={item.antwoord}
+                                placeholder="Antwoord"
+                                className="text-field1"
+                                onChange={(e) => {
+                                    const newAntwoord = (e.target as HTMLInputElement).value;
+                                    setListData((current) => {
+                                        const newListItems = [...current.listItems];
+                                        newListItems[index] = {
+                                            ...newListItems[index],
+                                            antwoord: newAntwoord,
+                                        };
+                                        return {
+                                            ...current,
+                                            listItems: newListItems,
+                                        };
+                                    });
+                                }}
+                            />
+                        </div>
+
 
                         <Button onClick={() => {
                             setListData((current) => {
@@ -288,9 +298,10 @@ export default function newList({ loaderData }: Route.ComponentProps) {
                             shape='circle'
                             icon="delete">
                         </Button>
-                    </div>
+                    </nav>
                 ))}
-            </div>
+            </Card>
+
 
             <div className="flex flex-row">
                 <Button onClick={() => setListData((current) => ({
@@ -301,6 +312,6 @@ export default function newList({ loaderData }: Route.ComponentProps) {
 
                 <Button onClick={handleSave}>Save</Button>
             </div>
-        </div>
+        </div >
     );
 }

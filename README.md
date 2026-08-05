@@ -16,6 +16,10 @@ A foss alternaitve for WRTS (Studygo), quizlet and others.
 ## Credits
 
 Thanks to @unbravechimp for making the very nice subject icons used in the lists!
+Thanks to @unbravechimp for hosting the website!
+Thanks to @unbravechimp for help with figma and the design of the website!
+Thanks to @unbravechimp for somthing!
+
 
 ## Contributing
 

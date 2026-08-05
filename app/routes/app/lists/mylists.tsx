@@ -6,6 +6,7 @@ import { Button, Progress } from "@siemsiem/beerreact";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { trpcClient } from "~/utils/trpc/client";
 import { useTRPC } from "~/utils/trpc/react";
+import { useMemo } from "react";
 
 
 export default function Mylists({ loaderData: user }: Route.ComponentProps) {

@@ -8,7 +8,16 @@ import { trpcClient } from "~/utils/trpc/client";
 import { useTRPC } from "~/utils/trpc/react";
 import { getSubjectBySlug } from "~/components/Icons";
 
-export default function view({ params }: Route.ComponentProps) {
+export async function clientLoader() {
+    const { data } = await authClient.getSession()
+    if (!data?.user) {
+        return redirect('/auth/login')
+    }
+    return data.user
+}
+
+
+export default function view({ params, loaderData: user }: Route.ComponentProps) {
     const { listId } = useParams();
     const { t } = useTranslation();
     const navigate = useNavigate();
@@ -28,23 +37,25 @@ export default function view({ params }: Route.ComponentProps) {
                 {list.isPending ? <Progress></Progress> : ""}
                 <nav className="m l">
                     <h1 className="max">{list.data?.name}</h1>
-                    <Button icon="edit" shape={"circle"} onClick={() => { navigate("/app/lists/edit/" + list.data?.id) }}></Button>
-                    <Button icon="delete" shape={"circle"} onClick={() => { navigate("/app/lists/edit/" + list.data?.id) }}></Button>
+                    {((user.id === list.data?.ownerId) || (user.role === "admin")) && <>
+                        <Button icon="edit" shape={"circle"} onClick={() => { navigate("/app/lists/edit/" + list.data?.id) }}></Button>
+                        <Button icon="delete" shape={"circle"} onClick={() => { navigate("/app/lists/edit/" + list.data?.id) }}></Button>
+                    </>}
+                    {/* <Button icon="bug_report" shape={"circle"} onClick={() => { alert(JSON.stringify(list.data)) }}></Button> */}
                 </nav>
                 <h1 className="s">{list.data?.name}</h1>
                 <h5 style={{ marginTop: "0" }} className={classNames.text.inlineSize.large}>
                     <nav className={"no-space"}>
-                        <img src={getSubjectBySlug(list.data?.fromLanguage || "??")?.icon} style={{ height: "1.5em" }} />
-                        <i>arrow_right_alt</i>
-                        <img src={getSubjectBySlug(list.data?.toLanguage || "??")?.icon} style={{ height: "1.5em" }} />
-                        <p >・{list.data?.listItems.length} Woorden</p>
+                        <p >{list.data?.listItems.length} Woorden</p>
                     </nav>
                 </h5>
                 <Space />
                 <nav className="scroll">
                     <SplitButton menu={menuHelper({ menuData: [] })}>Leren</SplitButton>
-                    <Button className="s" icon="edit" onClick={() => { navigate("/app/lists/edit/" + list.data?.id) }}>Bewerken</Button>
-                    <Button className="s" icon="delete" onClick={() => { navigate("/app/lists/edit/" + list.data?.id) }}>Verwijderen</Button>
+                    {((user.id === list.data?.ownerId) || (user.role === "admin")) && <>
+                        <Button className="s" icon="edit" onClick={() => { navigate("/app/lists/edit/" + list.data?.id) }}>Bewerken</Button>
+                        <Button className="s" icon="delete" onClick={() => { navigate("/app/lists/edit/" + list.data?.id) }}>Verwijderen</Button>
+                    </>}
                 </nav>
             </Card>
 
@@ -52,8 +63,14 @@ export default function view({ params }: Route.ComponentProps) {
                 <table className={`stripes center-align`}>
                     <thead>
                         <tr>
-                            <th>Van</th>
-                            <th>Naar</th>
+                            <th>
+                                <img src={getSubjectBySlug(list.data?.fromLanguage || "??")?.icon} style={{ height: "1.5em" }} />
+                                Van
+                            </th>
+                            <th>
+                                <img src={getSubjectBySlug(list.data?.toLanguage || "??")?.icon} style={{ height: "1.5em" }} />
+                                Naar
+                            </th>
                         </tr>
                     </thead>
                     <tbody>

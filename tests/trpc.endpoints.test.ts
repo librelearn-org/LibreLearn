@@ -201,11 +201,13 @@ describe("tRPC endpoints (integration)", () => {
               { vraag: "vraag2", antwoord: "antwoord2" },
             ],
             language: TaalSlugEnum.NL,
-            fromLanguage: TaalSlugEnum.EN,
-            toLanguage: TaalSlugEnum.NL,
+            fromLanguage: TaalSlugEnum.FR,
+            toLanguage: TaalSlugEnum.EN,
           });
           expect(updated.id).toBe(createdList.id);
           expect(updated.name).toBe(updatedName);
+          expect(updated.fromLanguage).toBe(TaalSlugEnum.FR);
+          expect(updated.toLanguage).toBe(TaalSlugEnum.EN);
           expect(updated.listItems.length).toBe(1);
           expect(updated.listItems[0].vraag).toBe("vraag2");
           expect(updated.listItems[0].antwoord).toBe("antwoord2");

@@ -65,6 +65,8 @@ export const learnRouting = {
         data: {
           id: input.id,
           language: input.language as string,
+          fromLanguage: input.fromLanguage as string,
+          toLanguage: input.toLanguage as string,
           name: input.name,
           ownerId: ctx.user.id,
           listItems: {
