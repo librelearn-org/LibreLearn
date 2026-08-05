@@ -1,6 +1,6 @@
 import { useTRPC } from "~/utils/trpc/react";
 import type { Route } from "./+types/new";
-import { useMutation } from "@tanstack/react-query";
+import { QueryClient, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button, Input, type InputProps, Select, Flex, Card } from "@siemsiem/beerreact";
 import React, { useMemo } from "react";
 import { trpcClient } from "~/utils/trpc/client";
@@ -87,11 +87,13 @@ export default function newList({ loaderData }: Route.ComponentProps) {
 
     const [listData, setListData] = useState<EditableListData>(loaderData.listData);
     const nav = useNavigate();
+    const queryClient = useQueryClient();
     const { t } = useTranslation();
 
     const submitMutation = useMutation({
         ...trpc.learn.upsertList.mutationOptions(),
         onSuccess: (data) => {
+            queryClient.invalidateQueries({ queryKey: trpc.learn.getList.queryKey({ id: data.id }) })
             // nu gaan we naar de viewer van de lijst die we net gemaakt hebben
             nav(`/app/lists/${data.id}`);
         }
