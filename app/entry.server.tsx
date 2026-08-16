@@ -26,7 +26,7 @@ export default async function handleRequest(
 
   responseHeaders.set("Content-Type", "text/html");
   responseHeaders.set("Content-Language", lang);
-  const comment = `<!--Tf ben je hier aan het doen. Opensource: github/supersiem/librelearn-->\n`;
+  const comment = `<!--Tf ben je hier aan het doen. Opensource: github/librelearn-org/librelearn-->\n`;
   const commentStream = new ReadableStream({
     start(controller) {
       controller.enqueue(new TextEncoder().encode(comment));
