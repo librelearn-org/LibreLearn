@@ -1,6 +1,5 @@
 import type { Route } from "./+types/view";
-import { authClient } from "~/utils/auth/client";
-import { redirect, useNavigate, useParams } from "react-router";
+import { redirect, useNavigate, useParams, useOutletContext } from "react-router";
 import { useTranslation } from "react-i18next";
 import { Button, Card, classNames, Flex, List, menuHelper, Progress, Space, SplitButton, useDialog, useToast } from "@siemsiem/beerreact";
 import { QueryClient, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -8,16 +7,8 @@ import { trpcClient } from "~/utils/trpc/client";
 import { useTRPC } from "~/utils/trpc/react";
 import { getSubjectBySlug } from "~/components/Icons";
 
-export async function clientLoader() {
-    const { data } = await authClient.getSession()
-    if (!data?.user) {
-        return redirect('/auth/login')
-    }
-    return data.user
-}
-
-
-export default function view({ params, loaderData: user }: Route.ComponentProps) {
+export default function view({ params }: Route.ComponentProps) {
+    const user = useOutletContext<any>();
     const { listId } = useParams();
     const { t } = useTranslation();
     const navigate = useNavigate();

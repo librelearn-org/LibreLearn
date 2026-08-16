@@ -1,6 +1,4 @@
-import type { Route } from "./+types/mylists";
-import { authClient } from "~/utils/auth/client";
-import { redirect, useNavigate } from "react-router";
+import { useNavigate } from "react-router";
 import { useTranslation } from "react-i18next";
 import { Button, Progress } from "@siemsiem/beerreact";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -9,7 +7,7 @@ import { useTRPC } from "~/utils/trpc/react";
 import { useMemo } from "react";
 
 
-export default function Mylists({ loaderData: user }: Route.ComponentProps) {
+export default function Mylists() {
     const { t } = useTranslation();
     const navigate = useNavigate();
     const trpc = useTRPC();

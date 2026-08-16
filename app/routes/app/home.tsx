@@ -1,18 +1,9 @@
-import type { Route } from "./+types/home";
-import { authClient } from "~/utils/auth/client"
-import { redirect, useNavigate } from "react-router";
+import { useNavigate, useOutletContext } from "react-router";
 import { useTranslation } from "react-i18next";
 import { Button } from "@siemsiem/beerreact";
 
-export async function clientLoader() {
-    const { data } = await authClient.getSession()
-    if (!data?.user) {
-        return redirect('/auth/login')
-    }
-    return data.user
-}
-
-export default function Home({ loaderData: user }: Route.ComponentProps) {
+export default function Home() {
+    const user = useOutletContext<any>();
     const { t } = useTranslation();
     const navigate = useNavigate();
     return (
