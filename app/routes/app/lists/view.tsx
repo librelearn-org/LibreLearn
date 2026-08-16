@@ -46,15 +46,15 @@ export default function view({ params, loaderData: user }: Route.ComponentProps)
                 <h1 className="s">{list.data?.name}</h1>
                 <h5 style={{ marginTop: "0" }} className={classNames.text.inlineSize.large}>
                     <nav className={"no-space"}>
-                        <p >{list.data?.listItems.length} Woorden</p>
+                        <p >{list.data?.listItems.length} {t("lists:words")}</p>
                     </nav>
                 </h5>
                 <Space />
                 <nav className="scroll">
-                    <SplitButton menu={menuHelper({ menuData: [] })}>Leren</SplitButton>
+                    <SplitButton menu={menuHelper({ menuData: [] })}>{t("learn:learnBtn")}</SplitButton>
                     {((user.id === list.data?.ownerId) || (user.role === "admin")) && <>
-                        <Button className="s" icon="edit" onClick={() => { navigate("/app/lists/edit/" + list.data?.id) }}>Bewerken</Button>
-                        <Button className="s" icon="delete" onClick={() => { navigate("/app/lists/edit/" + list.data?.id) }}>Verwijderen</Button>
+                        <Button className="s" icon="edit" onClick={() => { navigate("/app/lists/edit/" + list.data?.id) }}>{t("lists:edit:edit")}</Button>
+                        <Button className="s" icon="delete" onClick={() => { navigate("/app/lists/edit/" + list.data?.id) }}>{t("lists:edit:delete")}</Button>
                     </>}
                 </nav>
             </Card>
@@ -64,12 +64,18 @@ export default function view({ params, loaderData: user }: Route.ComponentProps)
                     <thead>
                         <tr>
                             <th>
-                                <img src={getSubjectBySlug(list.data?.fromLanguage || "??")?.icon} style={{ height: "1.5em" }} />
-                                Van
+                                <nav className="vertical no-space center-align">
+
+                                    <img src={getSubjectBySlug(list.data?.fromLanguage || "??")?.icon} style={{ height: "1.5em" }} />
+                                    {t("icons:from")}
+                                </nav>
                             </th>
                             <th>
-                                <img src={getSubjectBySlug(list.data?.toLanguage || "??")?.icon} style={{ height: "1.5em" }} />
-                                Naar
+                                <nav className="vertical no-space center-align">
+
+                                    <img src={getSubjectBySlug(list.data?.toLanguage || "??")?.icon} style={{ height: "1.5em" }} />
+                                    {t("icons:to")}
+                                </nav>
                             </th>
                         </tr>
                     </thead>

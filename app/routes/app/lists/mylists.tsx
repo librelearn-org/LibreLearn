@@ -21,7 +21,7 @@ export default function Mylists({ loaderData: user }: Route.ComponentProps) {
     return (
         <div>
 
-            <h4>Mijn lijsten</h4>
+            <h4>{t("lists:myLists")}</h4>
 
             {lists.isPending ? <Progress></Progress> : ""}
 

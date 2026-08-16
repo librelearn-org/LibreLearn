@@ -4,6 +4,26 @@ import { protectedProcedure } from '~/server/trpc'
 import { taalSlugsList } from "~/components/Icons"
 import { TRPCError } from '@trpc/server/unstable-core-do-not-import'
 
+function mapItemToKaartStaat(item: {
+  id: string
+  vraag: string
+  antwoord: string
+  fase: number
+  methode: string
+  lastReview: Date
+  nextReview: Date
+  metaData: unknown
+}) {
+  return {
+    ...item,
+    methodeId: item.methode,
+    lastReviewed: item.lastReview,
+    metaData: (item.metaData && typeof item.metaData === "object" && !Array.isArray(item.metaData)
+      ? (item.metaData as Record<string, any>)
+      : {}) as Record<string, any>,
+  }
+}
+
 export const learnRouting = {
   upsertList: protectedProcedure
     .input(
@@ -140,5 +160,122 @@ export const learnRouting = {
         }
       })
       return list
+    }),
+  getLearnSession: protectedProcedure
+    .input(
+      z.object({
+        id: z.string()
+      })
+    )
+    .query(async ({ input, ctx }) => {
+      const session = await ctx.prisma.learnSession.findFirstOrThrow({
+        where: {
+          id: input.id,
+          userId: ctx.user.id
+        },
+        include: {
+          wachtrij: true
+        }
+      })
+      return {
+        ...session,
+        wachtrij: session.wachtrij.map(mapItemToKaartStaat)
+      }
+    }),
+  upsertLearnSession: protectedProcedure
+    .input(
+      z.object({
+        id: z.string().optional(),
+        wachtrij: z.array(
+          z.object({
+            id: z.string().optional(),
+            vraag: z.string().min(1),
+            antwoord: z.string().min(1),
+            fase: z.number().int().optional().default(0),
+            methodeId: z.string().optional(),
+            methode: z.string().optional(),
+            lastReviewed: z.coerce.date().optional(),
+            lastReview: z.coerce.date().optional(),
+            nextReview: z.coerce.date().optional(),
+            metaData: z.record(z.string(), z.any()).optional().default({}),
+          })
+        ),
+      })
+    )
+    .mutation(async ({ input, ctx }) => {
+      const createItems = input.wachtrij.map((item) => ({
+        vraag: item.vraag,
+        antwoord: item.antwoord,
+        fase: item.fase ?? 0,
+        methode: item.methodeId ?? item.methode ?? "simple",
+        lastReview: item.lastReviewed ?? item.lastReview ?? new Date(),
+        nextReview: item.nextReview ?? new Date(),
+        metaData: item.metaData ?? {},
+      }))
+
+      if (!input.id) {
+        const session = await ctx.prisma.learnSession.create({
+          data: {
+            userId: ctx.user.id,
+            wachtrij: {
+              create: createItems,
+            },
+          },
+          include: {
+            wachtrij: true,
+          },
+        })
+        return {
+          ...session,
+          wachtrij: session.wachtrij.map(mapItemToKaartStaat)
+        }
+      }
+
+      const existingSession = await ctx.prisma.learnSession.findFirst({
+        where: {
+          id: input.id,
+        },
+        include: {
+          wachtrij: true,
+        },
+      })
+
+      if (!existingSession) {
+        throw new TRPCError({ message: "Sessie bestaat niet!", code: "NOT_FOUND" })
+      }
+
+      if (existingSession.userId !== ctx.user.id && !ctx.user.role?.includes("admin")) {
+        throw new TRPCError({ message: "Niet jouw sessie!", code: "UNAUTHORIZED" })
+      }
+
+      const oldItemIds = existingSession.wachtrij.map((item) => item.id)
+      if (oldItemIds.length > 0) {
+        await ctx.prisma.learnSessionItem.deleteMany({
+          where: {
+            id: { in: oldItemIds },
+          },
+        })
+      }
+
+      const session = await ctx.prisma.learnSession.update({
+        where: {
+          id: input.id,
+        },
+        data: {
+          wachtrij: {
+            create: createItems,
+          },
+        },
+        include: {
+          wachtrij: true,
+        },
+      })
+
+      return {
+        ...session,
+        wachtrij: session.wachtrij.map(mapItemToKaartStaat)
+      }
     })
+
+
 } satisfies TRPCRouterRecord

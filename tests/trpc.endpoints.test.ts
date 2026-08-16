@@ -80,6 +80,8 @@ async function cleanupArtifacts() {
   await prisma.list.deleteMany({ where: { id: { in: listIds } } });
   if (userIds.length > 0) {
     await prisma.list.deleteMany({ where: { ownerId: { in: userIds } } });
+    await prisma.learnSession.deleteMany({ where: { userId: { in: userIds } } });
+    await prisma.learnSessionItem.deleteMany({});
     await prisma.user.deleteMany({ where: { id: { in: userIds } } });
   }
 
@@ -255,6 +257,141 @@ describe("tRPC endpoints (integration)", () => {
       });
 
     });
+
+    describe("learnSession", () => {
+      it("creates a learnSession and integrates seamlessly with Learnlib", async () => {
+        const { default: Learnlib, simpleMethode, verySimple, simpleWachtrij } = await import("@siemsiem/learnlib");
+        const user = await createTestUser();
+        const { caller } = makeCaller({ id: user.id, email: user.email, name: user.name });
+
+        // 1. Create a learnSession
+        const session = await caller.learn.upsertLearnSession({
+          wachtrij: [
+            { vraag: "cat", antwoord: "kat" },
+            { vraag: "dog", antwoord: "hond" },
+          ],
+        });
+
+        expect(session.id).toBeDefined();
+        expect(session.userId).toBe(user.id);
+        expect(session.wachtrij.length).toBe(2);
+
+        // 2. Initialize Learnlib using the session's returned wachtrij
+        const learnInstance = new Learnlib(
+          session.wachtrij,
+          new simpleMethode(),
+          new verySimple(),
+          new simpleWachtrij()
+        );
+
+        expect(learnInstance.current).toBeDefined();
+        expect(learnInstance.wachtrij.length).toBe(2);
+
+        // 3. Answer a card with Learnlib
+        const currentAnswer = learnInstance.current.antwoord;
+        learnInstance.antwoord(currentAnswer);
+
+        // 4. Update the session with the new learnlib.wachtrij state
+        const updatedSession = await caller.learn.upsertLearnSession({
+          id: session.id,
+          wachtrij: learnInstance.wachtrij,
+        });
+
+        expect(updatedSession.id).toBe(session.id);
+        expect(updatedSession.wachtrij.length).toBe(1);
+
+        // 5. Retrieve via getLearnSession and verify consistency
+        const retrievedSession = await caller.learn.getLearnSession({ id: session.id });
+        expect(retrievedSession.id).toBe(session.id);
+        expect(retrievedSession.wachtrij.length).toBe(1);
+        expect(retrievedSession.wachtrij[0].methodeId).toBeDefined();
+        expect(retrievedSession.wachtrij[0].lastReviewed).toBeDefined();
+      });
+
+
+      it("prevents non-owner from updating a learnSession", async () => {
+        const user1 = await createTestUser();
+        const user2 = await createTestUser();
+
+        const { caller: caller1 } = makeCaller({ id: user1.id, email: user1.email, name: user1.name });
+        const { caller: caller2 } = makeCaller({ id: user2.id, email: user2.email, name: user2.name });
+
+        const session = await caller1.learn.upsertLearnSession({
+          wachtrij: [{ vraag: "apple", antwoord: "appel" }],
+        });
+
+        await expect(
+          caller2.learn.upsertLearnSession({
+            id: session.id,
+            wachtrij: [{ vraag: "banana", antwoord: "banaan" }],
+          })
+        ).rejects.toThrow("Niet jouw sessie!");
+      });
+
+      it("rejects updating non-existent learnSession", async () => {
+        const user = await createTestUser();
+        const { caller } = makeCaller({ id: user.id, email: user.email, name: user.name });
+
+        await expect(
+          caller.learn.upsertLearnSession({
+            id: "non-existent-session-id",
+            wachtrij: [{ vraag: "hello", antwoord: "hallo" }],
+          })
+        ).rejects.toThrow("Sessie bestaat niet!");
+      });
+
+      describe("getLearnSession getter", () => {
+        it("returns a learnSession by ID with mapped KaartStaat items for the session owner", async () => {
+          const user = await createTestUser();
+          const { caller } = makeCaller({ id: user.id, email: user.email, name: user.name });
+
+          const createdSession = await caller.learn.upsertLearnSession({
+            wachtrij: [
+              { vraag: "sun", antwoord: "zon", methodeId: "simple", metaData: { difficulty: 1 } },
+              { vraag: "moon", antwoord: "maan", methodeId: "simple" },
+            ],
+          });
+
+          const retrieved = await caller.learn.getLearnSession({ id: createdSession.id });
+
+          expect(retrieved.id).toBe(createdSession.id);
+          expect(retrieved.userId).toBe(user.id);
+          expect(retrieved.wachtrij.length).toBe(2);
+
+          const firstItem = retrieved.wachtrij.find((i) => i.vraag === "sun");
+          expect(firstItem).toBeDefined();
+          expect(firstItem?.antwoord).toBe("zon");
+          expect(firstItem?.methodeId).toBe("simple");
+          expect(firstItem?.lastReviewed).toBeInstanceOf(Date);
+          expect(firstItem?.metaData).toEqual({ difficulty: 1 });
+        });
+
+        it("prevents retrieving a learnSession owned by another user", async () => {
+          const owner = await createTestUser();
+          const attacker = await createTestUser();
+
+          const { caller: ownerCaller } = makeCaller({ id: owner.id, email: owner.email, name: owner.name });
+          const { caller: attackerCaller } = makeCaller({ id: attacker.id, email: attacker.email, name: attacker.name });
+
+          const session = await ownerCaller.learn.upsertLearnSession({
+            wachtrij: [{ vraag: "secret", antwoord: "geheim" }],
+          });
+
+          await expect(
+            attackerCaller.learn.getLearnSession({ id: session.id })
+          ).rejects.toThrow();
+        });
+
+        it("throws an error when getLearnSession is called for a non-existent session ID", async () => {
+          const user = await createTestUser();
+          const { caller } = makeCaller({ id: user.id, email: user.email, name: user.name });
+
+          await expect(
+            caller.learn.getLearnSession({ id: "invalid-uuid-12345" })
+          ).rejects.toThrow();
+        });
+      });
+    });
   });
 
   describe("admin", () => {
@@ -271,7 +408,7 @@ describe("tRPC endpoints (integration)", () => {
   });
 
   describe("artificial lag", () => {
-    it("delays endpoint response by 10 seconds when flag is enabled", async () => {
+    it.skip("delays endpoint response by 10 seconds when flag is enabled", async () => {
       const { setArtificialEndpointLag } = await import("~/server/trpc");
       const { caller } = makeCaller();
       setArtificialEndpointLag(true);

@@ -169,13 +169,13 @@ export default function newList({ loaderData }: Route.ComponentProps) {
                                 }
                                 output={
                                     saveState === "saving"
-                                        ? "Opslaan..."
+                                        ? t("lists:edit:saving")
                                         : saveState === "saved"
-                                            ? "Opgeslagen!"
+                                            ? t("lists:edit:saved")
                                             : saveState === "error"
-                                                ? "Error tijdens het opslaan!"
+                                                ? t("lists:edit:error")
                                                 : (saveState == "invalid" || saveState == "invalid-e")
-                                                    ? "Je lijst is niet geldig! Check voor lege items."
+                                                    ? t("lists:edit:invalid")
                                                     : undefined
                                 }
                                 invalid={(saveState === "error" || saveState == "invalid-e")}
@@ -249,7 +249,7 @@ export default function newList({ loaderData }: Route.ComponentProps) {
                     </Flex>
                     <Flex className="m l">
                         <Select
-                            label="Vak:"
+                            label={t("icons:subject")}
                             value={listData.language || "nl"}
                             onChange={(e) => {
                                 // we halen die shit op van een slug
@@ -286,7 +286,7 @@ export default function newList({ loaderData }: Route.ComponentProps) {
                                     fromLanguage: e.target.value,
                                 }))
                             }
-                            label="Van: "
+                            label={t("icons:from")}
                         >
                             {subjects.map((s) => (
                                 <option key={s.slug} value={s.slug}>
@@ -302,7 +302,8 @@ export default function newList({ loaderData }: Route.ComponentProps) {
                                     toLanguage: e.target.value,
                                 }))
                             }
-                            label="Naar: "
+                            label={t("icons:to")}
+
                         >
                             {subjects.map((s) => (
                                 <option key={s.slug} value={s.slug}>
@@ -384,7 +385,7 @@ export default function newList({ loaderData }: Route.ComponentProps) {
 
                                 <Input
                                     value={item.vraag}
-                                    placeholder="Vraag"
+                                    placeholder={t("lists:questionU")}
                                     onChange={(e) => {
                                         const newVraag = (e.target as HTMLInputElement).value;
                                         setListData((current) => {
@@ -406,7 +407,7 @@ export default function newList({ loaderData }: Route.ComponentProps) {
                                 <Input
                                     type="text"
                                     value={item.antwoord}
-                                    placeholder="Antwoord"
+                                    placeholder={t("lists:anwserU")}
                                     className="text-field1"
                                     onChange={(e) => {
                                         const newAntwoord = (e.target as HTMLInputElement).value;
@@ -426,18 +427,22 @@ export default function newList({ loaderData }: Route.ComponentProps) {
                             </div>
 
 
-                            <Button onClick={() => {
-                                setListData((current) => {
-                                    const newListItems = current.listItems.filter((_, i) => i !== index);
-                                    return {
-                                        ...current,
-                                        listItems: newListItems,
-                                    };
-                                });
-                            }} variant="transparent"
+                            <Button
+                                about=""
+                                onClick={() => {
+                                    setListData((current) => {
+                                        const newListItems = current.listItems.filter((_, i) => i !== index);
+                                        return {
+                                            ...current,
+                                            listItems: newListItems,
+                                        };
+                                    });
+                                }} variant="transparent"
                                 // shape='circle'
                                 responsive
+
                                 icon="delete">
+                                {t("lists:edit:deleteWordBtn")}
                             </Button>
                         </nav>
                     </>
@@ -448,10 +453,10 @@ export default function newList({ loaderData }: Route.ComponentProps) {
                             ...current,
                             listItems: [...current.listItems, { id: crypto.randomUUID(), vraag: "", antwoord: "", listId: current.id ?? null }],
                         }))} icon="add">
-                            Nieuw woord
+                            {t("lists:edit:addToList")}
                         </Button>
                         <Button onClick={handleSave} icon="save" className="s">
-                            Opslaan
+                            {t("lists:edit:save")}
                         </Button>
                     </nav>
 
@@ -459,7 +464,7 @@ export default function newList({ loaderData }: Route.ComponentProps) {
                 </div>
             </Card>
             <div className="fixed right bottom padding m l">
-                <Button onClick={handleSave} icon="save" FAB shape="square" extendedFAB>Opslaan</Button>
+                <Button onClick={handleSave} icon="save" FAB shape="square" extendedFAB> {t("lists:edit:save")}</Button>
 
             </div>
         </ >

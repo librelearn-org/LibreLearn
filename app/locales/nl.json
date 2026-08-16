@@ -1,6 +1,8 @@
 {
-  "welcome": "Welkom bij PolarLearn!",
-  "description": "PolarLearn is een gratis en open-source leerplatform.",
+  "startPage": {
+    "welcome": "Welkom op Librelearn!",
+    "description": "Librelearn is een gratis en open-source leerplatform."
+  },
   "auth": {
     "login": "Inloggen",
     "logout": "Uitloggen",
@@ -25,6 +27,25 @@
       "Ratelimit": "Woah! Rustig aan! Je bent te snel bezig. Probeer het over een paar seconden opnieuw."
     }
   },
+  "lists": {
+    "myLists": "Mijn lijsten",
+    "edit": {
+      "edit": "Bewerken",
+      "delete": "Verwijderen",
+      "save": "Opslaan",
+      "saving": "Aan het opslaan...",
+      "saved": "Opgeslagen!",
+      "saveError": "Er was een error tijdens het opslaan!",
+      "invalid": "Je lijst is niet geldig! Check voor lege items.",
+      "addToList": "Nieuw woord",
+      "deleteWordBtn": "Verwijderen woord"
+    },
+    "question": "vraag",
+    "questionU": "Vraag",
+    "anwser": "antwoord",
+    "words": "Woorden",
+    "anwserU": "Antwoord"
+  },
   "errors": {
     "404": {
       "title": "Pagina niet gevonden",
@@ -44,15 +65,16 @@
       "tooManyRequests": "Te veel aanvragen. Wacht even en probeer het opnieuw.",
       "internal": "Er ging iets mis aan onze kant. Probeer het later opnieuw.",
       "network": "Kan de server niet bereiken. Controleer je verbinding en probeer het opnieuw.",
-      "generic": "Er ging iets mis. Probeer het later opnieuw.",
-      "forumLoad": "Forumposts konden nu niet geladen worden.",
-      "reviewQueueLoad": "De moderatiequeue kon nu niet geladen worden.",
-      "createPost": "Je post kon niet aangemaakt worden. Probeer het opnieuw.",
-      "vote": "Je stem kon niet opgeslagen worden. Probeer het opnieuw.",
-      "reply": "Je reactie kon niet geplaatst worden. Probeer het opnieuw."
+      "generic": "Er ging iets mis. Probeer het later opnieuw."
     }
   },
+  "learn": {
+    "learnBtn": "Leren"
+  },
   "icons": {
+    "from": "Van",
+    "to": "Naar",
+    "subject": "Vak",
     "nederlands": "Nederlands",
     "engels": "Engels",
     "frans": "Frans",

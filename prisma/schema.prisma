@@ -8,24 +8,25 @@ datasource db {
 }
 
 model User {
-  id            String    @id
+  id            String         @id
   name          String
   email         String
-  emailVerified Boolean   @default(false)
+  emailVerified Boolean        @default(false)
   image         String?
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
   role          String?
-  banned        Boolean?  @default(false)
-  forumBanned   Boolean   @default(false)
+  banned        Boolean?       @default(false)
+  forumBanned   Boolean        @default(false)
   banReason     String?
   banExpires    DateTime?
   sessions      Session[]
   accounts      Account[]
   lists         list[]
-  trueFlags     flag[] @relation("trueUser")
-  falseFlags flag[] @relation("falseUser")
-  
+  trueFlags     flag[]         @relation("trueUser")
+  falseFlags    flag[]         @relation("falseUser")
+  learnSessions learnSession[]
+
   @@unique([email])
   @@map("user")
 }
@@ -109,22 +110,36 @@ model listItemSaved {
   listId String?
 }
 
-model learnSessionContainer {
-  id String @id @unique @default(uuid())
+model learnSessionItem {
+  id            String         @id @unique @default(uuid())
+  vraag         String
+  antwoord      String
+  fase          Int
+  methode       String
+  lastReview    DateTime
+  nextReview    DateTime
+  metaData      Json // zucht
+  learnSessions learnSession[]
+}
+
+model learnSession {
+  id       String             @id @unique @default(uuid())
+  owner    User               @relation(fields: [userId], references: [id])
+  userId   String
+  wachtrij learnSessionItem[]
 }
 
 model flag {
   // de id is een door mens leesbare id bijv 26.08.02.AB.klas-or-group of 26.09.05.feat.dc-integration het vormaat is YY.MM.DD.feat/fix/AB.naam-van-flag
-  id String @id @unique 
-  startDate DateTime @default(now())
-  endDate DateTime?
-  closed Boolean @default(false)
-  closedTo Boolean?
-  
+  id        String    @id @unique
+  startDate DateTime  @default(now())
+  endDate   DateTime?
+  closed    Boolean   @default(false)
+  closedTo  Boolean?
 
   // voor nieuwe gebruikers en de initele toepassing van de flag
   defaultValue Boolean @default(false)
-  trueChance Int @default(0)
+  trueChance   Int     @default(0)
 
   // de gebruiker hun relatie met de flag
   trueUser  User[] @relation("trueUser")
