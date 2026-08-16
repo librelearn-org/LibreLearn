@@ -2,16 +2,14 @@ import { createTRPCClient, httpBatchLink } from "@trpc/client";
 import SuperJSON from "superjson";
 import type { AppRouter } from "~/server/main";
 
-import { Capacitor } from "@capacitor/core";
-
 const getBaseUrl = () => {
   if (typeof window !== "undefined") {
-    if (Capacitor.isNativePlatform()) {
+    if (window.location.hostname === "localhost" || window.location.protocol === "capacitor:" || window.location.protocol === "file:") {
       return "https://librelearn.nl";
     }
     return window.location.origin;
   }
-  return process.env.NODE_ENV === "production" ? "https://librelearn.nl" : "http://localhost:5173";
+  return "https://librelearn.nl";
 };
 
 export const trpcClient = createTRPCClient<AppRouter>({

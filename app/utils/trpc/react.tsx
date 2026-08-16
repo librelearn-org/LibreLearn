@@ -28,19 +28,16 @@ function getQueryClient() {
     }
 }
 
-import { Capacitor } from '@capacitor/core'
-
 const getBaseUrl = () => {
     if (typeof window !== 'undefined') {
-        if (Capacitor.isNativePlatform()) {
+        if (window.location.hostname === 'localhost' || window.location.protocol === 'capacitor:' || window.location.protocol === 'file:') {
             return 'https://librelearn.nl'
         }
         return window.location.origin
     }
-    if (typeof process !== 'undefined' && process.env.APP_BASE) return process.env.APP_BASE
     if (typeof process !== 'undefined' && process.env.VERCEL_URL) return `https://${process.env.VERCEL_URL}`
     if (typeof process !== 'undefined' && process.env.PORT) return `http://localhost:${process.env.PORT}`
-    return process.env.NODE_ENV === 'production' ? 'https://librelearn.nl' : 'http://localhost:3000'
+    return `https://librelearn.nl`
 }
 
 const links = [
