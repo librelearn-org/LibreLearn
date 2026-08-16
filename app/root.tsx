@@ -51,36 +51,10 @@ export function meta({ }: Route.MetaArgs) {
   ];
 }
 
-import { Capacitor } from "@capacitor/core";
-import { App as CapApp } from "@capacitor/app";
-import { Browser } from "@capacitor/browser";
-
 function RootContent({ children }: { children: React.ReactNode }) {
   const navigate = useNavigate();
   const location = useLocation();
   const { pushDialog } = useDialog();
-
-  useEffect(() => {
-    if (Capacitor.isNativePlatform()) {
-      const listenerHandle = CapApp.addListener("appUrlOpen", (event) => {
-        try {
-          Browser.close().catch(() => {});
-        } catch {}
-        try {
-          const url = new URL(event.url);
-          const pathname = url.pathname || "/app";
-          const search = url.search || "";
-          const hash = url.hash || "";
-          navigate(pathname + search + hash);
-        } catch {
-          navigate("/app");
-        }
-      });
-      return () => {
-        listenerHandle.then((l) => l.remove());
-      };
-    }
-  }, [navigate]);
 
   const helper = useCallback((v: navItem) => {
     if (v.id === "new-dialog") {

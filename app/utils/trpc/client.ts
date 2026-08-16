@@ -3,13 +3,8 @@ import SuperJSON from "superjson";
 import type { AppRouter } from "~/server/main";
 
 const getBaseUrl = () => {
-  if (typeof window !== "undefined") {
-    if (window.location.hostname === "localhost" || window.location.protocol === "capacitor:" || window.location.protocol === "file:") {
-      return "https://librelearn.nl";
-    }
-    return window.location.origin;
-  }
-  return "https://librelearn.nl";
+  if (typeof window !== "undefined") return window.location.origin;
+  return "http://localhost:5173";
 };
 
 export const trpcClient = createTRPCClient<AppRouter>({

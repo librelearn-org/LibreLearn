@@ -140,8 +140,5 @@ export const learnRouting = {
         }
       })
       return list
-    }),
-
-  // getLearnSession: protectedProcedure
-
+    })
 } satisfies TRPCRouterRecord

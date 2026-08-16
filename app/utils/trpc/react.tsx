@@ -29,15 +29,10 @@ function getQueryClient() {
 }
 
 const getBaseUrl = () => {
-    if (typeof window !== 'undefined') {
-        if (window.location.hostname === 'localhost' || window.location.protocol === 'capacitor:' || window.location.protocol === 'file:') {
-            return 'https://librelearn.nl'
-        }
-        return window.location.origin
-    }
+    if (typeof window !== 'undefined') return window.location.origin
     if (typeof process !== 'undefined' && process.env.VERCEL_URL) return `https://${process.env.VERCEL_URL}`
     if (typeof process !== 'undefined' && process.env.PORT) return `http://localhost:${process.env.PORT}`
-    return `https://librelearn.nl`
+    return `http://localhost:3000`
 }
 
 const links = [
