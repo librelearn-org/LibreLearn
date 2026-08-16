@@ -42,7 +42,7 @@ app.get("*", (c) => {
   return c.text("Build not found. Run 'bun run build' first.", 404);
 });
 
-console.log(`🚀 LibreLearn Server (API + SPA Host) running on http://localhost:${PORT}`);
+console.log(`Server running on http://localhost:${PORT}`);
 
 declare const Bun: any;
 
