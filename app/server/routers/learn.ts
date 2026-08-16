@@ -1,5 +1,5 @@
 import type { TRPCRouterRecord } from '@trpc/server'
-import { z } from 'zod'
+import { string, z } from 'zod'
 import { protectedProcedure } from '~/server/trpc'
 import { taalSlugsList } from "~/components/Icons"
 import { TRPCError } from '@trpc/server/unstable-core-do-not-import'
@@ -200,6 +200,7 @@ export const learnRouting = {
             metaData: z.record(z.string(), z.any()).optional().default({}),
           })
         ),
+        listId: z.uuidv4().optional(),
       })
     )
     .mutation(async ({ input, ctx }) => {
@@ -220,6 +221,7 @@ export const learnRouting = {
             wachtrij: {
               create: createItems,
             },
+            listId: input.listId
           },
           include: {
             wachtrij: true,
@@ -275,6 +277,17 @@ export const learnRouting = {
         ...session,
         wachtrij: session.wachtrij.map(mapItemToKaartStaat)
       }
+    }),
+  getUserLearnSessions: protectedProcedure
+    .query(async ({ input, ctx }) => {
+      return await ctx.prisma.learnSession.findMany({
+        where: {
+          userId: ctx.user.id,
+        },
+        include: {
+          list: true
+        }
+      })
     })
 
 

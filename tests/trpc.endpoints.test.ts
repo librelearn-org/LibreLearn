@@ -264,12 +264,29 @@ describe("tRPC endpoints (integration)", () => {
         const user = await createTestUser();
         const { caller } = makeCaller({ id: user.id, email: user.email, name: user.name });
 
-        // 1. Create a learnSession
+        const createdList1 = await prisma.list.create({
+          data: {
+            name: `Topwoorden1-${Date.now()}`,
+            ownerId: user.id,
+            listItems: {
+              create: [
+                { vraag: "cat", antwoord: "kat" },
+                { vraag: "dog", antwoord: "hond" },
+              ],
+            },
+            fromLanguage: TaalSlugEnum.EN,
+            toLanguage: TaalSlugEnum.NL,
+          },
+          include: { listItems: true },
+        });
+        createdListIds.add(createdList1.id);
+
         const session = await caller.learn.upsertLearnSession({
           wachtrij: [
             { vraag: "cat", antwoord: "kat" },
             { vraag: "dog", antwoord: "hond" },
           ],
+          listId: createdList1.id
         });
 
         expect(session.id).toBeDefined();
@@ -295,6 +312,7 @@ describe("tRPC endpoints (integration)", () => {
         const updatedSession = await caller.learn.upsertLearnSession({
           id: session.id,
           wachtrij: learnInstance.wachtrij,
+          listId: createdList1.id
         });
 
         expect(updatedSession.id).toBe(session.id);
@@ -313,11 +331,16 @@ describe("tRPC endpoints (integration)", () => {
         const user1 = await createTestUser();
         const user2 = await createTestUser();
 
-        const { caller: caller1 } = makeCaller({ id: user1.id, email: user1.email, name: user1.name });
         const { caller: caller2 } = makeCaller({ id: user2.id, email: user2.email, name: user2.name });
 
-        const session = await caller1.learn.upsertLearnSession({
-          wachtrij: [{ vraag: "apple", antwoord: "appel" }],
+        const session = await prisma.learnSession.create({
+          data: {
+            wachtrij: {
+              create: [{ vraag: "apple", antwoord: "appel", fase: 0, metaData: {}, methode: "", lastReview: new Date, nextReview: new Date }],
+            },
+            listId: undefined,
+            userId: user1.id
+          }
         });
 
         await expect(
@@ -345,11 +368,18 @@ describe("tRPC endpoints (integration)", () => {
           const user = await createTestUser();
           const { caller } = makeCaller({ id: user.id, email: user.email, name: user.name });
 
-          const createdSession = await caller.learn.upsertLearnSession({
-            wachtrij: [
-              { vraag: "sun", antwoord: "zon", methodeId: "simple", metaData: { difficulty: 1 } },
-              { vraag: "moon", antwoord: "maan", methodeId: "simple" },
-            ],
+          const createdSession = await prisma.learnSession.create({
+            data: {
+              wachtrij: {
+                create: [
+                  { vraag: "sun", antwoord: "zon", fase: 0, metaData: { difficulty: 1 }, methode: "simple", lastReview: new Date, nextReview: new Date },
+                  { vraag: "moon", antwoord: "maan", fase: 0, metaData: {}, methode: "simple", lastReview: new Date, nextReview: new Date }
+
+                ],
+              },
+              listId: undefined,
+              userId: user.id
+            }
           });
 
           const retrieved = await caller.learn.getLearnSession({ id: createdSession.id });
@@ -370,11 +400,18 @@ describe("tRPC endpoints (integration)", () => {
           const owner = await createTestUser();
           const attacker = await createTestUser();
 
-          const { caller: ownerCaller } = makeCaller({ id: owner.id, email: owner.email, name: owner.name });
           const { caller: attackerCaller } = makeCaller({ id: attacker.id, email: attacker.email, name: attacker.name });
 
-          const session = await ownerCaller.learn.upsertLearnSession({
-            wachtrij: [{ vraag: "secret", antwoord: "geheim" }],
+          const session = await prisma.learnSession.create({
+            data: {
+              wachtrij: {
+                create: [{
+                  vraag: "secret", antwoord: "geheim", fase: 0, metaData: {}, methode: "", lastReview: new Date, nextReview: new Date
+                }],
+              },
+              listId: undefined,
+              userId: owner.id
+            }
           });
 
           await expect(
@@ -391,6 +428,24 @@ describe("tRPC endpoints (integration)", () => {
           ).rejects.toThrow();
         });
       });
+
+      it("We can use getUserLearnSessions to get the users learnsessions", async () => {
+        const user = await createTestUser()
+        const { caller } = makeCaller({ id: user.id, email: user.email, name: user.name });
+
+        const session = await prisma.learnSession.create({
+          data: {
+            wachtrij: {
+              create: [{ vraag: "apple", antwoord: "appel", fase: 0, metaData: {}, methode: "", lastReview: new Date, nextReview: new Date }],
+            },
+            listId: undefined,
+            userId: user.id
+          }
+        });
+
+        expect((await caller.learn.getUserLearnSessions())[0].id).toBe(session.id)
+
+      })
     });
   });
 

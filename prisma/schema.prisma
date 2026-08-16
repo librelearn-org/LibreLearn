@@ -91,14 +91,15 @@ model config {
 }
 
 model list {
-  id           String          @id @unique @default(uuid())
-  name         String
-  listItems    listItemSaved[]
-  owner        User            @relation(fields: [ownerId], references: [id])
-  ownerId      String
-  language     String          @default("NL")
-  fromLanguage String
-  toLanguage   String
+  id            String          @id @unique @default(uuid())
+  name          String
+  listItems     listItemSaved[]
+  owner         User            @relation(fields: [ownerId], references: [id])
+  ownerId       String
+  language      String          @default("NL")
+  fromLanguage  String
+  toLanguage    String
+  learnSessions learnSession[]
 }
 
 model listItemSaved {
@@ -127,6 +128,8 @@ model learnSession {
   owner    User               @relation(fields: [userId], references: [id])
   userId   String
   wachtrij learnSessionItem[]
+  list     list?              @relation(fields: [listId], references: [id])
+  listId   String?
 }
 
 model flag {
