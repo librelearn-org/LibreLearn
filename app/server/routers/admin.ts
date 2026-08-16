@@ -31,7 +31,7 @@ export const adminRouter = {
     })
 
   }),
-  getAllUsers: protectedProcedure
+  getAllUsers: veryProtectedProcedure
     .input(
       z.object({
         limit: z.number().min(1).max(100).optional(),
