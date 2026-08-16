@@ -17,10 +17,9 @@ function devApiPlugin(): Plugin {
           return;
         }
 
-        if (req.url.startsWith("/api/native-callback") || req.url.startsWith("/api/auth") || req.url.startsWith("/api/trpc")) {
+        if (req.url.startsWith("/api/auth") || req.url.startsWith("/api/trpc")) {
           try {
             const { auth } = await server.ssrLoadModule("./app/utils/auth/server.server.ts");
-            const { handleNativeCallback } = await server.ssrLoadModule("./app/utils/auth/native-callback.server.ts");
             const { appRouter } = await server.ssrLoadModule("./app/server/main.ts");
             const { createTRPCContext } = await server.ssrLoadModule("./app/server/trpc.ts");
             const { fetchRequestHandler } = await import("@trpc/server/adapters/fetch");
@@ -54,9 +53,7 @@ function devApiPlugin(): Plugin {
             });
 
             let webRes: Response;
-            if (req.url.startsWith("/api/native-callback")) {
-              webRes = await handleNativeCallback(webReq);
-            } else if (req.url.startsWith("/api/auth")) {
+            if (req.url.startsWith("/api/auth")) {
               webRes = await auth.handler(webReq);
             } else {
               webRes = await fetchRequestHandler({

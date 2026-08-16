@@ -54,7 +54,6 @@ export function meta({ }: Route.MetaArgs) {
 import { Capacitor } from "@capacitor/core";
 import { App as CapApp } from "@capacitor/app";
 import { Browser } from "@capacitor/browser";
-import { authClient } from "~/utils/auth/client";
 
 function RootContent({ children }: { children: React.ReactNode }) {
   const navigate = useNavigate();
@@ -63,51 +62,20 @@ function RootContent({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     if (Capacitor.isNativePlatform()) {
-      const handleDeepLink = async (urlStr: string) => {
+      const listenerHandle = CapApp.addListener("appUrlOpen", (event) => {
         try {
-          await Browser.close();
+          Browser.close().catch(() => {});
         } catch {}
-
         try {
-          let url: URL;
-          if (urlStr.startsWith("org.librelearn.app://")) {
-            url = new URL(urlStr.replace("org.librelearn.app://", "https://librelearn.nl/"));
-          } else {
-            url = new URL(urlStr);
-          }
-
-          const token = url.searchParams.get("token");
-          if (token) {
-            document.cookie = `better-auth.session_token=${token}; path=/; max-age=31536000; Secure; SameSite=Lax`;
-            try {
-              await authClient.getSession({ query: { disableCookieCache: true } });
-            } catch {}
-          }
-
-          let pathname = url.pathname;
-          if (!pathname || pathname === "/" || pathname === "/auth/callback") {
-            pathname = "/app";
-          }
-
+          const url = new URL(event.url);
+          const pathname = url.pathname || "/app";
           const search = url.search || "";
           const hash = url.hash || "";
-          navigate(pathname + search + hash, { replace: true });
-        } catch (err) {
-          console.error("Failed to process deep link URL:", err);
-          navigate("/app", { replace: true });
-        }
-      };
-
-      CapApp.getLaunchUrl().then((launchUrl) => {
-        if (launchUrl?.url) {
-          handleDeepLink(launchUrl.url);
+          navigate(pathname + search + hash);
+        } catch {
+          navigate("/app");
         }
       });
-
-      const listenerHandle = CapApp.addListener("appUrlOpen", (event) => {
-        handleDeepLink(event.url);
-      });
-
       return () => {
         listenerHandle.then((l) => l.remove());
       };
