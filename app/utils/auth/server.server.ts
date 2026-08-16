@@ -12,6 +12,12 @@ const getFirstName = (name?: string | null) => {
 export const auth = betterAuth({
     appName: "Librelearn",
     secret: process.env.AUTH_SECRET,
+    trustedOrigins: [
+        'org.librelearn.app://',
+        'https://librelearn.nl',
+        'http://localhost:5173',
+        'http://localhost:3000',
+    ],
 
     emailAndPassword: {
         enabled: false, // voor nu. 

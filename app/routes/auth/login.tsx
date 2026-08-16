@@ -4,6 +4,8 @@ import i18next from 'i18next'
 import zod from 'zod'
 import { Link, redirect, useNavigate, useSearchParams } from 'react-router'
 import { useEffect } from 'react'
+import { Capacitor } from '@capacitor/core'
+import { Browser } from '@capacitor/browser'
 export async function clientLoader() {
   const { data } = await authClient.getSession()
   if (data?.user) {
@@ -60,13 +62,27 @@ export default function SignIn() {
       <Card  align='center-align'>
         
         <h4>De Librelearn beta is helaas aleen voor mensen in HackClub</h4>
+
         <Button
           onClick={async () => {
-            await authClient.signIn.social({
-              provider: 'Hackclub',
-              callbackURL: '/app',
-              errorCallbackURL: '/auth/login',
-            })
+            const isNative = Capacitor.isNativePlatform();
+            if (isNative) {
+              const res = await authClient.signIn.social({
+                provider: 'Hackclub',
+                callbackURL: 'org.librelearn.app://app',
+                errorCallbackURL: 'org.librelearn.app://auth/login',
+                disableRedirect: true,
+              });
+              if (res.data?.url) {
+                await Browser.open({ url: res.data.url });
+              }
+            } else {
+              await authClient.signIn.social({
+                provider: 'Hackclub',
+                callbackURL: '/app',
+                errorCallbackURL: '/auth/login',
+              });
+            }
           }}
         >{i18next.t('auth:loginHC')}</Button>
       </Card>

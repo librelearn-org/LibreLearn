@@ -8,24 +8,25 @@ datasource db {
 }
 
 model User {
-  id            String    @id
+  id            String         @id
   name          String
   email         String
-  emailVerified Boolean   @default(false)
+  emailVerified Boolean        @default(false)
   image         String?
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
   role          String?
-  banned        Boolean?  @default(false)
-  forumBanned   Boolean   @default(false)
+  banned        Boolean?       @default(false)
+  forumBanned   Boolean        @default(false)
   banReason     String?
   banExpires    DateTime?
   sessions      Session[]
   accounts      Account[]
   lists         list[]
-  trueFlags     flag[] @relation("trueUser")
-  falseFlags flag[] @relation("falseUser")
-  
+  trueFlags     flag[]         @relation("trueUser")
+  falseFlags    flag[]         @relation("falseUser")
+  learnSessions LearnSession[]
+
   @@unique([email])
   @@map("user")
 }
@@ -109,24 +110,58 @@ model listItemSaved {
   listId String?
 }
 
-model learnSessionContainer {
-  id String @id @unique @default(uuid())
-}
-
 model flag {
   // de id is een door mens leesbare id bijv 26.08.02.AB.klas-or-group of 26.09.05.feat.dc-integration het vormaat is YY.MM.DD.feat/fix/AB.naam-van-flag
-  id String @id @unique 
-  startDate DateTime @default(now())
-  endDate DateTime?
-  closed Boolean @default(false)
-  closedTo Boolean?
-  
+  id        String    @id @unique
+  startDate DateTime  @default(now())
+  endDate   DateTime?
+  closed    Boolean   @default(false)
+  closedTo  Boolean?
 
   // voor nieuwe gebruikers en de initele toepassing van de flag
   defaultValue Boolean @default(false)
-  trueChance Int @default(0)
+  trueChance   Int     @default(0)
 
   // de gebruiker hun relatie met de flag
   trueUser  User[] @relation("trueUser")
   falseUser User[] @relation("falseUser")
+}
+
+// Leer data
+
+enum SessionStatus {
+  IN_PROGRESS
+  COMPLETED
+  ABANDONED
+}
+
+enum Grade {
+  FOUT // 0
+  GOED_MOEILIJK // 1
+  GOED_PRIMA // 2
+  GOED_MAAKKELIJK // 3
+}
+
+enum Fase {
+  LEER // 0
+  REVIEW // 1
+}
+
+model LearnSession {
+  id     String @id @default(uuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  listId String
+
+  status    SessionStatus @default(IN_PROGRESS)
+  startedAt DateTime      @default(now())
+  endedAt   DateTime?
+
+  // Gegevens over welke leermethode is gebruikt (uit learnlib)
+  methodeId         String // bijv. "simple" of "fsrs"
+  graderId          String? // bijv. "verySimple"
+  wachtrijUpdaterId String? // bijv. "simple"
+
+  @@index([userId])
+  @@index([listId])
 }
