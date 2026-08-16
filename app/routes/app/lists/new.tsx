@@ -31,7 +31,7 @@ export async function clientLoader(loaderArgs: Route.LoaderArgs) {
     let listId = loaderArgs.params.listId || undefined;
     let listData = null;
     if (listId === "new") {
-        listId = undefined;
+        listId = undefined
     }
 
     if (listId) {
@@ -130,7 +130,7 @@ export default function newList({ loaderData }: Route.ComponentProps) {
         });
 
     };
-    useMemo(() => {
+    useEffect(() => {
         if (!isValidDraft(listData)) {
             setSaveState("invalid")
             return;

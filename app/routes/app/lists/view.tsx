@@ -2,8 +2,8 @@ import type { Route } from "./+types/view";
 import { authClient } from "~/utils/auth/client";
 import { redirect, useNavigate, useParams } from "react-router";
 import { useTranslation } from "react-i18next";
-import { Button, Card, classNames, Flex, List, menuHelper, Progress, Space, SplitButton } from "@siemsiem/beerreact";
-import { useQuery } from "@tanstack/react-query";
+import { Button, Card, classNames, Flex, List, menuHelper, Progress, Space, SplitButton, useDialog, useToast } from "@siemsiem/beerreact";
+import { QueryClient, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { trpcClient } from "~/utils/trpc/client";
 import { useTRPC } from "~/utils/trpc/react";
 import { getSubjectBySlug } from "~/components/Icons";
@@ -22,6 +22,8 @@ export default function view({ params, loaderData: user }: Route.ComponentProps)
     const { t } = useTranslation();
     const navigate = useNavigate();
     const trpc = useTRPC();
+    const { addToast } = useToast();
+    const queryClient = useQueryClient();
 
     const list = useQuery(
         trpc.learn.getList.queryOptions(
@@ -29,6 +31,42 @@ export default function view({ params, loaderData: user }: Route.ComponentProps)
             { enabled: !!(listId || params.listId) }
         )
     );
+
+    const verwijder = useMutation({
+
+        ...trpc.learn.removeList.mutationOptions(),
+        onSuccess(data, variables, onMutateResult, context) {
+            queryClient.invalidateQueries(trpc.learn.getList.queryFilter({ id: listId }));
+            queryClient.invalidateQueries(trpc.learn.getUserLists.queryFilter());
+            addToast({
+                text: "Gelukt!"
+            });
+            navigate("/app/lists/mylists");
+        },
+        onError(error, variables, onMutateResult, context) {
+            addToast({
+                text: error.message,
+                type: "error"
+            });
+        },
+
+    })
+    const { pushDialog } = useDialog()
+
+    function vwDialog() {
+        pushDialog({
+            content: <>
+                <h2>Weet je het zeker</h2>
+                <p>Je kan een verwijderde lijst niet herstellen!</p>
+                <nav className="right-align">
+                    <Button>WACHT NEE TERUG</Button>
+                    <Button onClick={() => { verwijder.mutate({ id: list.data?.id || listId || params.listId }) }}>Ja!</Button>
+                </nav>
+
+            </>,
+            // pos: "left" // TODO: een pos geven op mobile
+        })
+    }
 
     return (
         <div>
@@ -39,7 +77,7 @@ export default function view({ params, loaderData: user }: Route.ComponentProps)
                     <h1 className="max">{list.data?.name}</h1>
                     {((user.id === list.data?.ownerId) || (user.role === "admin")) && <>
                         <Button icon="edit" shape={"circle"} onClick={() => { navigate("/app/lists/edit/" + list.data?.id) }}></Button>
-                        <Button icon="delete" shape={"circle"} onClick={() => { navigate("/app/lists/edit/" + list.data?.id) }}></Button>
+                        <Button icon="delete" shape={"circle"} onClick={vwDialog}></Button>
                     </>}
                     {/* <Button icon="bug_report" shape={"circle"} onClick={() => { alert(JSON.stringify(list.data)) }}></Button> */}
                 </nav>
@@ -54,7 +92,7 @@ export default function view({ params, loaderData: user }: Route.ComponentProps)
                     <SplitButton menu={menuHelper({ menuData: [] })}>{t("learn:learnBtn")}</SplitButton>
                     {((user.id === list.data?.ownerId) || (user.role === "admin")) && <>
                         <Button className="s" icon="edit" onClick={() => { navigate("/app/lists/edit/" + list.data?.id) }}>{t("lists:edit:edit")}</Button>
-                        <Button className="s" icon="delete" onClick={() => { navigate("/app/lists/edit/" + list.data?.id) }}>{t("lists:edit:delete")}</Button>
+                        <Button className="s" icon="delete" onClick={vwDialog}>{t("lists:edit:delete")}</Button>
                     </>}
                 </nav>
             </Card>
