@@ -1,18 +1,18 @@
 import { createAuthClient } from "better-auth/client"
-import { adminClient, genericOAuthClient, organizationClient, usernameClient } from "better-auth/client/plugins"
+import { adminClient, genericOAuthClient } from "better-auth/client/plugins"
+import { Capacitor } from "@capacitor/core"
 
 const getAuthBaseUrl = () => {
-    if (typeof window !== "undefined") {
-        if (window.location.hostname === "localhost" || window.location.protocol === "capacitor:" || window.location.protocol === "file:") {
-            return "https://librelearn.nl"
-        }
-        return window.location.origin
+    if (typeof window !== "undefined" && Capacitor.isNativePlatform()) {
+        return "https://librelearn.nl"
     }
-    return "https://librelearn.nl"
+    return undefined
 }
 
+const nativeBaseUrl = getAuthBaseUrl()
+
 export const authClient = createAuthClient({
-    baseURL: getAuthBaseUrl(),
+    ...(nativeBaseUrl ? { baseURL: nativeBaseUrl } : {}),
     plugins: [
         genericOAuthClient(),
         adminClient(),

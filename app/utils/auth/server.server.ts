@@ -49,7 +49,7 @@ export const auth = betterAuth({
         }),
         admin(),
     ],
-    baseURL: process.env.APP_BASE || 'http://localhost:5173',
+    baseURL: process.env.APP_BASE || process.env.BETTER_AUTH_URL || (process.env.NODE_ENV === 'production' ? 'https://librelearn.nl' : 'http://localhost:5173'),
     database: prismaAdapter(prisma, {
         provider: 'postgresql'
     }) 
