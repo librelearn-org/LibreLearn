@@ -69,8 +69,8 @@ export default function SignIn() {
             if (isNative) {
               const res = await authClient.signIn.social({
                 provider: 'Hackclub',
-                callbackURL: 'org.librelearn.app://app',
-                errorCallbackURL: 'org.librelearn.app://auth/login',
+                callbackURL: 'https://librelearn.nl/api/native-callback',
+                errorCallbackURL: 'https://librelearn.nl/api/native-callback?error=true',
                 disableRedirect: true,
               });
               if (res.data?.url) {

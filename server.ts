@@ -5,12 +5,18 @@ import { fetchRequestHandler } from "@trpc/server/adapters/fetch";
 import { appRouter } from "~/server/main";
 import { createTRPCContext } from "~/server/trpc";
 import { auth } from "~/utils/auth/server.server";
+import { handleNativeCallback } from "~/utils/auth/native-callback.server";
 import path from "node:path";
 import fs from "node:fs";
 
 const app = new Hono();
 
 const PORT = Number(process.env.PORT || process.env.API_PORT || 5173);
+
+// 0. Native OAuth callback handler
+app.get("/api/native-callback", async (c) => {
+  return handleNativeCallback(c.req.raw);
+});
 
 // 1. Better Auth endpoint handler
 app.all("/api/auth/*", (c) => {
