@@ -23,6 +23,30 @@ export default function view({ params }: Route.ComponentProps) {
         )
     );
 
+    const startSession = useMutation({
+        ...trpc.learn.upsertLearnSession.mutationOptions(),
+        onSuccess(session) {
+            navigate(`/app/learn/${session.id}`);
+        },
+        onError(error) {
+            addToast({
+                text: error.message,
+                type: "error"
+            });
+        }
+    });
+
+    const handleStartLearn = () => {
+        if (!list.data) return;
+        startSession.mutate({
+            listId: list.data.id,
+            wachtrij: list.data.listItems.map((item) => ({
+                vraag: item.vraag,
+                antwoord: item.antwoord
+            }))
+        });
+    };
+
     const verwijder = useMutation({
 
         ...trpc.learn.removeList.mutationOptions(),
@@ -80,7 +104,7 @@ export default function view({ params }: Route.ComponentProps) {
                 </h5>
                 <Space />
                 <nav className="scroll">
-                    <SplitButton menu={menuHelper({ menuData: [] })}>{t("learn:learnBtn")}</SplitButton>
+                    <SplitButton menu={menuHelper({ menuData: [] })} disabled={startSession.isPending || !list.data?.listItems.length} onClick={handleStartLearn}>{t("learn:learnBtn")}</SplitButton>
                     {((user.id === list.data?.ownerId) || (user.role === "admin")) && <>
                         <Button className="s" icon="edit" onClick={() => { navigate("/app/lists/edit/" + list.data?.id) }}>{t("lists:edit:edit")}</Button>
                         <Button className="s" icon="delete" onClick={vwDialog}>{t("lists:edit:delete")}</Button>

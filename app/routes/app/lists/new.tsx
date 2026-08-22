@@ -106,7 +106,7 @@ export default function newList({ loaderData }: Route.ComponentProps) {
         onSuccess: (data, variables) => {
             // first autosave for a new list returns a DB id; keep it for future updates
             setListData((current) => (current.id ? current : { ...current, id: data.id }));
-            lastSavedHashRef.current = JSON.stringify(variables);
+            lastSavedHashRef.current = JSON.stringify({ ...variables, id: data.id });
             setSaveState("saved");
         },
         onError: () => setSaveState("error"),
@@ -132,7 +132,7 @@ export default function newList({ loaderData }: Route.ComponentProps) {
     };
     useEffect(() => {
         if (!isValidDraft(listData)) {
-            setSaveState("invalid")
+            setSaveState((prev) => (prev === "invalid" ? prev : "invalid"));
             return;
         };
 

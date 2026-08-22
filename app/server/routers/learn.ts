@@ -174,7 +174,12 @@ export const learnRouting = {
           userId: ctx.user.id
         },
         include: {
-          wachtrij: true
+          wachtrij: true,
+          list: {
+            include: {
+              listItems: true
+            }
+          }
         }
       })
       return {
