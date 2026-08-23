@@ -53,7 +53,8 @@ const withResolvedUser = t.middleware(async ({ ctx, next, path }) => {
             email: true,
             role: true,
             banned: true,
-            forumBanned: true
+            forumBanned: true,
+            theme: true
         }
     })
 

@@ -26,6 +26,16 @@ export const auth = betterAuth({
     },
     socialProviders: {
     },
+    user: {
+        additionalFields: {
+            theme: {
+                type: "string",
+                required: false,
+                defaultValue: "023824",
+                input: true,
+            },
+        },
+    },
     plugins: [
         genericOAuth({
             config: [

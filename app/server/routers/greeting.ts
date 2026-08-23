@@ -21,6 +21,23 @@ export const greetingRouter = {
     checkSession: protectedProcedure.query(async ({ ctx }) => {
         return ctx.user
     }),
+    updateTheme: protectedProcedure
+        .input(
+            z.object({
+                theme: z.string()
+            })
+        )
+        .mutation(async ({ input, ctx }) => {
+            const updatedUser = await ctx.prisma.user.update({
+                where: {
+                    id: ctx.user.id
+                },
+                data: {
+                    theme: input.theme
+                }
+            })
+            return updatedUser
+        }),
     adminLog: veryProtectedProcedure
         .input(
             z.object({

@@ -1,8 +1,9 @@
-import { useCallback, useMemo } from "react";
+import { useCallback, useMemo, useEffect } from "react";
 import { Outlet, redirect, useLoaderData, useLocation, useNavigate } from "react-router";
 import { AutoNavRail, Button, NavBar, useDialog, type navItem } from "@siemsiem/beerreact";
 import { authClient } from "~/utils/auth/client";
 import { TRPCReactProvider } from "~/utils/trpc/react";
+import ui from "beercss";
 
 export async function clientLoader() {
     const { data } = await authClient.getSession();
@@ -21,6 +22,13 @@ export default function MyAppLayout() {
     const navigate = useNavigate();
     const location = useLocation();
     const { pushDialog } = useDialog();
+
+    useEffect(() => {
+        if (user && (user as any).theme) {
+            const themeColor = (user as any).theme.startsWith("#") ? (user as any).theme : `#${(user as any).theme}`;
+            ui("theme", themeColor);
+        }
+    }, [user]);
 
     const helper = useCallback((v: navItem) => {
         if (v.id === "new-dialog") {

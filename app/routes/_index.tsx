@@ -1,11 +1,10 @@
 import i18n from "i18next";
 import { redirect, useNavigate } from "react-router";
 import type { Route } from "./+types/_index";
-const logo = "/logos/OL-VT-NOTLONG-LOGO-2.png";
-const homeIcon = "/logo.png";
+const logo = "/logos/LiL-VT-LONG.svg";
 import { authClient } from "~/utils/auth/client";
-import { Button } from "@siemsiem/beerreact"
-
+import { Button } from "@siemsiem/beerreact";
+import { Logo } from "~/components/Logo";
 
 export async function clientLoader() {
   const { data } = await authClient.getSession();
@@ -29,7 +28,7 @@ export default function Home() {
         /> */}
 
         {/* <main >  */}
-        <img src={logo} alt="Logo" />
+        <Logo style={{ height: "60px", maxWidth: "100%", width: "auto" }} />
         <p>TODO: Nieuwe homepagina</p>
         {/* <p >
             Learn <span className="accent">fast</span>, <span className="accent">efficient</span> and <span className="accent">free</span>.
