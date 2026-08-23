@@ -5,11 +5,9 @@ import {
   Outlet,
   Scripts,
   ScrollRestoration,
-  useLocation,
-  useNavigate,
   useRouteLoaderData,
 } from "react-router";
-import { useCallback, useEffect, useMemo } from "react";
+import { useEffect } from "react";
 import { initI18n } from "./i18n";
 import config from "~/utils/config";
 
@@ -17,7 +15,7 @@ import { TRPCReactProvider } from "~/utils/trpc/react";
 import type { Route } from "./+types/root";
 import "./app.css";
 import ui from "beercss";
-import { AutoNavRail, BeerProviders, Button, Nav, NavBar, useDialog, type navItem } from "@siemsiem/beerreact";
+import { BeerProviders } from "@siemsiem/beerreact";
 
 initI18n();
 
@@ -51,87 +49,6 @@ export function meta({ }: Route.MetaArgs) {
   ];
 }
 
-function RootContent({ children }: { children: React.ReactNode }) {
-  const navigate = useNavigate();
-  const location = useLocation();
-  const { pushDialog } = useDialog();
-
-  const helper = useCallback((v: navItem) => {
-    if (v.id === "new-dialog") {
-      pushDialog({
-        content: <><nav className="vertical no-space">
-          <div className="row center-align">
-            <h4>Nieuw</h4>
-          </div>
-          <Button variant="transparent" size="extra" icon="list" rounding="round" responsive={true} FAB={false} onClick={() => { navigate("/app/lists/edit/new"); }}>Lijst</Button>
-          <Button variant="transparent" size="extra" icon="book" rounding="round" responsive={true} FAB={false}>Boek</Button>
-          <Button variant="transparent" size="extra" icon="group" rounding="round" responsive={true} FAB={false}>Klas</Button>
-        </nav></>,
-        // pos: ""
-      });
-      return;
-    } else {
-      navigate(v.id);
-    }
-  }, [navigate, pushDialog]);
-
-  const big = useMemo(() => ({
-    id: "new-dialog",
-    icon: "add",
-    text: "Nieuw",
-    onClick: helper
-  }), [helper]);
-
-  const mainOptions = useMemo(() => [
-    {
-      id: "/app",
-      icon: "home",
-      text: "Home",
-      onClick: helper
-    },
-    {
-      id: "/app/lists/mylists",
-      icon: "chat_bubble",
-      text: "Mijn lijsten",
-      onClick: helper
-    },
-    {
-      id: "/app/testing",
-      icon: "experiment",
-      text: "Tests",
-      onClick: helper
-    }
-  ], [helper]);
-
-  const navConfig = useMemo(() => ({
-    pos: "left" as const,
-    InitialMenuOpen: true,
-
-    initialSelected: location.pathname,
-    selectedId: location.pathname,
-    items: mainOptions,
-    bigButton: big,
-    autoUpdateSelected: true,
-    allowSizeChange: false,
-  }), [location.pathname, mainOptions, big]);
-  const navConfigBar = useMemo(() => ({
-    pos: "bottom" as const,
-    initialSelected: location.pathname,
-    selectedId: location.pathname,
-    items: mainOptions,
-    autoUpdateSelected: true,
-  }), [location.pathname, mainOptions, big]);
-
-  return (
-    <AutoNavRail key={location.pathname} navConfig={navConfig}>
-      <main>
-        {children}
-      </main>
-      <NavBar {...navConfigBar}></NavBar>
-    </AutoNavRail>
-  );
-}
-
 export function Layout({ children }: { children: React.ReactNode }) {
   const data = useRouteLoaderData("root") as { lang: string, colorScheme: "light" | "dark" } | undefined;
   const lang = data?.lang || config.lang;
@@ -154,7 +71,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
       <body className="dark" suppressHydrationWarning>
         <TRPCReactProvider>
           <BeerProviders>
-            <RootContent>{children}</RootContent>
+            {children}
           </BeerProviders>
         </TRPCReactProvider>
 

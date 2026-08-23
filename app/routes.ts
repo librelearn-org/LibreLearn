@@ -15,6 +15,11 @@ export default [
         ])
     ]),
 
+    route("/admin", "routes/admin/layout.tsx", [
+        route("", "routes/admin/home.tsx"),
+        route("ulist", "routes/admin/gebruikerslijst.tsx")
+    ]),
+
     ...prefix("auth", [
         route("login", "routes/auth/login.tsx"),
     ]),

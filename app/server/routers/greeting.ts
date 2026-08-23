@@ -6,7 +6,7 @@ import { protectedProcedure, publicProcedure, veryProtectedProcedure } from '~/s
 import { sendMessageToDiscord } from '~/utils/discord.server'
 
 export const greetingRouter = {
-    hello: publicProcedure.query(async ({ ctx }) => {
+    hello: protectedProcedure.query(async ({ ctx }) => {
         return 'hello world'
     }),
     user: protectedProcedure.query(async ({ input, ctx }) => {

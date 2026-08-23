@@ -1,4 +1,4 @@
-import type { TRPCRouterRecord } from '@trpc/server'
+import { TRPCError, type TRPCRouterRecord } from '@trpc/server'
 import { z } from 'zod'
 import { protectedProcedure, publicProcedure, veryProtectedProcedure } from '~/server/trpc'
 import { sendMessageToDiscord } from '~/utils/discord.server';
@@ -55,5 +55,38 @@ export const adminRouter = {
 
       return { users, nextCursor };
     }),
+  toggleBanUser: veryProtectedProcedure
+    .input(
+      z.object({
+        userId: z.string(),
+        banned: z.boolean(),
+        banReason: z.string().optional()
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      if (input.userId === ctx.user.id) {
+        throw new TRPCError({
+          code: 'BAD_REQUEST',
+          message: 'Je kunt jezelf niet bannen.'
+        });
+      }
+      const updatedUser = await ctx.prisma.user.update({
+        where: { id: input.userId },
+        data: {
+          banned: input.banned,
+          banReason: input.banned ? (input.banReason ?? 'Verbannen door admin') : null
+        }
+      });
+
+      sendMessageToDiscord({
+        title: input.banned ? 'Gebruiker verbannen' : 'Gebruiker niet langer verbannen',
+        description: `Admin ${ctx.user.name} heeft gebruiker ${updatedUser.name} (${updatedUser.id})  ${input.banned ? 'verbannen' : 'unbanned'} .`,
+        color: input.banned ? 0xFF0000 : 0x00FF00,
+        timestamp: new Date().toISOString(),
+      });
+
+      return updatedUser;
+    }),
 } satisfies TRPCRouterRecord
+
 

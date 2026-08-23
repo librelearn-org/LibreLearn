@@ -3,6 +3,7 @@ import { TRPCError } from "@trpc/server";
 import type { AppRouter } from "~/server/main";
 import { prisma } from "~/utils/prisma";
 import { TaalSlugEnum } from "~/components/Icons";
+import { create } from "node:domain";
 
 type CallerContext = Parameters<AppRouter["createCaller"]>[0];
 
@@ -105,8 +106,9 @@ describe("tRPC endpoints (integration)", () => {
       const { caller } = makeCaller({ id: user.id, email: user.email, name: user.name });
       await expect(caller.user.hello()).rejects.toBeInstanceOf(TRPCError)
     })
-    it("returns hello world from user.hello", async () => {
-      const { caller } = makeCaller();
+    it("returns hello world from user.hello (other tests depend)", async () => {
+      const user = await createTestUser();
+      const { caller } = makeCaller({ id: user.id, email: user.email, name: user.name });
       const result = await caller.user.hello();
       expect(result).toBe("hello world");
     });
@@ -461,6 +463,65 @@ describe("tRPC endpoints (integration)", () => {
       expect(profile?.email).toBe(user.email);
     });
   });
+
+  describe("banning", () => {
+    it("Ban a user from using the platform", async () => {
+      const admin = await createTestUser(true)
+      const user = await createTestUser(false)
+      const { caller: adminCaller } = makeCaller({ id: admin.id, email: admin.email, name: admin.name })
+      const { caller: userCaller } = makeCaller({ id: user.id, email: user.id, name: user.name })
+      await adminCaller.admin.toggleBanUser({
+        userId: user.id,
+        banned: true
+      })
+
+      expect(userCaller.user.hello()).rejects.toThrow();
+    })
+    it("Unban a user from using the platform", async () => {
+      const admin = await createTestUser(true)
+      const user = await createTestUser(false)
+      await prisma.user.update({
+        where: {
+          id: user.id
+        },
+        data: {
+          banned: true
+        }
+      })
+      const { caller: adminCaller } = makeCaller({ id: admin.id, email: admin.email, name: admin.name })
+      const { caller: userCaller } = makeCaller({ id: user.id, email: user.id, name: user.name })
+
+      expect(userCaller.user.hello()).rejects.toThrow();
+      await adminCaller.admin.toggleBanUser({
+        userId: user.id,
+        banned: false
+      })
+
+      expect(await userCaller.user.hello()).toBe("hello world")
+    })
+    it("Prevent a non admin user from banning", async () => {
+      const notadmin = await createTestUser(false)
+      const user = await createTestUser(false)
+      const { caller: notadminCaller } = makeCaller({ id: notadmin.id, email: notadmin.email, name: notadmin.name })
+      const { caller: userCaller } = makeCaller({ id: user.id, email: user.id, name: user.name })
+      await expect(notadminCaller.admin.toggleBanUser({
+        userId: user.id,
+        banned: true
+      })).rejects.toThrow()
+
+      expect(await userCaller.user.hello()).toBe("hello world")
+    })
+    it("Prevent banning the user that is banning", async () => {
+      const admin = await createTestUser(true)
+      const { caller: adminCaller } = makeCaller({ id: admin.id, email: admin.email, name: admin.name })
+      await expect(adminCaller.admin.toggleBanUser({
+        userId: admin.id,
+        banned: true
+      })).rejects.toThrow()
+
+      expect(await adminCaller.user.hello()).toBe("hello world")
+    })
+  })
 
   describe("artificial lag", () => {
     it.skip("delays endpoint response by 10 seconds when flag is enabled", async () => {
