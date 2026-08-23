@@ -38,7 +38,16 @@ export const auth = betterAuth({
                     mapProfileToUser: (profile: Record<string, any>) => ({
                         name: getFirstName(profile.name ?? profile.given_name ?? profile.family_name),
                     }),
-                }] : []
+                }] : [{
+                    providerId: "Hackclub",
+                    discoveryUrl: "http://localhost:8092/.well-known/openid-configuration",
+                    clientId: "",
+                    clientSecret: "",
+                    scopes: ["openid", "email", "profile"],
+                    mapProfileToUser: (profile: Record<string, any>) => ({
+                        name: getFirstName(profile.name ?? profile.given_name ?? profile.family_name),
+                    }),
+                }]
             ],
         }),
         admin(),
@@ -46,5 +55,5 @@ export const auth = betterAuth({
     baseURL: process.env.APP_BASE || 'http://localhost:5173',
     database: prismaAdapter(prisma, {
         provider: 'postgresql'
-    }) 
+    })
 })
