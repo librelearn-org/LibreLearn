@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useOutletContext } from "react-router";
 import { useTranslation } from "react-i18next";
-import { Button, Card } from "@siemsiem/beerreact";
+import { Button, Card, Flex, Nav } from "@siemsiem/beerreact";
 import ui from "beercss";
 import { trpcClient } from "~/utils/trpc/client";
 
@@ -56,8 +56,8 @@ export default function Home() {
         <div>
             <div>
                 <div>
-                    <Logo style={{ height: "60px", maxWidth: "100%", width: "auto", marginBottom: "1rem" }} />
-                    <h1>{t("startPage:welcome")}</h1>
+                    <h1>{t("startPage:welcome")} <Logo style={{ height: "1em", margin: "0", padding: "-10em" }} /></h1>
+
                     <p>{t("startPage:description")}</p>
 
                     <Card>

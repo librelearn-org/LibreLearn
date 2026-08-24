@@ -3,6 +3,7 @@ import { string, z } from 'zod'
 import { protectedProcedure } from '~/server/trpc'
 import { taalSlugsList } from "~/components/Icons"
 import { TRPCError } from '@trpc/server/unstable-core-do-not-import'
+import { learnFormat } from '../../../generated/prisma/enums'
 
 function mapItemToKaartStaat(item: {
   id: string
@@ -47,7 +48,12 @@ export const learnRouting = {
           data: {
             language: input.language as string,
             name: input.name,
-            ownerId: ctx.user.id,
+            learnFormat: learnFormat.toets,
+            owner: {
+              connect: {
+                id: ctx.user.id,
+              },
+            },
             listItems: {
               create: input.list.map(item => ({
                 vraag: item.vraag,
@@ -87,6 +93,7 @@ export const learnRouting = {
           language: input.language as string,
           fromLanguage: input.fromLanguage as string,
           toLanguage: input.toLanguage as string,
+          learnFormat: learnFormat.toets,
           name: input.name,
           ownerId: ctx.user.id,
           listItems: {

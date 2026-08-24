@@ -102,6 +102,13 @@ model list {
   fromLanguage  String
   toLanguage    String
   learnSessions learnSession[]
+  learnFormat   learnFormat
+}
+
+enum learnFormat {
+  toets
+  leren
+  gedachten
 }
 
 model listItemSaved {
