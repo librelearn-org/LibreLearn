@@ -261,109 +261,137 @@ describe("tRPC endpoints (integration)", () => {
     });
 
     describe("learnSession", () => {
-      it("creates a learnSession and integrates seamlessly with Learnlib", async () => {
-        const { default: Learnlib, simpleMethode, verySimple, simpleWachtrij } = await import("@siemsiem/learnlib");
-        const user = await createTestUser();
-        const { caller } = makeCaller({ id: user.id, email: user.email, name: user.name });
 
-        const createdList1 = await prisma.list.create({
-          data: {
-            name: `Topwoorden1-${Date.now()}`,
-            ownerId: user.id,
-            listItems: {
-              create: [
-                { vraag: "cat", antwoord: "kat" },
-                { vraag: "dog", antwoord: "hond" },
-              ],
+      describe("Learnsessions maken en updaten met upsertLearnSession", () => {
+
+        it("creates a learnSession and integrates seamlessly with Learnlib", async () => {
+          const { default: Learnlib, simpleMethode, verySimple, simpleWachtrij } = await import("@siemsiem/learnlib");
+          const user = await createTestUser();
+          const { caller } = makeCaller({ id: user.id, email: user.email, name: user.name });
+
+          const createdList1 = await prisma.list.create({
+            data: {
+              name: `Topwoorden1-${Date.now()}`,
+              ownerId: user.id,
+              listItems: {
+                create: [
+                  { vraag: "cat", antwoord: "kat" },
+                  { vraag: "dog", antwoord: "hond" },
+                ],
+              },
+              fromLanguage: TaalSlugEnum.EN,
+              toLanguage: TaalSlugEnum.NL,
             },
-            fromLanguage: TaalSlugEnum.EN,
-            toLanguage: TaalSlugEnum.NL,
-          },
-          include: { listItems: true },
-        });
-        createdListIds.add(createdList1.id);
+            include: { listItems: true },
+          });
+          createdListIds.add(createdList1.id);
 
-        const session = await caller.learn.upsertLearnSession({
-          wachtrij: [
-            { vraag: "cat", antwoord: "kat" },
-            { vraag: "dog", antwoord: "hond" },
-          ],
-          listId: createdList1.id
-        });
+          const session = await caller.learn.upsertLearnSession({
+            wachtrij: [
+              { vraag: "cat", antwoord: "kat" },
+              { vraag: "dog", antwoord: "hond" },
+            ],
+            listId: createdList1.id
+          });
 
-        expect(session.id).toBeDefined();
-        expect(session.userId).toBe(user.id);
-        expect(session.wachtrij.length).toBe(2);
+          expect(session.id).toBeDefined();
+          expect(session.userId).toBe(user.id);
+          expect(session.wachtrij.length).toBe(2);
 
-        // 2. Initialize Learnlib using the session's returned wachtrij
-        const learnInstance = new Learnlib(
-          session.wachtrij,
-          new simpleMethode(),
-          new verySimple(),
-          new simpleWachtrij()
-        );
+          // 2. Initialize Learnlib using the session's returned wachtrij
+          const learnInstance = new Learnlib(
+            session.wachtrij,
+            new simpleMethode(),
+            new verySimple(),
+            new simpleWachtrij()
+          );
 
-        expect(learnInstance.current).toBeDefined();
-        expect(learnInstance.wachtrij.length).toBe(2);
+          expect(learnInstance.current).toBeDefined();
+          expect(learnInstance.wachtrij.length).toBe(2);
 
-        // 3. Answer a card with Learnlib
-        const currentAnswer = learnInstance.current.antwoord;
-        learnInstance.antwoord(currentAnswer);
+          // 3. Answer a card with Learnlib
+          const currentAnswer = learnInstance.current.antwoord;
+          learnInstance.antwoord(currentAnswer);
 
-        // 4. Update the session with the new learnlib.wachtrij state
-        const updatedSession = await caller.learn.upsertLearnSession({
-          id: session.id,
-          wachtrij: learnInstance.wachtrij,
-          listId: createdList1.id
-        });
-
-        expect(updatedSession.id).toBe(session.id);
-        expect(updatedSession.wachtrij.length).toBe(1);
-
-        // 5. Retrieve via getLearnSession and verify consistency
-        const retrievedSession = await caller.learn.getLearnSession({ id: session.id });
-        expect(retrievedSession.id).toBe(session.id);
-        expect(retrievedSession.wachtrij.length).toBe(1);
-        expect(retrievedSession.wachtrij[0].methodeId).toBeDefined();
-        expect(retrievedSession.wachtrij[0].lastReviewed).toBeDefined();
-      });
-
-
-      it("prevents non-owner from updating a learnSession", async () => {
-        const user1 = await createTestUser();
-        const user2 = await createTestUser();
-
-        const { caller: caller2 } = makeCaller({ id: user2.id, email: user2.email, name: user2.name });
-
-        const session = await prisma.learnSession.create({
-          data: {
-            wachtrij: {
-              create: [{ vraag: "apple", antwoord: "appel", fase: 0, metaData: {}, methode: "", lastReview: new Date, nextReview: new Date }],
-            },
-            listId: undefined,
-            userId: user1.id
-          }
-        });
-
-        await expect(
-          caller2.learn.upsertLearnSession({
+          // 4. Update the session with the new learnlib.wachtrij state
+          const updatedSession = await caller.learn.upsertLearnSession({
             id: session.id,
-            wachtrij: [{ vraag: "banana", antwoord: "banaan" }],
-          })
-        ).rejects.toThrow("Niet jouw sessie!");
-      });
+            wachtrij: learnInstance.wachtrij,
+            listId: createdList1.id
+          });
 
-      it("rejects updating non-existent learnSession", async () => {
-        const user = await createTestUser();
-        const { caller } = makeCaller({ id: user.id, email: user.email, name: user.name });
+          expect(updatedSession.id).toBe(session.id);
+          expect(updatedSession.wachtrij.length).toBe(1);
 
-        await expect(
-          caller.learn.upsertLearnSession({
-            id: "non-existent-session-id",
-            wachtrij: [{ vraag: "hello", antwoord: "hallo" }],
-          })
-        ).rejects.toThrow("Sessie bestaat niet!");
-      });
+          // 5. Retrieve via getLearnSession and verify consistency
+          const retrievedSession = await caller.learn.getLearnSession({ id: session.id });
+          expect(retrievedSession.id).toBe(session.id);
+          expect(retrievedSession.wachtrij.length).toBe(1);
+          expect(retrievedSession.wachtrij[0].methodeId).toBeDefined();
+          expect(retrievedSession.wachtrij[0].lastReviewed).toBeDefined();
+        });
+
+
+        it("prevents non-owner from updating a learnSession", async () => {
+          const user1 = await createTestUser();
+          const user2 = await createTestUser();
+
+          const { caller: caller2 } = makeCaller({ id: user2.id, email: user2.email, name: user2.name });
+
+          const session = await prisma.learnSession.create({
+            data: {
+              wachtrij: {
+                create: [{ vraag: "apple", antwoord: "appel", fase: 0, metaData: {}, methode: "", lastReview: new Date, nextReview: new Date }],
+              },
+              listId: undefined,
+              userId: user1.id
+            }
+          });
+
+          await expect(
+            caller2.learn.upsertLearnSession({
+              id: session.id,
+              wachtrij: [{ vraag: "banana", antwoord: "banaan" }],
+            })
+          ).rejects.toThrow("Niet jouw sessie!");
+        });
+
+        it("allows admins to update learnSession", async () => {
+          const user1 = await createTestUser();
+          const user2 = await createTestUser(true);
+
+          const { caller: caller2 } = makeCaller({ id: user2.id, email: user2.email, name: user2.name });
+
+          const session = await prisma.learnSession.create({
+            data: {
+              wachtrij: {
+                create: [{ vraag: "apple", antwoord: "appel", fase: 0, metaData: {}, methode: "", lastReview: new Date, nextReview: new Date }],
+              },
+              listId: undefined,
+              userId: user1.id
+            }
+          });
+
+          await expect(
+            caller2.learn.upsertLearnSession({
+              id: session.id,
+              wachtrij: [{ vraag: "banana", antwoord: "banaan" }],
+            })
+          ).resolves.toBeDefined();
+        });
+
+        it("rejects updating non-existent learnSession", async () => {
+          const user = await createTestUser();
+          const { caller } = makeCaller({ id: user.id, email: user.email, name: user.name });
+
+          await expect(
+            caller.learn.upsertLearnSession({
+              id: "non-existent-session-id",
+              wachtrij: [{ vraag: "hello", antwoord: "hallo" }],
+            })
+          ).rejects.toThrow("Sessie bestaat niet!");
+        });
+      })
 
       describe("getLearnSession getter", () => {
         it("returns a learnSession by ID with mapped KaartStaat items for the session owner", async () => {
