@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useSearchParams, useParams } from "react-router";
-import { Button, Card, Input, Progress } from "@siemsiem/beerreact";
+import { Button, Card, Progress } from "@siemsiem/beerreact";
 import { omzetLijstNaarKaartStaten } from "~/utils/learn/omzet";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useTRPC } from "~/utils/trpc/react";
@@ -8,11 +8,10 @@ import { useTRPC } from "~/utils/trpc/react";
 export default function SessionStartPage() {
     const [searchParams] = useSearchParams();
     const params = useParams();
-    const [manualListId, setManualListId] = useState("");
     const [error, setError] = useState<string | null>(null);
     const navigate = useNavigate();
 
-    const listId = searchParams.get("listId") || searchParams.get("id") || params.listId || manualListId;
+    const listId = params.listId || searchParams.get("listId") || searchParams.get("id") || "";
 
     const trpc = useTRPC();
     const make = useMutation(
@@ -60,23 +59,7 @@ export default function SessionStartPage() {
         <div style={{ padding: "1.5rem", maxWidth: "600px", margin: "0 auto" }}>
             {!listId ? (
                 <Card>
-                    <h3>Sessie Starten</h3>
-                    <p>Voer een Lijst ID in om een leersessie aan te maken:</p>
-                    <div style={{ marginBottom: "1rem" }}>
-                        <Input
-                            label="Lijst ID"
-                            value={manualListId}
-                            onChange={(e) => setManualListId(e.target.value)}
-                        />
-                    </div>
-                    <Button onClick={handleCreateSession} disabled={!manualListId || make.isPending} icon="add">
-                        {make.isPending ? "Sessie aanmaken..." : "Start!"}
-                    </Button>
-                    {error && (
-                        <div style={{ color: "red", marginTop: "1rem" }}>
-                            <p><strong>Fout:</strong> {error}</p>
-                        </div>
-                    )}
+                    <p style={{ color: "red" }}>Geen lijst ID opgegeven.</p>
                 </Card>
             ) : loadListData.isPending ? (
                 <Progress />
@@ -95,13 +78,6 @@ export default function SessionStartPage() {
                     ) : (
                         <>
                             <p style={{ color: "red" }}>Lijst niet gevonden.</p>
-                            <div style={{ marginBottom: "1rem" }}>
-                                <Input
-                                    label="Lijst ID"
-                                    value={manualListId}
-                                    onChange={(e) => setManualListId(e.target.value)}
-                                />
-                            </div>
                         </>
                     )}
 

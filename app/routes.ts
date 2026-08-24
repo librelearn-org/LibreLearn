@@ -7,7 +7,7 @@ export default [
     route("/app", "routes/app/layout.tsx", [
         route("", "routes/app/home.tsx"),
         route("learn/:id", "routes/app/learn.tsx"),
-        route("sessionstart/:listId?", "routes/app/sessionstart.tsx"),
+        route("sessionstart/:listId", "routes/app/sessionstart.tsx"),
         ...prefix("lists", [
             route("mylists", "routes/app/lists/mylists.tsx"),
             route("edit/:listId", "routes/app/lists/new.tsx"),
