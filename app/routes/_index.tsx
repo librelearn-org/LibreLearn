@@ -3,7 +3,7 @@ import { redirect, useNavigate } from "react-router";
 import type { Route } from "./+types/_index";
 const logo = "/logos/LiL-VT-LONG.svg";
 import { authClient } from "~/utils/auth/client";
-import { Button } from "@siemsiem/beerreact";
+import { Button, Card } from "@siemsiem/beerreact";
 import { Logo } from "~/components/Logo";
 
 export async function clientLoader() {
@@ -28,14 +28,19 @@ export default function Home() {
         /> */}
 
         {/* <main >  */}
-        <Logo style={{ height: "60px", maxWidth: "100%", width: "auto" }} />
-        <p>TODO: Nieuwe homepagina</p>
-        {/* <p >
+        <nav className="vertical middle-align center-align">
+
+          <Card >
+                 <Logo style={{ height: "60px", maxWidth: "100%", width: "auto" }} />
+            <p>TODO: Nieuwe homepagina</p>
+            {/* <p >
             Learn <span className="accent">fast</span>, <span className="accent">efficient</span> and <span className="accent">free</span>.
           </p> */}
-        <Button onClick={() => navigate('/auth/login')}>
-          {i18n.t('auth:signupMarketing')}
-        </Button>
+            <Button onClick={() => navigate('/auth/login')}>
+              {i18n.t('auth:signupMarketing')}
+            </Button>
+          </Card>
+        </nav>
         {/* </main> */}
 
         {/* <div className="absolute top-4 left-4 right-4 z-20 flex flex-row items-center justify-between pointer-events-auto">
