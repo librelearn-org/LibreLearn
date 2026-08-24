@@ -38,13 +38,7 @@ export default function view({ params }: Route.ComponentProps) {
 
     const handleStartLearn = () => {
         if (!list.data) return;
-        startSession.mutate({
-            listId: list.data.id,
-            wachtrij: list.data.listItems.map((item) => ({
-                vraag: item.vraag,
-                antwoord: item.antwoord
-            }))
-        });
+        navigate("/app/sessionstart/" + list.data.id)
     };
 
     const verwijder = useMutation({

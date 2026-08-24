@@ -1,15 +1,21 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useSearchParams, useParams } from "react-router";
-import { Button, Card, Progress } from "@siemsiem/beerreact";
+import { Button, Card, Progress, Select } from "@siemsiem/beerreact";
 import { omzetLijstNaarKaartStaten } from "~/utils/learn/omzet";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useTRPC } from "~/utils/trpc/react";
+import { learnFormat } from "../../../generated/prisma/enums";
 
 export default function SessionStartPage() {
     const [searchParams] = useSearchParams();
     const params = useParams();
     const [error, setError] = useState<string | null>(null);
     const navigate = useNavigate();
+    const initialFormatParam = searchParams.get("format") || searchParams.get("methode") || searchParams.get("type");
+    const initialFormat = (initialFormatParam && Object.values(learnFormat).includes(initialFormatParam as any))
+        ? (initialFormatParam as learnFormat)
+        : learnFormat.toets;
+    const [format, setformat] = useState<learnFormat>(initialFormat);
 
     const listId = params.listId || searchParams.get("listId") || searchParams.get("id") || "";
 
@@ -28,7 +34,6 @@ export default function SessionStartPage() {
     const loadListData = useQuery(
         trpc.learn.getList.queryOptions(
             { id: listId },
-            { enabled: !!listId }
         )
     );
 
@@ -39,6 +44,7 @@ export default function SessionStartPage() {
                 make.mutate({
                     listId: loadListData.data.id,
                     wachtrij: omzetLijstNaarKaartStaten(loadListData.data.listItems),
+                    methode: format,
                 });
             } else {
                 throw new Error("Geen geldige lijst gevonden of de lijst heeft geen vragen.");
@@ -49,7 +55,7 @@ export default function SessionStartPage() {
     };
 
     useEffect(() => {
-        const auto = searchParams.get("auto") === "true" || searchParams.get("autostart") === "true";
+        const auto = searchParams.get("auto") === "true" || searchParams.get("autostart") === "true" || searchParams.get("autoload") === "true" || searchParams.get("autoload") === "1";
         if (auto && loadListData.data?.listItems && loadListData.data.listItems.length > 0 && !make.isPending && !make.isSuccess) {
             handleCreateSession();
         }
@@ -71,9 +77,16 @@ export default function SessionStartPage() {
                             <p><strong>Lijst:</strong> {loadListData.data.name}</p>
                             <p><strong>Aantal vragen:</strong> {loadListData.data.listItems.length}</p>
 
+                            <Select label="Leermethode" value={format} onChange={(e: React.ChangeEvent<HTMLSelectElement>) => { setformat(e.target.value as learnFormat); }}>
+                                <option value={learnFormat.toets}>Toets</option>
+                                <option value={learnFormat.leren}>Leren</option>
+                                <option value={learnFormat.gedachten}>Gedachten</option>
+                            </Select>
+
                             <Button onClick={handleCreateSession} disabled={make.isPending || loadListData.data.listItems.length === 0} icon="add">
                                 {make.isPending ? "Sessie aanmaken..." : "Start!"}
                             </Button>
+
                         </>
                     ) : (
                         <>
