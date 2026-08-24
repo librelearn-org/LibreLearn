@@ -112,12 +112,13 @@ export default function MyAppLayout() {
                 text: "Mijn lijsten",
                 onClick: helper
             },
-            {
-                id: "/app/testing",
-                icon: "experiment",
-                text: "Tests",
-                onClick: helper
-            },
+            // gebruik deze als je snel een test/tijdelijke pagina nodig hebt
+            // {
+            //     id: "/app/testing",
+            //     icon: "experiment",
+            //     text: "Tests",
+            //     onClick: helper
+            // },
         ];
 
         if (user?.role === "admin") {
