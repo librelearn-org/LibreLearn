@@ -48,7 +48,6 @@ export const learnRouting = {
           data: {
             language: input.language as string,
             name: input.name,
-            learnFormat: learnFormat.toets,
             owner: {
               connect: {
                 id: ctx.user.id,
@@ -93,7 +92,6 @@ export const learnRouting = {
           language: input.language as string,
           fromLanguage: input.fromLanguage as string,
           toLanguage: input.toLanguage as string,
-          learnFormat: learnFormat.toets,
           name: input.name,
           ownerId: ctx.user.id,
           listItems: {
@@ -213,6 +211,7 @@ export const learnRouting = {
           })
         ),
         listId: z.uuidv4().optional(),
+        methode: z.enum(learnFormat).optional(),
       })
     )
     .mutation(async ({ input, ctx }) => {
@@ -233,7 +232,8 @@ export const learnRouting = {
             wachtrij: {
               create: createItems,
             },
-            listId: input.listId
+            listId: input.listId,
+            learnFormat: input.methode
           },
           include: {
             wachtrij: true,
