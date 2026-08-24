@@ -77,6 +77,8 @@ export default function view({ params }: Route.ComponentProps) {
         })
     }
 
+
+
     return (
         <div>
 

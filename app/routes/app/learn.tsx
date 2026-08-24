@@ -1,9 +1,10 @@
 import type { Route } from "./+types/learn";
-import { useSearchParams } from "react-router";
+import { data, useSearchParams } from "react-router";
 import { Button, Card, Code, Input, Space, classNames, useDialog } from "@siemsiem/beerreact";
 import { trpcClient } from "~/utils/trpc/client";
 import { useEffect, useMemo, useRef, useState } from "react";
 import Learnlib, { gradeMakers, methodes, wachtrijUpdaters, type LearnlibState } from "@siemsiem/learnlib";
+import { learnFormat } from "../../../generated/prisma/enums";
 
 export async function clientLoader({ params }: Route.ClientLoaderArgs) {
     const id = params.id;
@@ -92,6 +93,10 @@ export default function LearnPage({ loaderData }: Route.ComponentProps) {
                             <Button onClick={() => setResetKey((k) => k + 1)} icon="refresh">
                                 Opnieuw Leren
                             </Button>
+                        </div>
+                    ) : loaderData.sessionData?.learnFormat !== learnFormat.toets ? (
+                        <div className="center-align padding">
+                            <p style={{ color: "red" }}>Aleen toets werkt voor nu</p>
                         </div>
                     ) : (
                         <form onSubmit={handleSubmit}>
