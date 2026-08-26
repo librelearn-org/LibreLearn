@@ -65,5 +65,10 @@
   "startPage": {
     "welcome": "Welcome to",
     "description": "This is not the complete version of Librelearn yet. This is only the beta version."
+  },
+  "profile": {
+    "title": "Profile",
+    "name": "First Name",
+    "lastName": "Last Name"
   }
 }

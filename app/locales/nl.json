@@ -86,5 +86,10 @@
     "wiskunde": "Wiskunde",
     "natuurkunde": "Natuurkunde",
     "scheikunde": "Scheikunde"
+  },
+  "profile": {
+    "title": "Profiel",
+    "name": "Naam",
+    "lastName": "Achternaam"
   }
 }
