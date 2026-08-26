@@ -23,6 +23,4 @@ export default [
     ...prefix("auth", [
         route("login", "routes/auth/login.tsx"),
     ]),
-
-    route("api/auth/*", "routes/api/auth.ts"),
 ] satisfies RouteConfig;
