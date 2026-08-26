@@ -14,7 +14,7 @@ export const auth = betterAuth({
     secret: process.env.AUTH_SECRET,
 
     emailAndPassword: {
-        enabled: false, // voor nu. 
+        enabled: false, // voor nu.
         requireEmailVerification: !!process.env.SMTP_HOST,
     },
     advanced: {
@@ -25,6 +25,10 @@ export const auth = betterAuth({
         }
     },
     socialProviders: {
+      google: {
+        clientId: process.env.GOOGLE_CLIENT_ID || "",
+        clientSecret: process.env.GOOGLE_CLIENT_SECRET || "",
+      }
     },
     user: {
         additionalFields: {

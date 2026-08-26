@@ -58,17 +58,29 @@ export default function SignIn() {
   return (
     <div >
       <Card  align='center-align'>
-        
-        <h4>De Librelearn beta is helaas aleen voor mensen in HackClub</h4>
-        <Button
-          onClick={async () => {
-            await authClient.signIn.social({
-              provider: 'Hackclub',
-              callbackURL: '/app',
-              errorCallbackURL: '/auth/login',
-            })
-          }}
-        >{i18next.t('auth:loginHC')}</Button>
+
+        <h4 className="overline">De Librelearn beta is helaas aleen voor mensen in HackClub</h4>
+        <div className="horizontal">
+          <Button
+            onClick={async () => {
+              await authClient.signIn.social({
+                provider: 'Hackclub',
+                callbackURL: '/app',
+                errorCallbackURL: '/auth/login',
+              })
+            }}
+          >{i18next.t('auth:loginHC')}</Button>
+          <Button
+            onClick={async () => {
+              await authClient.signIn.social({
+                provider: 'Google',
+                callbackURL: '/app',
+                errorCallbackURL: '/auth/login',
+              })
+            }}
+          >{i18next.t('auth:loginGoogle')}
+          </Button>
+        </div>
       </Card>
 
     </div>
