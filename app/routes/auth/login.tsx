@@ -73,7 +73,7 @@ export default function SignIn() {
           <Button
             onClick={async () => {
               await authClient.signIn.social({
-                provider: 'Google',
+                provider: 'google',
                 callbackURL: '/app',
                 errorCallbackURL: '/auth/login',
               })
