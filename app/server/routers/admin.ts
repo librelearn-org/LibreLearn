@@ -87,6 +87,107 @@ export const adminRouter = {
 
       return updatedUser;
     }),
+  veryCoolAdminStats: veryProtectedProcedure
+    .query(async ({ ctx }) => {
+      const now = new Date();
+
+      const [
+        listsWithItemCount,
+        totalLists,
+        woordenData,
+        activeUserSessions,
+        totalUsers,
+        activeUsersCount,
+        bannedUsers,
+        totalLearnSessions,
+        learnFormatGrouped,
+      ] = await Promise.all([
+        ctx.prisma.list.findMany({
+          select: {
+            language: true,
+            _count: {
+              select: {
+                listItems: true,
+              },
+            },
+          },
+        }),
+        ctx.prisma.list.count(),
+        ctx.prisma.listItemSaved.count(),
+        ctx.prisma.session.count({
+          where: {
+            expiresAt: {
+              gt: now,
+            },
+          },
+        }),
+        ctx.prisma.user.count(),
+        ctx.prisma.user.count({
+          where: {
+            sessions: {
+              some: {
+                expiresAt: {
+                  gt: now,
+                },
+              },
+            },
+          },
+        }),
+        ctx.prisma.user.count({
+          where: {
+            banned: true,
+          },
+        }),
+        ctx.prisma.learnSession.count(),
+        ctx.prisma.learnSession.groupBy({
+          by: ['learnFormat'],
+          _count: {
+            id: true,
+          },
+        }),
+      ]);
+
+      const inactiveUsersCount = Math.max(0, totalUsers - activeUsersCount);
+
+      const vakkenMap = new Map<string, { listsCount: number; wordsCount: number }>();
+      for (const l of listsWithItemCount) {
+        const lang = l.language;
+        const current = vakkenMap.get(lang) || { listsCount: 0, wordsCount: 0 };
+        current.listsCount += 1;
+        current.wordsCount += l._count.listItems;
+        vakkenMap.set(lang, current);
+      }
+
+      const vakkenData = Array.from(vakkenMap.entries())
+        .map(([language, data]) => ({
+          language,
+          count: data.listsCount,
+          wordsCount: data.wordsCount,
+          woorden: data.wordsCount,
+          _count: {
+            id: data.listsCount,
+          },
+        }))
+        .sort((a, b) => b.count - a.count);
+
+      const learnFormats = learnFormatGrouped.map((f) => ({
+        format: f.learnFormat,
+        count: f._count.id,
+      }));
+
+      return {
+        vakkenData,
+        totalLists,
+        woordenData,
+        users: totalUsers,
+        activeUsers: activeUsersCount,
+        inactiveUsers: inactiveUsersCount,
+        bannedUsers,
+        activeUserSessions,
+        totalLearnSessions,
+        learnFormats,
+      };
+    })
 } satisfies TRPCRouterRecord
 
 
