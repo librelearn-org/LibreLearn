@@ -68,7 +68,14 @@
   },
   "profile": {
     "title": "Profile",
+    "fullName": "Full name",
     "name": "First Name",
-    "lastName": "Last Name"
+    "lastName": "Last Name",
+    "save": "Save",
+    "logout": "Logout",
+    "themeColor": "Theme color",
+    "resetTheme": "Reset",
+    "themeLearn": "Learn more",
+    "themeLearnText": "We use a dynamic color system, which means all colors in the app are derived from this color for readability and contrast, so the final colors you see may differ slightly from the exact color you choose."
   }
 }
