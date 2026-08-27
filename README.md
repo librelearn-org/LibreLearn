@@ -1,35 +1,37 @@
+
+
+
+
+
+![Het Librelearn logo](https://cdn.hackclub.com/01a043c7-7712-7b80-a540-b4efb9a508dc/verybasic.png) 
 # Librelearn
 
-A foss alternaitve for WRTS (Studygo), quizlet and others.
+Een FOSS alternatief voor Studygo (WRTS) en soortgelijken platformen
 
-## Running locally
+## functies
 
-1. Clone the repository
-2. Create a PostgreSQL database for the website
-3. Create a `.env` file based on `.env.example` and fill in the required values
-4. Install dependencies with `bun install`
-5. Run the development server with `bun dev`
-6. Open `http://localhost:5173` in your browser to see the website
-7. To run the tests, use `bun test`
-8. To lint, use `bun run lint`; to format, use `bun run format`
+- Makkelijk lijsten maken
+- Lijsten leren
+- uhhhhh
+- binnekort FSRS
+
+## Hosted versie
+
+Ben je niet van plan om zelf te hosten? gebruik dan gewoon de hosted versie op [https://librelearn.nl](https://librelearn.nl)
+## Dev server
+
+1. Clone de repo
+2. Maak een PostgreSQL database voor librelearn
+3. Maak een `.env` gebaseerd op `.env.example` en doe je best om alles in te vullen
+4. Als je geen oath creds hebt kan je `bunx @bluecateng/mock-oidc-provider` runnen om te kunnen inloggen
+4. Installeer dependencies met `bun install`
+5. Voer de dev server uit `bun dev`
+6. Open `http://localhost:5173` in je browser
+7.  Voer tests uit met `bun test`
+
 
 ## Credits
 
-Thanks to @unbravechimp for making the very nice subject icons used in the lists!
-Thanks to @unbravechimp for hosting the website!
-Thanks to @unbravechimp for help with figma and the design of the website!
-Thanks to @unbravechimp for somthing!
 
-
-## Contributing
-
-Contributions are very welcome! If you want to contribute, please open an issue or a pull request. I will try to review and merge as soon as possible.
-You can find things to do by:
-
-- asking in the discord server
-- looking at the issues
-- searching for "TODO" in the codebase (ITS IN DUTCH SORRY)
-
-## AI declaration
-
-I used copilot for help with CSS and Tailwind because I hate CSS. I also sometimes asked it for help when stuff just randomly brakes and I have no idea why. I also use github copilot auto complete. And help with the readme.
+- [Doodles172](https://github.com/doodles172) voor de vak iconen
+- [Mij](https://github.com/siemvk) voor het maken van react componenten van [BeerCss](https://github.com/beercss/beercss)
