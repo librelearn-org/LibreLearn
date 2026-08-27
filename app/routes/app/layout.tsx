@@ -1,6 +1,7 @@
 import { useCallback, useMemo, useEffect } from "react";
 import { Outlet, redirect, useLoaderData, useLocation, useNavigate } from "react-router";
-import { AutoNavRail, Button, NavBar, useDialog, type navItem } from "@siemsiem/beerreact";
+import { useTranslation } from "react-i18next";
+import { AutoNavRail, Button, NavBar, Space, useDialog, type navItem } from "@siemsiem/beerreact";
 import { authClient } from "~/utils/auth/client";
 import { TRPCReactProvider } from "~/utils/trpc/react";
 import ui from "beercss";
@@ -22,6 +23,7 @@ export default function MyAppLayout() {
     const navigate = useNavigate();
     const location = useLocation();
     const { pushDialog } = useDialog();
+    const { t } = useTranslation();
 
     useEffect(() => {
         if (user && (user as any).theme) {
@@ -66,8 +68,9 @@ export default function MyAppLayout() {
                 content: (
                     <nav className="vertical no-space">
                         <div className="row center-align">
-                            <h4>Tijdelijk menu</h4>
+                            <h4>{t("profile:title")}</h4>
                         </div>
+                        <Space />
                         <Button
                             variant="transparent"
                             size="extra"
@@ -89,7 +92,7 @@ export default function MyAppLayout() {
         }
 
         navigate(v.id);
-    }, [navigate, pushDialog, user]);
+    }, [navigate, pushDialog, user, t]);
 
     const big = useMemo(() => ({
         id: "new-dialog",
