@@ -43,7 +43,7 @@ export default function AdminLayout() {
         },
         {
             id: "stats",
-            icon: "patient_list",
+            icon: "show_chart",
             text: "Statistieken",
             onClick: helper
         }
