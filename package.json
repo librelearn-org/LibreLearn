@@ -48,6 +48,7 @@
     "react-i18next": "16.5.3",
     "react-markdown": "10.1.0",
     "react-router": "8.3.0",
+    "recharts": "^3.10.1",
     "remark-breaks": "4.0.0",
     "remark-gfm": "4.0.1",
     "remix-i18next": "7.4.2",

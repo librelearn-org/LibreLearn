@@ -40,7 +40,14 @@ export default function AdminLayout() {
             icon: "patient_list",
             text: "Gebruiker lijst",
             onClick: helper
+        },
+        {
+            id: "stats",
+            icon: "patient_list",
+            text: "Statistieken",
+            onClick: helper
         }
+
     ], [helper]);
 
     const navConfig = useMemo(() => ({
