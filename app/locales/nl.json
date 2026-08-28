@@ -89,7 +89,14 @@
   },
   "profile": {
     "title": "Profiel",
+    "fullName": "Volledige naam",
     "name": "Naam",
-    "lastName": "Achternaam"
+    "lastName": "Achternaam",
+    "save": "Opslaan",
+    "logout": "Uitloggen",
+    "themeColor": "Thema kleur",
+    "resetTheme": "Reset",
+    "themeLearn": "Meer informatie",
+    "themeLearnText": "Wij gebruiken een dynamisch kleursysteem; dat betekent dat alle kleuren in de app zijn afgeleid van deze kleur voor leesbaarheid en contrast, waardoor de uiteindelijke kleuren die je ziet iets kunnen afwijken van de exacte kleur die je kiest."
   }
 }

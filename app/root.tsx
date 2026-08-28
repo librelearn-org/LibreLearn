@@ -58,6 +58,12 @@ export function Layout({ children }: { children: React.ReactNode }) {
     ui("theme", "#076745");
   }, [lang]);
 
+  // vraag mij niet waarom maar dit zorgt ervoor dat wanneer je op een dialog klikt dat het niet gwn verdwijnt
+  // fuck you bearcss <3
+  useEffect(() => {
+    document.getElementById("dialog")?.removeAttribute("data-ui");
+  }, []);
+
   return (
     <html lang={lang} suppressHydrationWarning>
       <head>
