@@ -53,10 +53,6 @@ export function Layout({ children }: { children: React.ReactNode }) {
   const data = useRouteLoaderData("root") as { lang: string, colorScheme: "light" | "dark" } | undefined;
   const lang = data?.lang || config.lang;
 
-  useEffect(() => {
-    initI18n(lang);
-    ui("theme", "#076745");
-  }, [lang]);
 
   // vraag mij niet waarom maar dit zorgt ervoor dat wanneer je op een dialog klikt dat het niet gwn verdwijnt
   // fuck you bearcss <3
