@@ -1,7 +1,6 @@
 import { useCallback, useMemo, useEffect } from "react";
 import { Outlet, redirect, useLoaderData, useLocation, useNavigate } from "react-router";
-import { useTranslation } from "react-i18next";
-import { AutoNavRail, Button, NavBar, Space, useDialog, type navItem } from "@siemsiem/beerreact";
+import { AutoNavRail, Button, NavBar, useDialog, type navItem } from "@siemsiem/beerreact";
 import { authClient } from "~/utils/auth/client";
 import { TRPCReactProvider } from "~/utils/trpc/react";
 import ui from "beercss";
@@ -22,8 +21,7 @@ export default function MyAppLayout() {
     const user = useLoaderData<typeof clientLoader>();
     const navigate = useNavigate();
     const location = useLocation();
-    const { pushDialog } = useDialog();
-    const { t } = useTranslation();
+    const { pushDialog, closeDialog } = useDialog();
 
     useEffect(() => {
         if (user && (user as any).theme) {
@@ -47,14 +45,14 @@ export default function MyAppLayout() {
                             rounding="round"
                             responsive={true}
                             FAB={false}
-                            onClick={() => { navigate("/app/lists/edit/new"); }}
+                            onClick={() => { navigate("/app/lists/edit/new"); closeDialog() }}
                         >
                             Lijst
                         </Button>
-                        <Button variant="transparent" size="extra" icon="book" rounding="round" responsive={true} FAB={false}>
+                        <Button variant="transparent" size="extra" icon="book" rounding="round" responsive={true} FAB={false} onClick={closeDialog}>
                             Boek
                         </Button>
-                        <Button variant="transparent" size="extra" icon="group" rounding="round" responsive={true} FAB={false}>
+                        <Button variant="transparent" size="extra" icon="group" rounding="round" responsive={true} FAB={false} onClick={closeDialog}>
                             Klas
                         </Button>
                     </nav>
@@ -63,36 +61,8 @@ export default function MyAppLayout() {
             return;
         }
 
-        if (v.id === "user-profile") {
-            pushDialog({
-                content: (
-                    <nav className="vertical no-space">
-                        <div className="row center-align">
-                            <h4>{t("profile:title")}</h4>
-                        </div>
-                        <Space />
-                        <Button
-                            variant="transparent"
-                            size="extra"
-                            icon="logout"
-                            rounding="round"
-                            responsive={true}
-                            FAB={false}
-                            onClick={async () => {
-                                await authClient.signOut();
-                                navigate("/");
-                            }}
-                        >
-                            Uitloggen
-                        </Button>
-                    </nav>
-                ),
-            });
-            return;
-        }
-
         navigate(v.id);
-    }, [navigate, pushDialog, user, t]);
+    }, [navigate, pushDialog, closeDialog]);
 
     const big = useMemo(() => ({
         id: "new-dialog",
@@ -134,7 +104,7 @@ export default function MyAppLayout() {
         }
 
         options.push({
-            id: "user-profile",
+            id: "/app/profile",
             icon: "account_circle",
             text: user?.name || user?.email || "Gebruiker",
             onClick: helper
@@ -173,4 +143,3 @@ export default function MyAppLayout() {
         </TRPCReactProvider>
     );
 }
-

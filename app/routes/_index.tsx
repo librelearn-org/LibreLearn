@@ -40,7 +40,7 @@ export default function Home() {
 
         {/* <div className="absolute top-4 left-4 right-4 z-20 flex flex-row items-center justify-between pointer-events-auto">
           <img
-            src={homeIcon}  
+            src={homeIcon}
             alt="Home"
             onClick={() => navigate('/app')}
             style={{ cursor: 'pointer' }}
