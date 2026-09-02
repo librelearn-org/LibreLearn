@@ -103,10 +103,14 @@ export default function MyAppLayout() {
             });
         }
 
+        const [firstName, ...rest] = user?.name?.split(" ") ?? [];
+        const lastNameInitial = rest.pop()?.[0];
+        const displayName = lastNameInitial ? `${firstName} ${lastNameInitial}.` : firstName;
+
         options.push({
             id: "/app/profile",
             icon: "account_circle",
-            text: user?.name || user?.email || "Gebruiker",
+            text: displayName || user?.email || "Gebruiker",
             onClick: helper
         });
 
