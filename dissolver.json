@@ -1,0 +1,5 @@
+{
+  "ignore": [".react-router", "generated"],
+  "tasks": ["whitespace"],
+  "require_dry": true
+}
