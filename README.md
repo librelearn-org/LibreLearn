@@ -3,7 +3,7 @@
 
 
 
-![Het Librelearn logo](https://cdn.hackclub.com/01a043c7-7712-7b80-a540-b4efb9a508dc/verybasic.png)
+![Het Librelearn logo](.github/assets/verybasic.png)
 # Librelearn
 
 Een FOSS alternatief voor Studygo (WRTS) en soortgelijken platformen
