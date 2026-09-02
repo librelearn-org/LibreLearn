@@ -60,7 +60,7 @@ export default function view({ params }: Route.ComponentProps) {
         },
 
     })
-    const { pushDialog } = useDialog()
+    const { pushDialog, closeDialog } = useDialog()
 
     function vwDialog() {
         pushDialog({
@@ -68,8 +68,8 @@ export default function view({ params }: Route.ComponentProps) {
                 <h2>Weet je het zeker</h2>
                 <p>Je kan een verwijderde lijst niet herstellen!</p>
                 <nav className="right-align">
-                    <Button>WACHT NEE TERUG</Button>
-                    <Button onClick={() => { verwijder.mutate({ id: list.data?.id || listId || params.listId }) }}>Ja!</Button>
+                    <Button onClick={closeDialog}>WACHT NEE TERUG</Button>
+                    <Button onClick={() => { verwijder.mutate({ id: list.data?.id || listId || params.listId }); closeDialog() }}>Ja!</Button>
                 </nav>
 
             </>,
