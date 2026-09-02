@@ -10,7 +10,7 @@ export default function Profile() {
     const user = useOutletContext<any>();
     const navigate = useNavigate();
     const { addToast } = useToast();
-    const { pushDialog } = useDialog();
+    const { pushDialog, closeDialog } = useDialog();
     const { t } = useTranslation();
     const firstNameRef = useRef<HTMLInputElement>(null);
     const lastNameRef = useRef<HTMLInputElement>(null);
@@ -56,10 +56,13 @@ export default function Profile() {
                     </div>
                     <Space />
                     <p>{t("profile:themeLearnText")}</p>
+                    <nav className="right-align">
+                        <Button onClick={closeDialog}>Oke!</Button>
+                    </nav>
                 </nav>
             ),
         });
-    }, [pushDialog, t]);
+    }, [pushDialog, closeDialog, t]);
 
     const handleColorChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const newColor = e.target.value;

@@ -124,7 +124,7 @@ export default function LearnPage({ loaderData }: Route.ComponentProps) {
 function debugPopup(
     { loaderData }: { loaderData: Route.ComponentProps["loaderData"] },
     lib: Learnlib | null | undefined,
-    inputFound: boolean
+    inputFound: boolean,
 ) {
     return (
         <>
@@ -158,6 +158,7 @@ function debugPopup(
                     Input niet gevonden!! ref is kapot!
                 </h2>
             )}
+
         </>
     );
 }
