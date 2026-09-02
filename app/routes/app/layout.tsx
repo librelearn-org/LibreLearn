@@ -21,7 +21,7 @@ export default function MyAppLayout() {
     const user = useLoaderData<typeof clientLoader>();
     const navigate = useNavigate();
     const location = useLocation();
-    const { pushDialog } = useDialog();
+    const { pushDialog, closeDialog } = useDialog();
 
     useEffect(() => {
         if (user && (user as any).theme) {
@@ -45,14 +45,14 @@ export default function MyAppLayout() {
                             rounding="round"
                             responsive={true}
                             FAB={false}
-                            onClick={() => { navigate("/app/lists/edit/new"); }}
+                            onClick={() => { navigate("/app/lists/edit/new"); closeDialog() }}
                         >
                             Lijst
                         </Button>
-                        <Button variant="transparent" size="extra" icon="book" rounding="round" responsive={true} FAB={false}>
+                        <Button variant="transparent" size="extra" icon="book" rounding="round" responsive={true} FAB={false} onClick={closeDialog}>
                             Boek
                         </Button>
-                        <Button variant="transparent" size="extra" icon="group" rounding="round" responsive={true} FAB={false}>
+                        <Button variant="transparent" size="extra" icon="group" rounding="round" responsive={true} FAB={false} onClick={closeDialog}>
                             Klas
                         </Button>
                     </nav>
@@ -62,7 +62,7 @@ export default function MyAppLayout() {
         }
 
         navigate(v.id);
-    }, [navigate, pushDialog]);
+    }, [navigate, pushDialog, closeDialog]);
 
     const big = useMemo(() => ({
         id: "new-dialog",

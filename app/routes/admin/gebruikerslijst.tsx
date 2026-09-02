@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useOutletContext } from "react-router";
 import { useInfiniteQuery, useMutation } from "@tanstack/react-query";
 import { Button, Card, classNames, Progress, useDialog } from "@siemsiem/beerreact";
@@ -7,7 +7,7 @@ import { useTRPC } from "~/utils/trpc/react";
 export default function AdminHome() {
     const currentUser = useOutletContext<any>();
     const trpc = useTRPC();
-    const { pushDialog } = useDialog();
+    const { pushDialog, closeDialog } = useDialog();
     const [actionError, setActionError] = useState<string | null>(null);
 
     const {
@@ -56,7 +56,7 @@ export default function AdminHome() {
         return () => observer.disconnect();
     }, [fetchNextPage, hasNextPage, isFetchingNextPage]);
 
-    const handleToggleBan = (targetUser: any) => {
+    const handleToggleBan = useCallback((targetUser: any) => {
         const isBanning = !targetUser.banned;
         pushDialog({
             content: (
@@ -74,6 +74,7 @@ export default function AdminHome() {
                                     userId: targetUser.id,
                                     banned: isBanning,
                                 });
+                                closeDialog();
                             }}
                             icon="check"
                         >
@@ -83,7 +84,7 @@ export default function AdminHome() {
                 </div>
             )
         });
-    };
+    }, [pushDialog, closeDialog]);
 
     const allUsers = data?.pages.flatMap((page) => page.users) ?? [];
 
