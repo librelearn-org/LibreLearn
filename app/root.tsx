@@ -53,11 +53,26 @@ export function Layout({ children }: { children: React.ReactNode }) {
   const data = useRouteLoaderData("root") as { lang: string, colorScheme: "light" | "dark" } | undefined;
   const lang = data?.lang || config.lang;
 
+  useEffect(() => {
+    ui("theme", config.getDefaultThemeColor());
+  }, []);
+
+  const envData = {
+    UI_KLEUR: typeof process !== "undefined" ? (process.env.UI_KLEUR || "023824") : "023824",
+    UI_KLEUR_BEWERKBAAR: typeof process !== "undefined" ? (process.env.UI_KLEUR_BEWERKBAAR !== "false" && process.env.UI_KLEUR_BEWERKBAAR !== "0" && process.env.UI_KLEUR_BEWERKBAAR !== "no" && process.env.UI_KLEUR_BEWERKBAAR !== "False") : true,
+  };
+
   return (
     <html lang={lang} suppressHydrationWarning>
       <head>
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <script
+          id="__LIBRELEARN_ENV__"
+          dangerouslySetInnerHTML={{
+            __html: `window.ENV = window.ENV || ${JSON.stringify(envData)};`,
+          }}
+        />
         <script data-goatcounter="https://librelearn.goatcounter.com/count"
           async src="//gc.zgo.at/count.js"></script>
         <Meta />

@@ -28,6 +28,13 @@ export const greetingRouter = {
             })
         )
         .mutation(async ({ input, ctx }) => {
+            if (process.env.UI_KLEUR_BEWERKBAAR == "False") {
+                throw new TRPCError({
+                    code: "FORBIDDEN",
+                    message: "UI_KLEUR_BEWERKBAAR is False"
+                });
+            }
+
             const updatedUser = await ctx.prisma.user.update({
                 where: {
                     id: ctx.user.id

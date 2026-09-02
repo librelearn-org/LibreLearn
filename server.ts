@@ -30,15 +30,52 @@ app.all("/api/trpc/*", (c) => {
   });
 });
 
-// 3. Serve static files from build/client
+function getPublicClientEnv() {
+  const rawEditable = process.env.UI_KLEUR_BEWERKBAAR;
+  let isEditable = true;
+  if (rawEditable !== undefined) {
+    const lower = rawEditable.trim().toLowerCase();
+    isEditable = lower !== "false" && lower !== "0" && lower !== "no";
+  }
+  return {
+    UI_KLEUR: process.env.UI_KLEUR || "023824",
+    UI_KLEUR_BEWERKBAAR: isEditable,
+  };
+}
+
+function renderIndexHtml() {
+  const indexPath = path.resolve(process.cwd(), "build/client/index.html");
+  if (!fs.existsSync(indexPath)) return null;
+
+  let html = fs.readFileSync(indexPath, "utf-8");
+  const script = `<script id="__LIBRELEARN_ENV__">window.ENV = ${JSON.stringify(getPublicClientEnv())};</script>`;
+  if (html.includes('id="__LIBRELEARN_ENV__"')) {
+    html = html.replace(/<script id="__LIBRELEARN_ENV__">.*?<\/script>/, script);
+  } else {
+    html = html.replace("</head>", `${script}</head>`);
+  }
+  return html;
+}
+
+// 3. Serve index.html dynamically on root / index routes to ensure runtime env vars are injected
+app.get("/", (c) => {
+  const html = renderIndexHtml();
+  if (html) return c.html(html);
+  return c.text("Build not found. Run 'bun run build' first.", 404);
+});
+app.get("/index.html", (c) => {
+  const html = renderIndexHtml();
+  if (html) return c.html(html);
+  return c.text("Build not found. Run 'bun run build' first.", 404);
+});
+
+// 4. Serve static files from build/client
 app.use("/*", serveStatic({ root: "./build/client" }));
 
-// 4. SPA Fallback routing: serve index.html for all non-API GET requests
+// 5. SPA Fallback routing: serve index.html for all non-API GET requests
 app.get("*", (c) => {
-  const indexPath = path.resolve(process.cwd(), "build/client/index.html");
-  if (fs.existsSync(indexPath)) {
-    return c.html(fs.readFileSync(indexPath, "utf-8"));
-  }
+  const html = renderIndexHtml();
+  if (html) return c.html(html);
   return c.text("Build not found. Run 'bun run build' first.", 404);
 });
 

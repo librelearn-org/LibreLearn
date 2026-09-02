@@ -3,6 +3,7 @@ import { Outlet, redirect, useLoaderData, useLocation, useNavigate } from "react
 import { AutoNavRail, Button, NavBar, useDialog, type navItem } from "@siemsiem/beerreact";
 import { authClient } from "~/utils/auth/client";
 import { TRPCReactProvider } from "~/utils/trpc/react";
+import { getDefaultThemeColor, isThemeColorEditable } from "~/utils/config";
 import ui from "beercss";
 
 export async function clientLoader() {
@@ -24,9 +25,11 @@ export default function MyAppLayout() {
     const { pushDialog, closeDialog } = useDialog();
 
     useEffect(() => {
-        if (user && (user as any).theme) {
+        if (isThemeColorEditable() && user && (user as any).theme) {
             const themeColor = (user as any).theme.startsWith("#") ? (user as any).theme : `#${(user as any).theme}`;
             ui("theme", themeColor);
+        } else {
+            ui("theme", getDefaultThemeColor());
         }
     }, [user]);
 
