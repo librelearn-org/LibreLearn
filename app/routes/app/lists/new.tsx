@@ -83,7 +83,7 @@ function toPayload(data: EditableListData) {
 
 // voor import/export
 function parseQaLines(text: string, listId: string | null) {
-    const lines = text.split(/\r?\n/).map((l) => l.trim()).filter(Boolean);
+    const lines = text.split(/\r?\n/).flatMap((l) => l.split("\t")).map((l) => l.trim()).filter(Boolean);
     const items: ListItemData[] = [];
     let skipped = 0;
     for (let i = 0; i < lines.length; i += 2) {
