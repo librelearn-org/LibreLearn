@@ -50,6 +50,29 @@
       "reply": "Could not post your reply. Please try again."
     }
   },
+  "learn": {
+    "learnBtn": "Learn",
+    "queue": "Queue",
+    "placeholder": "Type your answer...",
+    "answerBtn": "Answer",
+    "correct": "Correct!",
+    "incorrect": "Incorrect!",
+    "question": "Question",
+    "yourAnswer": "Your answer",
+    "correctAnswer": "Correct answer",
+    "noAnswer": "(no answer entered)",
+    "continue": "Continue",
+    "overrideCorrect": "I was actually right",
+    "congratsTitle": "Congratulations!",
+    "congratsDescription": "You learned all words in this session!",
+    "learnAgain": "Learn Again",
+    "backToList": "Back to list",
+    "noItems": "No items found to learn.",
+    "onlyTestSupported": "Only test mode works for now",
+    "showAnswer": "Show answer",
+    "know": "I knew it",
+    "dontKnow": "Did not know"
+  },
   "icons": {
     "nederlands": "Dutch",
     "engels": "English",
