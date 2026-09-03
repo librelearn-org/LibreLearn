@@ -1,7 +1,7 @@
 import { useTRPC } from "~/utils/trpc/react";
 import type { Route } from "./+types/new";
 import { QueryClient, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Button, Input, type InputProps, Select, Flex, Card } from "@siemsiem/beerreact";
+import { Button, Input, type InputProps, Select, Flex, Card, useToast } from "@siemsiem/beerreact";
 import React, { useMemo } from "react";
 import { trpcClient } from "~/utils/trpc/client";
 import { useEffect, useRef, useState } from "react";
@@ -80,6 +80,34 @@ function toPayload(data: EditableListData) {
         list: data.listItems.map(({ vraag, antwoord }) => ({ vraag, antwoord })),
     };
 }
+
+// voor import/export
+function parseQaLines(text: string, listId: string | null) {
+    const lines = text.split(/\r?\n/).map((l) => l.trim()).filter(Boolean);
+    const items: ListItemData[] = [];
+    let skipped = 0;
+    for (let i = 0; i < lines.length; i += 2) {
+        const [vraag, antwoord] = [lines[i], lines[i + 1]];
+        if (!antwoord) {
+            skipped++;
+            break;
+        }
+        items.push({ id: crypto.randomUUID(), vraag, antwoord, listId });
+    }
+    return { items, skipped };
+}
+
+function downloadTextFile(filename: string, content: string) {
+    const blob = new Blob([content], { type: "text/plain;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+}
 export default function newList({ loaderData }: Route.ComponentProps) {
     const trpc = useTRPC();
     const [saveState, setSaveState] = useState<"idle" | "saving" | "saved" | "error" | "invalid" | "invalid-e">("idle");
@@ -89,6 +117,8 @@ export default function newList({ loaderData }: Route.ComponentProps) {
     const nav = useNavigate();
     const queryClient = useQueryClient();
     const { t } = useTranslation();
+    const { addToast } = useToast();
+    const fileInputRef = useRef<HTMLInputElement>(null);
 
     // we hebben 2 mutaties, een voor autosave en een voor de opslaan knop
     const submitMutation = useMutation({
@@ -130,6 +160,41 @@ export default function newList({ loaderData }: Route.ComponentProps) {
         });
 
     };
+
+    const handleImportClick = () => fileInputRef.current?.click();
+
+    const handleImportFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        e.target.value = "";
+        if (!file) return;
+
+        try {
+            const { items, skipped } = parseQaLines(await file.text(), listData.id ?? null);
+            if (!items.length) {
+                addToast({ text: t("lists:edit:importEmpty"), type: "error" });
+                return;
+            }
+
+            setListData((current) => ({
+                ...current,
+                listItems: [...current.listItems, ...items],
+            }));
+
+            const skippedSuffix = skipped ? ` (${t("lists:edit:importSkipped", { count: skipped })})` : "";
+            addToast({ text: t("lists:edit:importSuccess", { count: items.length }) + skippedSuffix });
+        } catch {
+            addToast({ text: t("lists:edit:importError"), type: "error" });
+        }
+    };
+
+    const handleExport = () => {
+        const content = listData.listItems
+            .filter((i) => i.vraag.trim() && i.antwoord.trim())
+            .flatMap((i) => [i.vraag, i.antwoord])
+            .join("\n");
+        downloadTextFile(`${listData.name.trim() || "lijst"}.txt`, content);
+    };
+
     useEffect(() => {
         if (!isValidDraft(listData)) {
             setSaveState((prev) => (prev === "invalid" ? prev : "invalid"));
@@ -442,7 +507,7 @@ export default function newList({ loaderData }: Route.ComponentProps) {
                                 responsive
 
                                 icon="delete">
-                                {t("lists:edit:deleteWordBtn")}
+                                {t("lists:edit:deleteWord")}
                             </Button>
                         </nav>
                     </>
@@ -455,11 +520,23 @@ export default function newList({ loaderData }: Route.ComponentProps) {
                         }))} icon="add">
                             {t("lists:edit:addToList")}
                         </Button>
+                        <Button onClick={handleImportClick} icon="upload" variant="transparent">
+                            {t("lists:edit:import")}
+                        </Button>
+                        <Button onClick={handleExport} icon="download" variant="transparent">
+                            {t("lists:edit:export")}
+                        </Button>
                         <Button onClick={handleSave} icon="save" className="s">
                             {t("lists:edit:save")}
                         </Button>
                     </nav>
-
+                    <input
+                        ref={fileInputRef}
+                        type="file"
+                        accept=".txt,text/plain"
+                        style={{ display: "none" }}
+                        onChange={handleImportFile}
+                    />
 
                 </div>
             </Card>

@@ -62,6 +62,31 @@
     "natuurkunde": "Physics",
     "scheikunde": "Chemistry"
   },
+  "lists": {
+    "myLists": "My lists",
+    "edit": {
+      "edit": "Edit",
+      "delete": "Delete",
+      "save": "Save",
+      "saving": "Saving...",
+      "saved": "Saved!",
+      "saveError": "Something went wrong while saving!",
+      "invalid": "Your list is not valid! Check for empty items.",
+      "addToList": "New word",
+      "deleteWord": "Delete word",
+      "import": "Import",
+      "export": "Export",
+      "importSuccess": "{{count}} word(s) imported!",
+      "importEmpty": "No valid lines found in this file.",
+      "importError": "Something went wrong while importing this file.",
+      "importSkipped": "{{count}} line(s) skipped"
+    },
+    "question": "question",
+    "questionU": "Question",
+    "anwser": "answer",
+    "words": "Words",
+    "anwserU": "Answer"
+  },
   "startPage": {
     "welcome": "Welcome to",
     "description": "This is not the complete version of Librelearn yet. This is only the beta version."

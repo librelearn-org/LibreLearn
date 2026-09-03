@@ -39,7 +39,13 @@
       "saveError": "Er was een error tijdens het opslaan!",
       "invalid": "Je lijst is niet geldig! Check voor lege items.",
       "addToList": "Nieuw woord",
-      "deleteWordBtn": "Verwijderen woord"
+      "deleteWord": "Verwijder woord",
+      "import": "Importeren",
+      "export": "Exporteren",
+      "importSuccess": "{{count}} woord(en) geïmporteerd!",
+      "importEmpty": "Geen geldige regels gevonden in dit bestand.",
+      "importError": "Er ging iets mis bij het importeren van dit bestand.",
+      "importSkipped": "{{count}} regel(s) overgeslagen"
     },
     "question": "vraag",
     "questionU": "Vraag",
