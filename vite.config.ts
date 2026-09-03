@@ -85,12 +85,44 @@ function devApiPlugin(): Plugin {
   };
 }
 
+function htmlEnvPlugin(): Plugin {
+  return {
+    name: "html-env-transform",
+    transformIndexHtml(html) {
+      const rawEditable = process.env.UI_KLEUR_BEWERKBAAR;
+      let isEditable = true;
+      if (rawEditable !== undefined) {
+        const lower = rawEditable.trim().toLowerCase();
+        isEditable = lower !== "false" && lower !== "0" && lower !== "no";
+      }
+      const envObj = {
+        UI_KLEUR: process.env.UI_KLEUR || "023824",
+        UI_KLEUR_BEWERKBAAR: isEditable,
+      };
+      const script = `<script id="__LIBRELEARN_ENV__">window.ENV = ${JSON.stringify(envObj)};</script>`;
+      if (html.includes('id="__LIBRELEARN_ENV__"')) {
+        return html.replace(/<script id="__LIBRELEARN_ENV__">.*?<\/script>/, script);
+      }
+      return html.replace("</head>", `${script}</head>`);
+    },
+  };
+}
+
 export default defineConfig({
+  define: {
+    "import.meta.env.UI_KLEUR": JSON.stringify(process.env.UI_KLEUR || "023824"),
+    "import.meta.env.UI_KLEUR_BEWERKBAAR": JSON.stringify(
+      process.env.UI_KLEUR_BEWERKBAAR !== undefined
+        ? process.env.UI_KLEUR_BEWERKBAAR
+        : "true"
+    ),
+  },
   optimizeDeps: {
     exclude: ["fsevents", "lightningcss"],
   },
   ssr: {
     noExternal: ["beercss", "@siemsiem/beerreact"],
   },
-  plugins: [devApiPlugin(), reactRouter(), tsconfigPaths()],
+  plugins: [htmlEnvPlugin(), devApiPlugin(), reactRouter(), tsconfigPaths()],
 });
+

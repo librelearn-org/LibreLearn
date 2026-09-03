@@ -25,17 +25,17 @@ export const auth = betterAuth({
         }
     },
     socialProviders: {
-      google: {
-        clientId: process.env.GOOGLE_CLIENT_ID || "",
-        clientSecret: process.env.GOOGLE_CLIENT_SECRET || "",
-      }
+        google: {
+            clientId: process.env.GOOGLE_CLIENT_ID || "",
+            clientSecret: process.env.GOOGLE_CLIENT_SECRET || "",
+        }
     },
     user: {
         additionalFields: {
             theme: {
                 type: "string",
                 required: false,
-                defaultValue: "023824",
+                defaultValue: process.env.UI_KLEUR || "023824",
                 input: true,
             },
         },

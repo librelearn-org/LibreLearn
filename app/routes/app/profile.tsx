@@ -1,10 +1,11 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useOutletContext } from "react-router";
 import { useTranslation } from "react-i18next";
-import { Button, Card, Input, Space, useDialog, useToast } from "@siemsiem/beerreact";
+import { Button, Card, classNames, Input, Space, useDialog, useToast } from "@siemsiem/beerreact";
 import ui from "beercss";
 import { authClient } from "~/utils/auth/client";
 import { trpcClient } from "~/utils/trpc/client";
+import config from "~/utils/config";
 
 export default function Profile() {
     const user = useOutletContext<any>();
@@ -14,11 +15,16 @@ export default function Profile() {
     const { t } = useTranslation();
     const firstNameRef = useRef<HTMLInputElement>(null);
     const lastNameRef = useRef<HTMLInputElement>(null);
+    const themeEditPriv = useMemo(() => {
+        console.log(config.isThemeColorEditable())
+        console.log(config.getDefaultThemeColor())
+        return config.isThemeColorEditable()
+    }, [])
 
     const [currentFirstName, ...currentLastNameParts] = user?.name?.split(" ") ?? [];
 
     const formatColor = (c?: string) => {
-        if (!c) return "#076745";
+        if (!c) return config.getDefaultThemeColor();
         return c.startsWith("#") ? c : `#${c}`;
     };
 
@@ -27,6 +33,9 @@ export default function Profile() {
 
     useEffect(() => {
         const fetchUserTheme = async () => {
+            if (!config.isThemeColorEditable()) {
+                return false
+            }
             try {
                 const userData = await trpcClient.user.user.query();
                 if (userData?.theme) {
@@ -123,47 +132,48 @@ export default function Profile() {
                     </div>
                 </div>
                 <Space />
-                <label htmlFor="theme-color-input" style={{ fontWeight: "bold" }}>
-                    {t("profile:themeColor")}
-                </label>
-                <Space />
-                <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
-                    <div
-                        style={{
-                            position: "relative",
-                            width: "48px",
-                            height: "48px",
-                            borderRadius: "50%",
-                            backgroundColor: themeColor,
-                            cursor: "pointer"
-                        }}
-                    >
-                        <input
-                            id="theme-color-input"
-                            type="color"
-                            value={themeColor}
-                            onChange={handleColorChange}
-                            style={{ cursor: "pointer" }}
-                        />
+                {themeEditPriv ? <>
+                    <label htmlFor="theme-color-input" className={classNames.text.bold}>
+                        {t("profile:themeColor")}
+                    </label>
+                    <Space />
+                    <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
+                        <div
+                            style={{
+                                position: "relative",
+                                width: "48px",
+                                height: "48px",
+                                borderRadius: "50%",
+                                backgroundColor: themeColor,
+                                cursor: "pointer"
+                            }}
+                        >
+                            <input
+                                id="theme-color-input"
+                                type="color"
+                                value={themeColor}
+                                onChange={handleColorChange}
+                                style={{ cursor: "pointer" }}
+                            />
+                        </div>
+                        <Button
+                            variant="transparent"
+                            onClick={() => {
+                                const defaultColor = config.getDefaultThemeColor();;
+                                setThemeColor(defaultColor);
+                                ui("theme", defaultColor);
+                            }}
+                        >
+                            {t("profile:resetTheme")}
+                        </Button>
                     </div>
-                    <Button
-                        variant="transparent"
-                        onClick={() => {
-                            const defaultColor = "#023824";
-                            setThemeColor(defaultColor);
-                            ui("theme", defaultColor);
-                        }}
+                    <a
+                        className={"secondary-text underline" + classNames.text.size.small}
+                        onClick={handleThemeLearnMore}
                     >
-                        {t("profile:resetTheme")}
-                    </Button>
-                </div>
-                <a
-                    className="secondary-text underline"
-                    style={{ cursor: "pointer", fontSize: "0.8rem" }}
-                    onClick={handleThemeLearnMore}
-                >
-                    {t("profile:themeLearn")}
-                </a>
+                        {t("profile:themeLearn")}
+                    </a>
+                </> : <p className={"red"}>Je mag niet je themakleur wijzigen.</p>}
                 <Space />
                 <Button
                     icon="save"

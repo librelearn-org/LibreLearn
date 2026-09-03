@@ -76,7 +76,27 @@
     }
   },
   "learn": {
-    "learnBtn": "Leren"
+    "learnBtn": "Leren",
+    "queue": "Wachtrij",
+    "placeholder": "Typ je antwoord...",
+    "answerBtn": "Antwoord",
+    "correct": "Goed!",
+    "incorrect": "Helaas, fout!",
+    "question": "Vraag",
+    "yourAnswer": "Jouw antwoord",
+    "correctAnswer": "Juiste antwoord",
+    "noAnswer": "(geen antwoord ingevuld)",
+    "continue": "Doorgaan",
+    "overrideCorrect": "Ik had het toch goed",
+    "congratsTitle": "Gefeliciteerd!",
+    "congratsDescription": "Je hebt alle woorden in deze sessie geleerd!",
+    "learnAgain": "Opnieuw Leren",
+    "backToList": "Terug naar lijst",
+    "noItems": "Geen items gevonden om te leren.",
+    "onlyTestSupported": "Alleen toets werkt voor nu",
+    "showAnswer": "Toon antwoord",
+    "know": "Ik wist het",
+    "dontKnow": "Niet geweten"
   },
   "icons": {
     "from": "Van",
