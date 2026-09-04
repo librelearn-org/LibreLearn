@@ -3,6 +3,18 @@
     "welcome": "Welkom op",
     "description": "Librelearn is een gratis en open-source leerplatform."
   },
+  "home": {
+    "nav": {
+      "source": "GitHub"
+    },
+    "hero": {
+      "title": "Leer gratis en open source.",
+      "subtitle": "Librelearn is een gratis en open-source alternatief voor Studygo & Quizlet."
+    },
+    "footer": {
+      "copyright": "© {{year}} Librelearn"
+    }
+  },
   "auth": {
     "login": "Inloggen",
     "logout": "Uitloggen",

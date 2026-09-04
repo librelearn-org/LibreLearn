@@ -1,0 +1,139 @@
+.home {
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+}
+
+.home-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 1.5rem;
+}
+
+.home-nav-logo {
+  height: 28px;
+  width: auto;
+}
+
+.home-nav-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.home-nav-github-content {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  line-height: 1;
+}
+
+.home-nav-github-content svg {
+  display: block;
+  flex-shrink: 0;
+  transform: translateY(-1px);
+}
+
+.home-hero {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 1.25rem;
+  padding: 3rem 1.5rem 4rem;
+}
+
+.home-hero-logo {
+  height: 84px;
+  max-width: 90%;
+  width: auto;
+}
+
+.home-hero-copy {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.home-hero-title {
+  font-size: clamp(1.75rem, 4vw + 1rem, 2.75rem);
+  margin-block: 0;
+  max-width: 38rem;
+}
+
+.home-hero-subtitle {
+  max-width: 40rem;
+  opacity: 0.85;
+  margin-block: 0;
+}
+
+.home-subjects {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem 1.5rem 3rem;
+  width: 100%;
+  max-width: 21rem;
+  margin: 0 auto;
+  overflow: hidden;
+  mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
+  -webkit-mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
+}
+
+.home-subjects-track {
+  display: flex;
+  width: max-content;
+  gap: 0.75rem;
+  animation: home-subjects-scroll 24s linear infinite;
+}
+
+.home-subjects:hover .home-subjects-track {
+  animation-play-state: paused;
+}
+
+@keyframes home-subjects-scroll {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-25%);
+  }
+}
+
+.home-subjects-track img {
+  width: 36px;
+  height: 36px;
+  opacity: 0.75;
+  flex-shrink: 0;
+  transition: opacity 0.2s, transform 0.2s;
+}
+
+.home-subjects-track img:hover {
+  opacity: 1;
+  transform: translateY(-2px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .home-subjects-track {
+    animation: none;
+  }
+}
+
+.home-footer {
+  margin-top: auto;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.8rem;
+  opacity: 0.6;
+  text-align: center;
+}
+
+.home-footer a {
+  color: inherit;
+}

@@ -74,6 +74,9 @@
     "dontKnow": "Did not know"
   },
   "icons": {
+    "from": "From",
+    "to": "To",
+    "subject": "Subject",
     "nederlands": "Dutch",
     "engels": "English",
     "frans": "French",
@@ -113,6 +116,18 @@
   "startPage": {
     "welcome": "Welcome to",
     "description": "This is not the complete version of Librelearn yet. This is only the beta version."
+  },
+  "home": {
+    "nav": {
+      "source": "GitHub"
+    },
+    "hero": {
+      "title": "Learn free and open source.",
+      "subtitle": "Librelearn is a free, open-source alternative to Studygo & Quizlet."
+    },
+    "footer": {
+      "copyright": "© {{year}} Librelearn"
+    }
   },
   "profile": {
     "title": "Profile",
