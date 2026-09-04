@@ -326,14 +326,14 @@ export default function LearnPage({ loaderData }: Route.ComponentProps) {
                       <i className="extra green-text">check_circle</i>
                       <h3 className="green-text">{t("learn:correct")}</h3>
                       <article className="border left-align round surface-container fill">
-                        <p className="secondary-text small-text">
+                        <p className="secondary-text medium-text">
                           {t("learn:question")}
                         </p>
                         <h5 className={classNames.text.bold}>
                           {feedback.question}
                         </h5>
                         <div className="small-space"></div>
-                        <p className="secondary-text small-text">
+                        <p className="secondary-text medium-text">
                           {t("learn:yourAnswer")}
                         </p>
                         <h5 className="green-text bold">
@@ -356,21 +356,21 @@ export default function LearnPage({ loaderData }: Route.ComponentProps) {
                       <i className="extra error-text">cancel</i>
                       <h3 className="error-text">{t("learn:incorrect")}</h3>
                       <article className="border left-align round surface-container fill">
-                        <p className="secondary-text small-text">
+                        <p className="secondary-text medium-text">
                           {t("learn:question")}
                         </p>
                         <h5 className={classNames.text.bold}>
                           {feedback.question}
                         </h5>
                         <div className="small-space"></div>
-                        <p className="secondary-text small-text">
+                        <p className="secondary-text medium-text">
                           {t("learn:yourAnswer")}
                         </p>
-                        <p className="error-text bold">
+                        <h5 className="error-text bold">
                           {feedback.userAnswer || <i>{t("learn:noAnswer")}</i>}
-                        </p>
+                        </h5>
                         <div className="small-space"></div>
-                        <p className="secondary-text small-text">
+                        <p className="secondary-text medium-text">
                           {t("learn:correctAnswer")}
                         </p>
                         <h5 className="green-text bold">
