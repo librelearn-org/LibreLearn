@@ -77,10 +77,10 @@ export default function SignIn() {
   }, [])
 
   return (
-    <div className="login">
-      <div className="login-card">
+    <div className="login middle-align center-align">
+      <div className="login-card vertical middle-align center-align">
         <Logo className="login-logo" />
-        <div className="login-actions">
+        <div className="login-actions vertical">
           <Button variant="primary" onClick={socialSignIn('Hackclub')}>
             <span className="login-button-content">
               <SiHackclub size={18} color="currentColor" />
