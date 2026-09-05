@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useNavigate, useSearchParams, useParams } from "react-router";
 import { Button, Card, Progress, Select } from "@siemsiem/beerreact";
 import { omzetLijstNaarKaartStaten } from "~/utils/learn/omzet";
@@ -37,13 +37,15 @@ export default function SessionStartPage() {
         )
     );
 
-    const handleCreateSession = async () => {
+    const handleCreateSession = useCallback(() => {
         setError(null);
         try {
             if (loadListData.data?.listItems && loadListData.data.listItems.length > 0) {
+                const kaartStaten = omzetLijstNaarKaartStaten(loadListData.data.listItems);
                 make.mutate({
                     listId: loadListData.data.id,
-                    wachtrij: omzetLijstNaarKaartStaten(loadListData.data.listItems),
+                    wachtrij: kaartStaten,
+                    lijst: kaartStaten,
                     methode: format,
                 });
             } else {
@@ -52,14 +54,14 @@ export default function SessionStartPage() {
         } catch (e: any) {
             setError(e?.message || "Er is een fout opgetreden bij het aanmaken van de sessie.");
         }
-    };
+    }, [loadListData.data, format, make]);
 
     useEffect(() => {
         const auto = searchParams.get("auto") === "true" || searchParams.get("autostart") === "true" || searchParams.get("autoload") === "true" || searchParams.get("autoload") === "1";
         if (auto && loadListData.data?.listItems && loadListData.data.listItems.length > 0 && !make.isPending && !make.isSuccess) {
             handleCreateSession();
         }
-    }, [loadListData.data, searchParams]);
+    }, [loadListData.data, searchParams, make.isPending, make.isSuccess, handleCreateSession]);
 
     return (
         <div style={{ padding: "1.5rem", maxWidth: "600px", margin: "0 auto" }}>
