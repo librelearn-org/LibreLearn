@@ -50,6 +50,20 @@
       "reply": "Could not post your reply. Please try again."
     }
   },
+  "homepage": {
+    "newBtn": {
+      "new": "New",
+      "dialog": {
+        "list": "List",
+        "book": "Book",
+        "class": "Class"
+    }
+    },
+    "sidebar": {
+      "home": "Home",
+      "myLists": "My Lists"
+    }
+  },
   "learn": {
     "learnBtn": "Learn",
     "queue": "Queue",

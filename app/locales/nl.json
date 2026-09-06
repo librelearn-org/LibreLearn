@@ -17,6 +17,20 @@
       "copyright": "© {{year}} Librelearn"
     }
   },
+  "homepage": {
+    "newBtn": {
+      "new": "Nieuw",
+      "dialog": {
+        "list": "Lijst",
+        "book": "Boek",
+        "class": "Klas"
+      }
+    },
+    "sidebar": {
+      "home": "Home",
+      "myLists": "Mijn lijsten"
+    }
+  },
   "auth": {
     "login": "Inloggen",
     "logout": "Uitloggen",
