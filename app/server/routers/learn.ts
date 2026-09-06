@@ -268,7 +268,7 @@ export const learnRouting = {
     )
     .mutation(async ({ input, ctx }) => {
       const masterItems = (input.lijst && input.lijst.length > 0 ? input.lijst : input.wachtrij).map((item) => {
-        const id = item.id && item.id.trim().length > 0 ? item.id : crypto.randomUUID();
+        const id = input.id && item.id && item.id.trim().length > 0 ? item.id : crypto.randomUUID();
         return {
           ...item,
           id,
