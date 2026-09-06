@@ -119,23 +119,39 @@ model listItemSaved {
   listId String?
 }
 
+model learnSessionItemHistory {
+  id        String           @id @unique @default(uuid())
+  kaartId   String?
+  date      DateTime         @default(now())
+  antwoord  String
+  goed      Int              // Grade enum: 0 (Fout), 1 (GoedMoeilijk), 2 (GoedPrima), 3 (GoedMakkelijk)
+
+  item      learnSessionItem @relation(fields: [itemId], references: [id], onDelete: Cascade)
+  itemId    String
+
+  @@index([itemId])
+}
+
 model learnSessionItem {
-  id            String         @id @unique @default(uuid())
-  vraag         String
-  antwoord      String
-  fase          Int
-  methode       String
-  lastReview    DateTime
-  nextReview    DateTime
-  metaData      Json // zucht
-  learnSessions learnSession[]
+  id               String                    @id @unique @default(uuid())
+  vraag            String
+  antwoord         String
+  fase             Int                       @default(0)
+  methode          String                    @default("simple")
+  lastReview       DateTime                  @default(now())
+  nextReview       DateTime                  @default(now())
+  metaData         Json                      @default("{}") // zucht
+  history          learnSessionItemHistory[]
+  wachtrijSessions learnSession[]            @relation("sessionWachtrij")
+  lijstSessions    learnSession[]            @relation("sessionLijst")
 }
 
 model learnSession {
   id          String             @id @unique @default(uuid())
   owner       User               @relation(fields: [userId], references: [id])
   userId      String
-  wachtrij    learnSessionItem[]
+  wachtrij    learnSessionItem[] @relation("sessionWachtrij")
+  lijst       learnSessionItem[] @relation("sessionLijst")
   list        list?              @relation(fields: [listId], references: [id])
   listId      String?
   learnFormat learnFormat        @default(toets)

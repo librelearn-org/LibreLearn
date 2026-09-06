@@ -1,8 +1,11 @@
-/**
- * gemini dit laten maken omdat ik geen zin had, als je problemen hebt herschrijf gwn
- */
+import type { KaartSnapshot, KaartStaat } from "@siemsiem/learnlib";
 
-import type { KaartStaat } from "@siemsiem/learnlib";
+export interface RuwKaartSnapshot {
+    kaartId?: string;
+    date?: string | Date;
+    antwoord?: string;
+    goed?: number;
+}
 
 export interface RuwKaartItem {
     id?: string;
@@ -14,6 +17,7 @@ export interface RuwKaartItem {
     lastReviewed?: string | Date;
     lastReview?: string | Date;
     nextReview?: string | Date;
+    history?: RuwKaartSnapshot[];
     metaData?: unknown;
 }
 
@@ -37,6 +41,14 @@ export function omzetNaarKaartStaat(
                 ? new Date(item.lastReview)
                 : now,
         nextReview: item.nextReview ? new Date(item.nextReview) : now,
+        history: Array.isArray(item.history)
+            ? item.history.map((h) => ({
+                kaartId: h.kaartId ?? item.id ?? "",
+                date: h.date ? new Date(h.date) : new Date(),
+                antwoord: h.antwoord ?? "",
+                goed: (h.goed ?? 0) as KaartSnapshot["goed"],
+            }))
+            : [],
         metaData:
             item.metaData && typeof item.metaData === "object" && !Array.isArray(item.metaData)
                 ? (item.metaData as Record<string, any>)

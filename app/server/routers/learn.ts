@@ -1,5 +1,5 @@
 import type { TRPCRouterRecord } from '@trpc/server'
-import { string, z } from 'zod'
+import { z } from 'zod'
 import { protectedProcedure } from '~/server/trpc'
 import { taalSlugsList } from "~/components/Icons"
 import { TRPCError } from '@trpc/server/unstable-core-do-not-import'
@@ -14,11 +14,23 @@ function mapItemToKaartStaat(item: {
   lastReview: Date
   nextReview: Date
   metaData: unknown
+  history?: Array<{
+    kaartId?: string | null
+    date: Date
+    antwoord: string
+    goed: number
+  }>
 }) {
   return {
     ...item,
     methodeId: item.methode,
     lastReviewed: item.lastReview,
+    history: (item.history ?? []).map((h) => ({
+      kaartId: h.kaartId ?? item.id,
+      date: h.date,
+      antwoord: h.antwoord,
+      goed: h.goed,
+    })),
     metaData: (item.metaData && typeof item.metaData === "object" && !Array.isArray(item.metaData)
       ? (item.metaData as Record<string, any>)
       : {}) as Record<string, any>,
@@ -77,7 +89,7 @@ export const learnRouting = {
         throw new TRPCError({ message: "Lijst bestaat niet!", code: 'NOT_FOUND' })
       }
 
-      if ((listOld.ownerId != ctx.user.id) && (listOld.ownerId !== null)) {
+      if ((listOld.ownerId !== ctx.user.id) && (listOld.ownerId !== null)) {
         if (!(ctx.user.role?.includes("admin"))) {
           throw new TRPCError({ message: "Niet jouw lijst!", code: 'UNAUTHORIZED' })
         }
@@ -135,7 +147,7 @@ export const learnRouting = {
       })
       if (list.ownerId !== ctx.user.id) {
         if (ctx.user.role !== "admin") {
-          throw new Error("You do not have permission to delete this list")
+          throw new TRPCError({ message: "You do not have permission to delete this list", code: 'FORBIDDEN' })
         }
       }
       await ctx.prisma.list.delete({
@@ -179,7 +191,16 @@ export const learnRouting = {
           userId: ctx.user.id
         },
         include: {
-          wachtrij: true,
+          wachtrij: {
+            include: {
+              history: true,
+            },
+          },
+          lijst: {
+            include: {
+              history: true,
+            },
+          },
           list: {
             include: {
               listItems: true
@@ -189,7 +210,8 @@ export const learnRouting = {
       })
       return {
         ...session,
-        wachtrij: session.wachtrij.map(mapItemToKaartStaat)
+        wachtrij: session.wachtrij.map(mapItemToKaartStaat),
+        lijst: session.lijst.map(mapItemToKaartStaat),
       }
     }),
   upsertLearnSession: protectedProcedure
@@ -207,15 +229,73 @@ export const learnRouting = {
             lastReviewed: z.coerce.date().optional(),
             lastReview: z.coerce.date().optional(),
             nextReview: z.coerce.date().optional(),
+            history: z.array(
+              z.object({
+                kaartId: z.string().optional(),
+                date: z.coerce.date().optional(),
+                antwoord: z.string(),
+                goed: z.number().int(),
+              })
+            ).optional().default([]),
             metaData: z.record(z.string(), z.any()).optional().default({}),
           })
         ),
+        lijst: z.array(
+          z.object({
+            id: z.string().optional(),
+            vraag: z.string().min(1),
+            antwoord: z.string().min(1),
+            fase: z.number().int().optional().default(0),
+            methodeId: z.string().optional(),
+            methode: z.string().optional(),
+            lastReviewed: z.coerce.date().optional(),
+            lastReview: z.coerce.date().optional(),
+            nextReview: z.coerce.date().optional(),
+            history: z.array(
+              z.object({
+                kaartId: z.string().optional(),
+                date: z.coerce.date().optional(),
+                antwoord: z.string(),
+                goed: z.number().int(),
+              })
+            ).optional().default([]),
+            metaData: z.record(z.string(), z.any()).optional().default({}),
+          })
+        ).optional(),
         listId: z.uuidv4().optional(),
         methode: z.enum(learnFormat).optional(),
       })
     )
     .mutation(async ({ input, ctx }) => {
-      const createItems = input.wachtrij.map((item) => ({
+      const masterItems = (input.lijst && input.lijst.length > 0 ? input.lijst : input.wachtrij).map((item) => {
+        const id = item.id && item.id.trim().length > 0 ? item.id : crypto.randomUUID();
+        return {
+          ...item,
+          id,
+        };
+      });
+
+      const masterItemMap = new Map<string, typeof masterItems[0]>();
+      masterItems.forEach((item) => masterItemMap.set(item.id, item));
+
+      const wachtrijIds: string[] = [];
+      for (const wItem of input.wachtrij) {
+        if (wItem.id && masterItemMap.has(wItem.id)) {
+          wachtrijIds.push(wItem.id);
+        } else {
+          const match = masterItems.find(
+            (m) => m.vraag === wItem.vraag && m.antwoord === wItem.antwoord && !wachtrijIds.includes(m.id)
+          );
+          if (match) {
+            wachtrijIds.push(match.id);
+          } else if (wItem.id) {
+            wachtrijIds.push(wItem.id);
+          }
+        }
+      }
+
+      const createItemData = (item: typeof masterItems[0]) => ({
+        id: item.id,
         vraag: item.vraag,
         antwoord: item.antwoord,
         fase: item.fase ?? 0,
@@ -223,26 +303,65 @@ export const learnRouting = {
         lastReview: item.lastReviewed ?? item.lastReview ?? new Date(),
         nextReview: item.nextReview ?? new Date(),
         metaData: item.metaData ?? {},
-      }))
+        history: item.history && item.history.length > 0 ? {
+          create: item.history.map((h) => ({
+            kaartId: h.kaartId ?? item.id,
+            date: h.date ?? new Date(),
+            antwoord: h.antwoord,
+            goed: h.goed,
+          }))
+        } : undefined,
+      });
 
       if (!input.id) {
+        await Promise.all(
+          masterItems.map((item) =>
+            ctx.prisma.learnSessionItem.create({
+              data: createItemData(item),
+            })
+          )
+        );
+
         const session = await ctx.prisma.learnSession.create({
           data: {
             userId: ctx.user.id,
-            wachtrij: {
-              create: createItems,
-            },
             listId: input.listId,
-            learnFormat: input.methode
+            learnFormat: input.methode,
+            lijst: {
+              connect: masterItems.map((item) => ({ id: item.id })),
+            },
+            wachtrij: {
+              connect: wachtrijIds.map((id) => ({ id })),
+            },
           },
           include: {
-            wachtrij: true,
+            wachtrij: {
+              include: {
+                history: true,
+              },
+            },
+            lijst: {
+              include: {
+                history: true,
+              },
+            },
           },
-        })
+        });
+
+        const wachtrijOrderMap = new Map(wachtrijIds.map((id, index) => [id, index]));
+        const sortedWachtrij = [...session.wachtrij].sort(
+          (a, b) => (wachtrijOrderMap.get(a.id) ?? 0) - (wachtrijOrderMap.get(b.id) ?? 0)
+        );
+        const lijstOrderMap = new Map(masterItems.map((item, index) => [item.id, index]));
+        const sortedLijst = [...session.lijst].sort(
+          (a, b) => (lijstOrderMap.get(a.id) ?? 0) - (lijstOrderMap.get(b.id) ?? 0)
+        );
+
         return {
           ...session,
-          wachtrij: session.wachtrij.map(mapItemToKaartStaat)
-        }
+          wachtrij: sortedWachtrij.map(mapItemToKaartStaat),
+          lijst: sortedLijst.map(mapItemToKaartStaat),
+        };
       }
 
       const existingSession = await ctx.prisma.learnSession.findFirst({
@@ -251,47 +370,84 @@ export const learnRouting = {
         },
         include: {
           wachtrij: true,
+          lijst: true,
         },
-      })
+      });
 
       if (!existingSession) {
-        throw new TRPCError({ message: "Sessie bestaat niet!", code: "NOT_FOUND" })
+        throw new TRPCError({ message: "Sessie bestaat niet!", code: "NOT_FOUND" });
       }
 
       if (existingSession.userId !== ctx.user.id && !ctx.user.role?.includes("admin")) {
-        throw new TRPCError({ message: "Niet jouw sessie!", code: "UNAUTHORIZED" })
+        throw new TRPCError({ message: "Niet jouw sessie!", code: "UNAUTHORIZED" });
       }
 
-      const oldItemIds = existingSession.wachtrij.map((item) => item.id)
+      const oldItemIds = Array.from(
+        new Set([
+          ...existingSession.wachtrij.map((item) => item.id),
+          ...existingSession.lijst.map((item) => item.id),
+        ])
+      );
       if (oldItemIds.length > 0) {
         await ctx.prisma.learnSessionItem.deleteMany({
           where: {
             id: { in: oldItemIds },
           },
-        })
+        });
       }
+
+      await Promise.all(
+        masterItems.map((item) =>
+          ctx.prisma.learnSessionItem.create({
+            data: createItemData(item),
+          })
+        )
+      );
 
       const session = await ctx.prisma.learnSession.update({
         where: {
           id: input.id,
         },
         data: {
+          ...(input.methode ? { learnFormat: input.methode } : {}),
+          lijst: {
+            set: masterItems.map((item) => ({ id: item.id })),
+          },
           wachtrij: {
-            create: createItems,
+            set: wachtrijIds.map((id) => ({ id })),
           },
         },
         include: {
-          wachtrij: true,
+          wachtrij: {
+            include: {
+              history: true,
+            },
+          },
+          lijst: {
+            include: {
+              history: true,
+            },
+          },
         },
-      })
+      });
+
+      const wachtrijOrderMap = new Map(wachtrijIds.map((id, index) => [id, index]));
+      const sortedWachtrij = [...session.wachtrij].sort(
+        (a, b) => (wachtrijOrderMap.get(a.id) ?? 0) - (wachtrijOrderMap.get(b.id) ?? 0)
+      );
+      const lijstOrderMap = new Map(masterItems.map((item, index) => [item.id, index]));
+      const sortedLijst = [...session.lijst].sort(
+        (a, b) => (lijstOrderMap.get(a.id) ?? 0) - (lijstOrderMap.get(b.id) ?? 0)
+      );
 
       return {
         ...session,
-        wachtrij: session.wachtrij.map(mapItemToKaartStaat)
-      }
+        wachtrij: sortedWachtrij.map(mapItemToKaartStaat),
+        lijst: sortedLijst.map(mapItemToKaartStaat),
+      };
     }),
   getUserLearnSessions: protectedProcedure
-    .query(async ({ input, ctx }) => {
+    .query(async ({ ctx }) => {
       return await ctx.prisma.learnSession.findMany({
         where: {
           userId: ctx.user.id,
