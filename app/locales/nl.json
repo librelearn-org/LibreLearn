@@ -1,6 +1,8 @@
 {
   "startPage": {
     "welcome": "Welkom op",
+    "greetingMorning": "Goedemorgen, {{name}}!",
+    "greetingEvening": "Goedenavond, {{name}}!",
     "description": "Librelearn is een gratis en open-source leerplatform."
   },
   "home": {
