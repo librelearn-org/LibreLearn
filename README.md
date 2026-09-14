@@ -33,5 +33,5 @@ Ben je niet van plan om zelf te hosten? gebruik dan gewoon de hosted versie op [
 ## Credits
 
 
-- [Doodles172](https://github.com/doodles172) voor de vak iconen
+- [Eamon](https://github.com/eamonwatson) voor de vak iconen
 - [Mij](https://github.com/siemvk) voor het maken van react componenten van [BeerCss](https://github.com/beercss/beercss)
