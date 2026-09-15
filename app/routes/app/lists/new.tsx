@@ -147,6 +147,7 @@ export default function newList({ loaderData }: Route.ComponentProps) {
       queryClient.invalidateQueries({
         queryKey: trpc.learn.getList.queryKey({ id: data.id }),
       });
+      queryClient.invalidateQueries(trpc.learn.getUserLists.queryFilter());
       // nu gaan we naar de viewer van de lijst die we net gemaakt hebben
       nav(`/app/lists/${data.id}`);
     },
@@ -161,6 +162,7 @@ export default function newList({ loaderData }: Route.ComponentProps) {
       );
       lastSavedHashRef.current = JSON.stringify({ ...variables, id: data.id });
       setSaveState("saved");
+      queryClient.invalidateQueries(trpc.learn.getUserLists.queryFilter());
     },
     onError: () => setSaveState("error"),
   });
