@@ -210,8 +210,8 @@ export default function AdminStats() {
                           nameKey="name"
                           cx="50%"
                           cy="50%"
-                          outerRadius={95}
-                          innerRadius={45}
+                          outerRadius={80}
+                          innerRadius={38}
                           paddingAngle={3}
                           label={({ name, percent }) =>
                             `${name} ${((percent ?? 0) * 100).toFixed(0)}%`
@@ -223,8 +223,12 @@ export default function AdminStats() {
                               fill={COLORS[index % COLORS.length]}
                             />
                           ))}
-                          <Legend />
                         </Pie>
+                        <Legend
+                          verticalAlign="bottom"
+                          align="center"
+                          wrapperStyle={{ paddingTop: 24 }}
+                        />
                       </PieChart>
                     </ResponsiveContainer>
                   </div>
@@ -330,8 +334,8 @@ export default function AdminStats() {
                           nameKey="name"
                           cx="50%"
                           cy="50%"
-                          outerRadius={95}
-                          innerRadius={45}
+                          outerRadius={80}
+                          innerRadius={38}
                           paddingAngle={3}
                           label={({ name, percent }) =>
                             `${name} ${((percent ?? 0) * 100).toFixed(0)}%`
@@ -344,7 +348,11 @@ export default function AdminStats() {
                             />
                           ))}
                         </Pie>
-                        <Legend />
+                        <Legend
+                          verticalAlign="bottom"
+                          align="center"
+                          wrapperStyle={{ paddingTop: 24 }}
+                        />
                       </PieChart>
                     </ResponsiveContainer>
                   </div>
