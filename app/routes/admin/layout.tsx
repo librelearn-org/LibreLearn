@@ -8,7 +8,6 @@ import {
 } from "react-router";
 import { AutoNavRail, NavBar, type navItem } from "@siemsiem/beerreact";
 import { authClient } from "~/utils/auth/client";
-import { TRPCReactProvider } from "~/utils/trpc/react";
 
 export async function clientLoader() {
   const { data } = await authClient.getSession();
@@ -87,13 +86,11 @@ export default function AdminLayout() {
   );
 
   return (
-    <TRPCReactProvider>
-      <AutoNavRail key={location.pathname} navConfig={navConfig}>
-        <main>
-          <Outlet context={user} />
-        </main>
-        <NavBar {...navConfigBar}></NavBar>
-      </AutoNavRail>
-    </TRPCReactProvider>
+    <AutoNavRail key={location.pathname} navConfig={navConfig}>
+      <main>
+        <Outlet context={user} />
+      </main>
+      <NavBar {...navConfigBar}></NavBar>
+    </AutoNavRail>
   );
 }

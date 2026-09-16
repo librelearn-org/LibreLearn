@@ -104,9 +104,9 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <Links />
       </head>
       <body className="dark" suppressHydrationWarning>
-        <TRPCReactProvider>
-          <BeerProviders>{children}</BeerProviders>
-        </TRPCReactProvider>
+        <BeerProviders>
+          <TRPCReactProvider>{children}</TRPCReactProvider>
+        </BeerProviders>
 
         <ScrollRestoration />
         <Scripts />

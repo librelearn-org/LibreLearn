@@ -186,6 +186,9 @@ export const learnRouting = {
           },
         },
       });
+      if (!list) {
+        throw new TRPCError({ code: "NOT_FOUND", message: "List not found" });
+      }
       return list;
     }),
   getLearnSession: protectedProcedure
