@@ -1,5 +1,6 @@
 import { useOutletContext } from "react-router";
 import { useQuery } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
 import { Button, Card, Progress, Space } from "@siemsiem/beerreact";
 import {
   BarChart,
@@ -37,6 +38,7 @@ const FORMAT_LABELS: Record<string, string> = {
 
 export default function AdminStats() {
   const trpc = useTRPC();
+  const { t } = useTranslation();
   const {
     data: stats,
     isLoading,
@@ -49,9 +51,7 @@ export default function AdminStats() {
     stats?.vakkenData?.map((item) => {
       const subject = getSubjectBySlug(item.language);
       return {
-        name: subject?.name
-          ? subject.name.replace("icons:", "")
-          : item.language.toUpperCase(),
+        name: subject?.name ? t(subject.name) : item.language.toUpperCase(),
         language: item.language.toUpperCase(),
         lijsten: item.count,
       };
@@ -61,9 +61,7 @@ export default function AdminStats() {
     stats?.vakkenData?.map((item) => {
       const subject = getSubjectBySlug(item.language);
       return {
-        name: subject?.name
-          ? subject.name.replace("icons:", "")
-          : item.language.toUpperCase(),
+        name: subject?.name ? t(subject.name) : item.language.toUpperCase(),
         language: item.language.toUpperCase(),
         woorden: item.woorden ?? item.wordsCount ?? 0,
       };
@@ -212,8 +210,8 @@ export default function AdminStats() {
                           nameKey="name"
                           cx="50%"
                           cy="50%"
-                          outerRadius={95}
-                          innerRadius={45}
+                          outerRadius={80}
+                          innerRadius={38}
                           paddingAngle={3}
                           label={({ name, percent }) =>
                             `${name} ${((percent ?? 0) * 100).toFixed(0)}%`
@@ -225,8 +223,12 @@ export default function AdminStats() {
                               fill={COLORS[index % COLORS.length]}
                             />
                           ))}
-                          <Legend />
                         </Pie>
+                        <Legend
+                          verticalAlign="bottom"
+                          align="center"
+                          wrapperStyle={{ paddingTop: 24 }}
+                        />
                       </PieChart>
                     </ResponsiveContainer>
                   </div>
@@ -332,8 +334,8 @@ export default function AdminStats() {
                           nameKey="name"
                           cx="50%"
                           cy="50%"
-                          outerRadius={95}
-                          innerRadius={45}
+                          outerRadius={80}
+                          innerRadius={38}
                           paddingAngle={3}
                           label={({ name, percent }) =>
                             `${name} ${((percent ?? 0) * 100).toFixed(0)}%`
@@ -346,7 +348,11 @@ export default function AdminStats() {
                             />
                           ))}
                         </Pie>
-                        <Legend />
+                        <Legend
+                          verticalAlign="bottom"
+                          align="center"
+                          wrapperStyle={{ paddingTop: 24 }}
+                        />
                       </PieChart>
                     </ResponsiveContainer>
                   </div>
