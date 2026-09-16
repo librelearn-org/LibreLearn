@@ -1,28 +1,42 @@
 import SuperJSON from "superjson";
 
-import { useState, type ReactNode } from "react";
-import { QueryClientProvider, QueryClient } from "@tanstack/react-query";
+import { useRef, useState, type ReactNode } from "react";
+import {
+  QueryClientProvider,
+  QueryClient,
+  QueryCache,
+  MutationCache,
+} from "@tanstack/react-query";
 import { createTRPCClient, httpBatchLink, loggerLink } from "@trpc/client";
 import { createTRPCContext } from "@trpc/tanstack-react-query";
+import { useToast } from "@siemsiem/beerreact";
 
 import type { AppRouter } from "~/server/main";
 import type { inferRouterInputs, inferRouterOutputs } from "@trpc/server";
+import { getErrorMessage } from "~/utils/error-message";
 
-function makeQueryClient() {
+function makeQueryClient(onError: (message: string) => void) {
   return new QueryClient({
     defaultOptions: {
       queries: {
         staleTime: 60 * 1000,
+        retry: false,
       },
     },
+    queryCache: new QueryCache({
+      onError: (error) => onError(getErrorMessage(error)),
+    }),
+    mutationCache: new MutationCache({
+      onError: (error) => onError(getErrorMessage(error)),
+    }),
   });
 }
 let browserQueryClient: QueryClient | undefined = undefined;
-function getQueryClient() {
+function getQueryClient(onError: (message: string) => void) {
   if (typeof window === "undefined") {
-    return makeQueryClient();
+    return makeQueryClient(onError);
   } else {
-    if (!browserQueryClient) browserQueryClient = makeQueryClient();
+    if (!browserQueryClient) browserQueryClient = makeQueryClient(onError);
     return browserQueryClient;
   }
 }
@@ -58,7 +72,15 @@ export const { TRPCProvider, useTRPC, useTRPCClient } =
   createTRPCContext<AppRouter>();
 
 export function TRPCReactProvider({ children }: { children: ReactNode }) {
-  const queryClient = getQueryClient();
+  const { addToast } = useToast();
+  const addToastRef = useRef(addToast);
+  addToastRef.current = addToast;
+
+  const [queryClient] = useState(() =>
+    getQueryClient((message) =>
+      addToastRef.current({ text: message, type: "error" }),
+    ),
+  );
   const [trpcClient] = useState(() =>
     createTRPCClient<AppRouter>({
       links,

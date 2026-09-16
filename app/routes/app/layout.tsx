@@ -15,7 +15,6 @@ import {
   type navItem,
 } from "@siemsiem/beerreact";
 import { authClient } from "~/utils/auth/client";
-import { TRPCReactProvider } from "~/utils/trpc/react";
 import { getDefaultThemeColor, isThemeColorEditable } from "~/utils/config";
 import ui from "beercss";
 
@@ -189,13 +188,11 @@ export default function MyAppLayout() {
   );
 
   return (
-    <TRPCReactProvider>
-      <AutoNavRail key={location.pathname} navConfig={navConfig}>
-        <main>
-          <Outlet context={user} />
-        </main>
-        <NavBar {...navConfigBar}></NavBar>
-      </AutoNavRail>
-    </TRPCReactProvider>
+    <AutoNavRail key={location.pathname} navConfig={navConfig}>
+      <main>
+        <Outlet context={user} />
+      </main>
+      <NavBar {...navConfigBar}></NavBar>
+    </AutoNavRail>
   );
 }

@@ -50,12 +50,6 @@ export default function view({ params }: Route.ComponentProps) {
     onSuccess(session) {
       navigate(`/app/learn/${session.id}`);
     },
-    onError(error) {
-      addToast({
-        text: error.message,
-        type: "error",
-      });
-    },
   });
 
   const handleStartLearn = () => {
@@ -74,12 +68,6 @@ export default function view({ params }: Route.ComponentProps) {
         text: "Gelukt!",
       });
       navigate("/app/lists/mylists");
-    },
-    onError(error, variables, onMutateResult, context) {
-      addToast({
-        text: error.message,
-        type: "error",
-      });
     },
   });
   const { pushDialog, closeDialog } = useDialog();
