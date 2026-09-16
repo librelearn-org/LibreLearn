@@ -1,14 +1,13 @@
-import { useNavigate } from "react-router";
+import { Link } from "react-router";
 import { useTranslation } from "react-i18next";
-import { Button, Progress } from "@siemsiem/beerreact";
+import { classNames, List, Progress } from "@siemsiem/beerreact";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { trpcClient } from "~/utils/trpc/client";
 import { useTRPC } from "~/utils/trpc/react";
-import { useMemo } from "react";
+import { getSubjectBySlug } from "~/components/Icons";
 
 export default function Mylists() {
   const { t } = useTranslation();
-  const navigate = useNavigate();
   const trpc = useTRPC();
   const queryClient = useQueryClient();
   const lists = useQuery(
@@ -23,29 +22,41 @@ export default function Mylists() {
 
       {lists.isPending ? <Progress></Progress> : ""}
 
-      {lists.data?.map((v) => {
-        const handlePreload = () => {
-          queryClient.prefetchQuery(
-            trpc.learn.getList.queryOptions({ id: v.id }),
-          );
-        };
+      <List>
+        {lists.data?.map((v) => {
+          const handlePreload = () => {
+            queryClient.prefetchQuery(
+              trpc.learn.getList.queryOptions({ id: v.id }),
+            );
+          };
 
-        return (
-          <Button
-            key={v.id}
-            variant="transparent"
-            responsive={true}
-            onClick={() => {
-              navigate("/app/lists/" + v.id);
-            }}
-            onMouseEnter={handlePreload}
-            onFocus={handlePreload}
-            onTouchStart={handlePreload}
-          >
-            {v.name}
-          </Button>
-        );
-      })}
+          return (
+            <li key={v.id}>
+              <Link
+                to={"/app/lists/" + v.id}
+                onMouseEnter={handlePreload}
+                onFocus={handlePreload}
+                onTouchStart={handlePreload}
+              >
+                <img
+                  className="round"
+                  src={getSubjectBySlug(v.toLanguage)?.icon}
+                />
+                <div className="max">
+                  <div className="large-text">
+                    {v.name}
+                  </div>
+                  <div className="on-surface-variant small-text">
+
+                    {v.listItems.length} {t("lists:words")}
+                  </div>
+                </div>
+                <i>chevron_right</i>
+              </Link>
+            </li>
+          );
+        })}
+      </List>
     </div>
   );
 }
