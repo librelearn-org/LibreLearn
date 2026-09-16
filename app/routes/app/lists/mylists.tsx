@@ -1,6 +1,6 @@
 import { Link } from "react-router";
 import { useTranslation } from "react-i18next";
-import { List, Progress } from "@siemsiem/beerreact";
+import { classNames, List, Progress } from "@siemsiem/beerreact";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { trpcClient } from "~/utils/trpc/client";
 import { useTRPC } from "~/utils/trpc/react";
@@ -43,8 +43,11 @@ export default function Mylists() {
                   src={getSubjectBySlug(v.toLanguage)?.icon}
                 />
                 <div className="max">
-                  <h6>{v.name}</h6>
-                  <div>
+                  <div className="large-text">
+                    {v.name}
+                  </div>
+                  <div className="on-surface-variant small-text">
+
                     {v.listItems.length} {t("lists:words")}
                   </div>
                 </div>
