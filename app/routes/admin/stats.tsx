@@ -1,5 +1,6 @@
 import { useOutletContext } from "react-router";
 import { useQuery } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
 import { Button, Card, Progress, Space } from "@siemsiem/beerreact";
 import {
   BarChart,
@@ -37,6 +38,7 @@ const FORMAT_LABELS: Record<string, string> = {
 
 export default function AdminStats() {
   const trpc = useTRPC();
+  const { t } = useTranslation();
   const {
     data: stats,
     isLoading,
@@ -49,9 +51,7 @@ export default function AdminStats() {
     stats?.vakkenData?.map((item) => {
       const subject = getSubjectBySlug(item.language);
       return {
-        name: subject?.name
-          ? subject.name.replace("icons:", "")
-          : item.language.toUpperCase(),
+        name: subject?.name ? t(subject.name) : item.language.toUpperCase(),
         language: item.language.toUpperCase(),
         lijsten: item.count,
       };
@@ -61,9 +61,7 @@ export default function AdminStats() {
     stats?.vakkenData?.map((item) => {
       const subject = getSubjectBySlug(item.language);
       return {
-        name: subject?.name
-          ? subject.name.replace("icons:", "")
-          : item.language.toUpperCase(),
+        name: subject?.name ? t(subject.name) : item.language.toUpperCase(),
         language: item.language.toUpperCase(),
         woorden: item.woorden ?? item.wordsCount ?? 0,
       };
