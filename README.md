@@ -1,7 +1,12 @@
-![Het Librelearn logo](.github/assets/verybasic.png)
-# Librelearn
+<div align="center">
+  ![Het Librelearn logo](.github/assets/verybasic.png)
 
-Een FOSS alternatief voor Studygo (WRTS) en soortgelijken platformen.
+  [![CodeFactor](https://www.codefactor.io/repository/github/librelearn-org/librelearn/badge)](https://www.codefactor.io/repository/github/librelearn-org/librelearn)
+  ![Github Repo Stars](https://img.shields.io/github/stars/librelearn-org/librelearn?style=flat)
+  [![GitHub issues](https://img.shields.io/github/issues/librelearn-org/librelearn)](https://github.com/librelearn-org/librelearn/issues)
+
+  Een FOSS alternatief voor Studygo (WRTS) en soortgelijken platformen.
+</div>
 
 ## Functies
 
