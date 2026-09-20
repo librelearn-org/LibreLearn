@@ -1,23 +1,18 @@
-
-
-
-
-
 ![Het Librelearn logo](.github/assets/verybasic.png)
 # Librelearn
 
 Een FOSS alternatief voor Studygo (WRTS) en soortgelijken platformen
 
-## functies
+## Functies
 
 - Makkelijk lijsten maken
 - Lijsten leren
-- uhhhhh
-- binnekort FSRS
+- Binnenkort FSRS
 
 ## Hosted versie
 
 Ben je niet van plan om zelf te hosten? gebruik dan gewoon de hosted versie op [https://librelearn.nl](https://librelearn.nl)
+
 ## Dev server
 
 1. Clone de repo
@@ -31,7 +26,6 @@ Ben je niet van plan om zelf te hosten? gebruik dan gewoon de hosted versie op [
 
 
 ## Credits
-
 
 - [Eamon](https://github.com/eamonwatson) voor de vak iconen
 - [Mij](https://github.com/siemvk) voor het maken van react componenten van [BeerCss](https://github.com/beercss/beercss)
