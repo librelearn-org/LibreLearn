@@ -1,23 +1,24 @@
+<div align="center">
 
+  ![Het Librelearn logo](.github/assets/verybasic.png)
 
+  [![CodeFactor](https://www.codefactor.io/repository/github/librelearn-org/librelearn/badge)](https://www.codefactor.io/repository/github/librelearn-org/librelearn)
+  ![Github Repo Stars](https://img.shields.io/github/stars/librelearn-org/librelearn?style=flat)
+  [![GitHub issues](https://img.shields.io/github/issues/librelearn-org/librelearn)](https://github.com/librelearn-org/librelearn/issues)
 
+  Een FOSS alternatief voor Studygo (WRTS) en soortgelijken platformen.
+</div>
 
-
-![Het Librelearn logo](.github/assets/verybasic.png)
-# Librelearn
-
-Een FOSS alternatief voor Studygo (WRTS) en soortgelijken platformen
-
-## functies
+## Functies
 
 - Makkelijk lijsten maken
 - Lijsten leren
-- uhhhhh
-- binnekort FSRS
+- Binnenkort FSRS
 
 ## Hosted versie
 
-Ben je niet van plan om zelf te hosten? gebruik dan gewoon de hosted versie op [https://librelearn.nl](https://librelearn.nl)
+Ben je niet van plan om zelf te hosten? Gebruik dan gewoon de hosted versie op [https://librelearn.nl](https://librelearn.nl).
+
 ## Dev server
 
 1. Clone de repo
@@ -32,6 +33,5 @@ Ben je niet van plan om zelf te hosten? gebruik dan gewoon de hosted versie op [
 
 ## Credits
 
-
 - [Eamon](https://github.com/eamonwatson) voor de vak iconen
-- [Mij](https://github.com/siemvk) voor het maken van react componenten van [BeerCss](https://github.com/beercss/beercss)
+- [Siem](https://github.com/siemvk) voor het maken van react componenten van [BeerCss](https://github.com/beercss/beercss)
