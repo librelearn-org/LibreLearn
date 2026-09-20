@@ -34,4 +34,4 @@ Ben je niet van plan om zelf te hosten? Gebruik dan gewoon de hosted versie op [
 ## Credits
 
 - [Eamon](https://github.com/eamonwatson) voor de vak iconen
-- [Mij](https://github.com/siemvk) voor het maken van react componenten van [BeerCss](https://github.com/beercss/beercss)
+- [Siem](https://github.com/siemvk) voor het maken van react componenten van [BeerCss](https://github.com/beercss/beercss)
