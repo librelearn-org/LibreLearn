@@ -1,7 +1,7 @@
 ![Het Librelearn logo](.github/assets/verybasic.png)
 # Librelearn
 
-Een FOSS alternatief voor Studygo (WRTS) en soortgelijken platformen
+Een FOSS alternatief voor Studygo (WRTS) en soortgelijken platformen.
 
 ## Functies
 
@@ -11,7 +11,7 @@ Een FOSS alternatief voor Studygo (WRTS) en soortgelijken platformen
 
 ## Hosted versie
 
-Ben je niet van plan om zelf te hosten? gebruik dan gewoon de hosted versie op [https://librelearn.nl](https://librelearn.nl)
+Ben je niet van plan om zelf te hosten? Gebruik dan gewoon de hosted versie op [https://librelearn.nl](https://librelearn.nl).
 
 ## Dev server
 
