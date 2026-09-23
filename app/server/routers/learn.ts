@@ -44,12 +44,14 @@ export const learnRouting = {
     .input(
       z.object({
         name: z.string().min(1).max(100),
-        list: z.array(
-          z.object({
-            vraag: z.string().min(1).max(100),
-            antwoord: z.string().min(1).max(100),
-          }),
-        ),
+        list: z
+          .array(
+            z.object({
+              vraag: z.string().min(1).max(100),
+              antwoord: z.string().min(1).max(100),
+            }),
+          )
+          .max(1500),
         id: z.uuid().optional(),
         language: z.enum(taalSlugsList),
         fromLanguage: z.enum(taalSlugsList),
@@ -57,6 +59,15 @@ export const learnRouting = {
       }),
     )
     .mutation(async ({ input, ctx }) => {
+      const dag = 24 * 60 * 60 * 1000;
+      const limit =
+        Date.now() - ctx.user.createdAt.getTime() < 30 * dag ? 750 : 1500;
+      if (input.list.length > limit) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: `Een lijst mag maximaal ${limit} vragen hebben`,
+        });
+      }
       if (!input.id) {
         const list = await ctx.prisma.list.create({
           data: {
