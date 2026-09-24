@@ -2,23 +2,27 @@
 
 ## Supported Versions
 
-Er zijn op dit moment geen supported versies.
-Waarom?
-omdat we echt nog in een beta staat zijn.
+- Beta
 
 ## Reporting a Vulnerability
 
-Maak een issue als het iets kleins is, dm me op discord of maar een github vuln dinges
+Make an issue if it is small, join our Discord or make a Github Security Advisory.
 
-## Wat mag je melden
+## What vulnerabilities are accepted
 
-Alle vulns behalven duidelijke AI slop of dingen die werken zoals ze horen.
-Niks met bruteforcen tho.
+### Quality
 
-## Note over CVEs
+We require you to maintain a certain level of quality in your security advisories. We *will **not*** be accepting blatant AI reports.
 
-CVEs voor v1 launch worden niet gepublished, dit is omdat we in een tijd leven dat als je CVEs hebt dat AI gaat zeggen dat je website SUPER onveilig is. Er is een uitzondering voor als iets van de volgende data leaked:
+### Types
+All vulnerabilities are accepted except brute force vulnerabilities.
 
-- Wachtwoord hashes
+## Note about CVE's
+
+CVEs made *before* the v1 launch will **not** be published, this is because we live in a time where having CVEs will cause AI to say that your site is super insecure.
+
+You are exempt of this rule if the vulnerability finds that any of the following leaks:
+
+- Password hashes
 - Admin tokens
 - User sessions
