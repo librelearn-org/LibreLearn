@@ -305,7 +305,7 @@ describe("tRPC endpoints (integration)", () => {
           createdListIds.add(created.id);
           expect(created.listItems.length).toBe(1500);
 
-          await expect(save(caller, 1501)).rejects.toThrow();
+          expect(save(caller, 1501)).rejects.toThrow("maximaal 1500");
         });
       });
     });

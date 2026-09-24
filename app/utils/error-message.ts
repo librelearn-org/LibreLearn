@@ -4,6 +4,7 @@ type ErrorLike = {
   message?: unknown;
   data?: {
     code?: unknown;
+    zodError?: unknown;
   };
   shape?: {
     message?: unknown;
@@ -87,6 +88,10 @@ export function getErrorMessage(
   fallbackKey = "errors.api.generic",
 ): string {
   const code = getCode(error);
+  const text = getText(error);
+  if (code === "BAD_REQUEST" && text && !asErrorLike(error)?.data?.zodError) {
+    return text;
+  }
   if (code) {
     const key = codeToTranslationKey[code];
     if (key) {
@@ -94,7 +99,6 @@ export function getErrorMessage(
     }
   }
 
-  const text = getText(error);
   if (text) {
     if (isNetworkError(text)) {
       return i18next.t("errors.api.network");
