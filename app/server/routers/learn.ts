@@ -44,14 +44,12 @@ export const learnRouting = {
     .input(
       z.object({
         name: z.string().min(1).max(100),
-        list: z
-          .array(
-            z.object({
-              vraag: z.string().min(1).max(100),
-              antwoord: z.string().min(1).max(100),
-            }),
-          )
-          .max(1500),
+        list: z.array(
+          z.object({
+            vraag: z.string().min(1).max(100),
+            antwoord: z.string().min(1).max(100),
+          }),
+        ),
         id: z.uuid().optional(),
         language: z.enum(taalSlugsList),
         fromLanguage: z.enum(taalSlugsList),
