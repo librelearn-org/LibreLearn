@@ -55,6 +55,7 @@ const withResolvedUser = t.middleware(async ({ ctx, next, path }) => {
       banned: true,
       forumBanned: true,
       theme: true,
+      createdAt: true,
     },
   });
 

@@ -261,6 +261,53 @@ describe("tRPC endpoints (integration)", () => {
         expect(updated.listItems[0].vraag).toBe("vraag2");
         expect(updated.listItems[0].antwoord).toBe("antwoord2");
       });
+
+      describe("item cap", () => {
+        const items = (n: number) =>
+          Array.from({ length: n }, (_, i) => ({
+            vraag: `v${i}`,
+            antwoord: `a${i}`,
+          }));
+        const save = (
+          caller: ReturnType<typeof makeCaller>["caller"],
+          n: number,
+        ) =>
+          caller.learn.upsertList({
+            name: `cap-${Date.now()}`,
+            list: items(n),
+            language: TaalSlugEnum.NL,
+            fromLanguage: TaalSlugEnum.EN,
+            toLanguage: TaalSlugEnum.NL,
+          });
+
+        it("new accounts 750 words max", async () => {
+          const user = await createTestUser();
+          const { caller } = makeCaller({ id: user.id });
+
+          const created = await save(caller, 750);
+          createdListIds.add(created.id);
+          expect(created.listItems.length).toBe(750);
+
+          await expect(save(caller, 751)).rejects.toThrow("maximaal 750");
+        });
+
+        it("old accounts 1.5K words max", async () => {
+          const user = await createTestUser();
+          await prisma.user.update({
+            where: { id: user.id },
+            data: {
+              createdAt: new Date(Date.now() - 31 * 24 * 60 * 60 * 1000),
+            },
+          });
+          const { caller } = makeCaller({ id: user.id });
+
+          const created = await save(caller, 1500);
+          createdListIds.add(created.id);
+          expect(created.listItems.length).toBe(1500);
+
+          await expect(save(caller, 1501)).rejects.toThrow();
+        });
+      });
     });
 
     it("get the users lists", async () => {
