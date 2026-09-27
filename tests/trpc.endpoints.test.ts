@@ -427,7 +427,7 @@ describe("tRPC endpoints (integration)", () => {
         const updatedSession = await caller.learn.upsertLearnSession({
           id: session.id,
           wachtrij: learnInstance.queue,
-          lijst: session.lijst,
+          lijst: learnInstance.cards,
           listId: createdList1.id,
         });
 
@@ -444,10 +444,24 @@ describe("tRPC endpoints (integration)", () => {
         expect(retrievedSession.lijst.length).toBe(2);
         expect(retrievedSession.wachtrij[0].methodId).toBeDefined();
         expect(retrievedSession.wachtrij[0].lastReviewed).toBeDefined();
+        const beantwoord = retrievedSession.lijst.find(
+          (kaart) => kaart.history.length > 0,
+        );
+        expect(beantwoord?.history[0].answer).toBe(currentAnswer);
+        expect(beantwoord?.metadata.learned).toBe(true);
 
         // 6. Resume Learnlib with retrieved session (testing ID consistency across wachtrij and lijst)
         const resumedLearn = new Learnlib(
-          retrievedSession.wachtrij,
+          {
+            cards: retrievedSession.lijst,
+            queue: retrievedSession.wachtrij,
+            queueState: {
+              current: retrievedSession.wachtrij[0],
+              isDone: false,
+              initialCount: retrievedSession.lijst.length,
+              progress: 0,
+            },
+          },
           new simpleMethode(),
           new verySimple(),
           new simpleWachtrij(),
@@ -464,12 +478,15 @@ describe("tRPC endpoints (integration)", () => {
         const finalSession = await caller.learn.upsertLearnSession({
           id: session.id,
           wachtrij: resumedLearn.queue,
-          lijst: retrievedSession.lijst,
+          lijst: resumedLearn.cards,
           listId: createdList1.id,
         });
 
         expect(finalSession.wachtrij.length).toBe(0);
         expect(finalSession.lijst.length).toBe(2);
+        expect(
+          finalSession.lijst.every((kaart) => kaart.history.length === 1),
+        ).toBe(true);
       });
 
       it("prevents non-owner from updating a learnSession", async () => {

@@ -68,7 +68,6 @@ export default function LearnPage({ loaderData }: Route.ComponentProps) {
   const navigate = useNavigate();
   const { pushDialog } = useDialog();
   const veld = useRef<HTMLInputElement>(null);
-  const [resetKey, setResetKey] = useState(0);
   const [feedback, setFeedback] = useState<FeedbackState | null>(null);
   const [showFlashcardAnswer, setShowFlashcardAnswer] = useState(false);
 
@@ -79,7 +78,7 @@ export default function LearnPage({ loaderData }: Route.ComponentProps) {
     loaderData.sessionData?.learnFormat ?? learnFormat.toets;
 
   const trpc = useTRPC();
-  const saveSession = useMutation(
+  const { mutate: saveSession } = useMutation(
     trpc.learn.upsertLearnSession.mutationOptions({
       onError: (err) => {
         console.error("Fout bij opslaan voortgang:", err);
@@ -88,28 +87,25 @@ export default function LearnPage({ loaderData }: Route.ComponentProps) {
   );
 
   const lib = useMemo(() => {
-    if (resetKey > 0) {
-      const fullList =
-        rawLijst && rawLijst.length > 0 ? rawLijst : (rawWachtrij ?? []);
-      if (fullList.length > 0) {
-        return new Learnlib(
-          fullList,
-          methods[0],
-          gradeMakers[0],
-          queueUpdaters[0],
-        );
-      }
-    }
-    if (rawWachtrij && rawWachtrij.length > 0) {
-      return new Learnlib(
-        rawWachtrij,
-        methods[0],
-        gradeMakers[0],
-        queueUpdaters[0],
-      );
-    }
-    return null;
-  }, [rawWachtrij, rawLijst, resetKey]);
+    const cards = rawLijst?.length ? rawLijst : (rawWachtrij ?? []);
+    if (cards.length === 0) return null;
+    const queue = rawWachtrij ?? [];
+    return new Learnlib(
+      {
+        cards,
+        queue,
+        queueState: {
+          current: queue[0] ?? null,
+          isDone: queue.length === 0,
+          initialCount: cards.length,
+          progress: 0,
+        },
+      },
+      methods[0],
+      gradeMakers[0],
+      queueUpdaters[0],
+    );
+  }, [rawWachtrij, rawLijst]);
 
   const [state, setState] = useState<LearnlibState | null>(
     () => lib?.getSnapshot() ?? null,
@@ -122,38 +118,22 @@ export default function LearnPage({ loaderData }: Route.ComponentProps) {
   }, [lib]);
 
   useEffect(() => {
-    if (resetKey >= 0) {
-      setFeedback(null);
-      setShowFlashcardAnswer(false);
-    }
-  }, [resetKey]);
-
-  useEffect(() => {
     if (!feedback && veld.current) {
       veld.current.focus();
     }
   }, [feedback]);
 
-  const syncProgress = useCallback(
-    (wachtrij: LearnlibState["queue"], lijst?: LearnlibState["queue"]) => {
-      if (sessionId && wachtrij) {
-        saveSession.mutate({
-          id: sessionId,
-          wachtrij,
-          lijst: lijst ?? rawLijst ?? undefined,
-          listId: loaderData.sessionData?.listId ?? undefined,
-          methode: currentFormat,
-        });
-      }
-    },
-    [sessionId, rawLijst, loaderData.sessionData, currentFormat, saveSession],
-  );
-
-  useEffect(() => {
-    if (resetKey > 0 && lib) {
-      syncProgress(lib.queue, rawLijst ?? lib.queue);
-    }
-  }, [resetKey, lib, rawLijst, syncProgress]);
+  const listId = loaderData.sessionData?.listId ?? undefined;
+  const syncProgress = useCallback(() => {
+    if (!sessionId || !lib) return;
+    saveSession({
+      id: sessionId,
+      wachtrij: lib.queue,
+      lijst: lib.cards,
+      listId,
+      methode: currentFormat,
+    });
+  }, [sessionId, lib, listId, currentFormat, saveSession]);
 
   const handleSubmit = (e?: React.FormEvent) => {
     if (e) e.preventDefault();
@@ -185,9 +165,9 @@ export default function LearnPage({ loaderData }: Route.ComponentProps) {
         veld.current.value = "";
       }
       setFeedback(null);
-      syncProgress(lib.queue, rawLijst);
+      syncProgress();
     },
-    [lib, feedback, rawLijst, syncProgress],
+    [lib, feedback, syncProgress],
   );
 
   const handleOverride = useCallback(() => {
@@ -198,7 +178,7 @@ export default function LearnPage({ loaderData }: Route.ComponentProps) {
     if (!lib || !state?.queueState.current) return;
     lib.answer(state.queueState.current.answer, grade);
     setShowFlashcardAnswer(false);
-    syncProgress(lib.queue, rawLijst);
+    syncProgress();
   };
 
   useEffect(() => {
@@ -227,19 +207,9 @@ export default function LearnPage({ loaderData }: Route.ComponentProps) {
     currentFormat === learnFormat.toets || currentFormat === learnFormat.leren;
   const isFlashcardMode = currentFormat === learnFormat.gedachten;
 
-  const totalCount =
-    rawLijst && rawLijst.length > 0
-      ? rawLijst.length
-      : (state?.queueState.initialCount ?? state?.queue.length ?? 0);
+  const totalCount = state?.queueState.initialCount ?? 0;
   const queueCount = state?.queue.length ?? 0;
-  const isKlaar =
-    state?.queueState.isDone ??
-    Boolean(
-      rawWachtrij &&
-        rawWachtrij.length === 0 &&
-        rawLijst &&
-        rawLijst.length > 0,
-    );
+  const isKlaar = state?.queueState.isDone ?? false;
 
   return (
     <>
@@ -279,7 +249,10 @@ export default function LearnPage({ loaderData }: Route.ComponentProps) {
                 <Space />
                 <nav className="responsive center-align">
                   <Button
-                    onClick={() => setResetKey((k) => k + 1)}
+                    onClick={() => {
+                      lib?.reset();
+                      syncProgress();
+                    }}
                     icon="refresh"
                   >
                     {t("learn:learnAgain")}
