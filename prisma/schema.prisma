@@ -121,10 +121,10 @@ model listItemSaved {
 
 model learnSessionItemHistory {
   id        String           @id @unique @default(uuid())
-  kaartId   String?
+  cardId    String?
   date      DateTime         @default(now())
-  antwoord  String
-  goed      Int              // Grade enum: 0 (Fout), 1 (GoedMoeilijk), 2 (GoedPrima), 3 (GoedMakkelijk)
+  answer    String
+  grade     Int              // Grade enum: 0 (Incorrect), 1 (Hard), 2 (Good), 3 (Easy)
 
   item      learnSessionItem @relation(fields: [itemId], references: [id], onDelete: Cascade)
   itemId    String
@@ -134,13 +134,13 @@ model learnSessionItemHistory {
 
 model learnSessionItem {
   id               String                    @id @unique @default(uuid())
-  vraag            String
-  antwoord         String
-  fase             Int                       @default(0)
-  methode          String                    @default("simple")
-  lastReview       DateTime                  @default(now())
+  question         String
+  answer           String
+  phase            Int                       @default(0)
+  methodId         String                    @default("simple")
+  lastReviewed     DateTime                  @default(now())
   nextReview       DateTime                  @default(now())
-  metaData         Json                      @default("{}") // zucht
+  metadata         Json                      @default("{}") // zucht
   history          learnSessionItemHistory[]
   wachtrijSessions learnSession[]            @relation("sessionWachtrij")
   lijstSessions    learnSession[]            @relation("sessionLijst")

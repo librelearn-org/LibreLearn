@@ -388,8 +388,8 @@ describe("tRPC endpoints (integration)", () => {
 
         const session = await caller.learn.upsertLearnSession({
           wachtrij: [
-            { vraag: "cat", antwoord: "kat" },
-            { vraag: "dog", antwoord: "hond" },
+            { question: "cat", answer: "kat" },
+            { question: "dog", answer: "hond" },
           ],
           listId: createdList1.id,
         });
@@ -405,7 +405,7 @@ describe("tRPC endpoints (integration)", () => {
           (item) => item.id === firstWachtrijItem.id,
         );
         expect(matchingLijstItem).toBeDefined();
-        expect(matchingLijstItem?.vraag).toBe(firstWachtrijItem.vraag);
+        expect(matchingLijstItem?.question).toBe(firstWachtrijItem.question);
 
         // 2. Initialize Learnlib using the session's returned wachtrij
         const learnInstance = new Learnlib(
@@ -416,17 +416,17 @@ describe("tRPC endpoints (integration)", () => {
         );
 
         expect(learnInstance.current).toBeDefined();
-        expect(learnInstance.wachtrij.length).toBe(2);
+        expect(learnInstance.queue.length).toBe(2);
 
         // 3. Answer a card with Learnlib
-        const currentAnswer = learnInstance.current?.antwoord;
+        const currentAnswer = learnInstance.current?.answer;
         expect(currentAnswer).toBeDefined();
-        learnInstance.antwoord(currentAnswer ?? "");
+        learnInstance.answer(currentAnswer ?? "");
 
         // 4. Update the session with the new learnlib.wachtrij and session.lijst state
         const updatedSession = await caller.learn.upsertLearnSession({
           id: session.id,
-          wachtrij: learnInstance.wachtrij,
+          wachtrij: learnInstance.queue,
           lijst: session.lijst,
           listId: createdList1.id,
         });
@@ -442,7 +442,7 @@ describe("tRPC endpoints (integration)", () => {
         expect(retrievedSession.id).toBe(session.id);
         expect(retrievedSession.wachtrij.length).toBe(1);
         expect(retrievedSession.lijst.length).toBe(2);
-        expect(retrievedSession.wachtrij[0].methodeId).toBeDefined();
+        expect(retrievedSession.wachtrij[0].methodId).toBeDefined();
         expect(retrievedSession.wachtrij[0].lastReviewed).toBeDefined();
 
         // 6. Resume Learnlib with retrieved session (testing ID consistency across wachtrij and lijst)
@@ -454,16 +454,16 @@ describe("tRPC endpoints (integration)", () => {
         );
 
         expect(resumedLearn.current).toBeDefined();
-        const secondAnswer = resumedLearn.current?.antwoord;
+        const secondAnswer = resumedLearn.current?.answer;
         expect(secondAnswer).toBeDefined();
-        resumedLearn.antwoord(secondAnswer ?? "");
+        resumedLearn.answer(secondAnswer ?? "");
 
         // Queue is now empty
-        expect(resumedLearn.wachtrij.length).toBe(0);
+        expect(resumedLearn.queue.length).toBe(0);
 
         const finalSession = await caller.learn.upsertLearnSession({
           id: session.id,
-          wachtrij: resumedLearn.wachtrij,
+          wachtrij: resumedLearn.queue,
           lijst: retrievedSession.lijst,
           listId: createdList1.id,
         });
@@ -487,12 +487,12 @@ describe("tRPC endpoints (integration)", () => {
             wachtrij: {
               create: [
                 {
-                  vraag: "apple",
-                  antwoord: "appel",
-                  fase: 0,
-                  metaData: {},
-                  methode: "",
-                  lastReview: new Date(),
+                  question: "apple",
+                  answer: "appel",
+                  phase: 0,
+                  metadata: {},
+                  methodId: "",
+                  lastReviewed: new Date(),
                   nextReview: new Date(),
                 },
               ],
@@ -505,7 +505,7 @@ describe("tRPC endpoints (integration)", () => {
         await expect(
           caller2.learn.upsertLearnSession({
             id: session.id,
-            wachtrij: [{ vraag: "banana", antwoord: "banaan" }],
+            wachtrij: [{ question: "banana", answer: "banaan" }],
           }),
         ).rejects.toThrow("Niet jouw sessie!");
       });
@@ -525,12 +525,12 @@ describe("tRPC endpoints (integration)", () => {
             wachtrij: {
               create: [
                 {
-                  vraag: "apple",
-                  antwoord: "appel",
-                  fase: 0,
-                  metaData: {},
-                  methode: "",
-                  lastReview: new Date(),
+                  question: "apple",
+                  answer: "appel",
+                  phase: 0,
+                  metadata: {},
+                  methodId: "",
+                  lastReviewed: new Date(),
                   nextReview: new Date(),
                 },
               ],
@@ -543,7 +543,7 @@ describe("tRPC endpoints (integration)", () => {
         await expect(
           caller2.learn.upsertLearnSession({
             id: session.id,
-            wachtrij: [{ vraag: "banana", antwoord: "banaan" }],
+            wachtrij: [{ question: "banana", answer: "banaan" }],
           }),
         ).resolves.toBeDefined();
       });
@@ -559,7 +559,7 @@ describe("tRPC endpoints (integration)", () => {
         await expect(
           caller.learn.upsertLearnSession({
             id: "non-existent-session-id",
-            wachtrij: [{ vraag: "hello", antwoord: "hallo" }],
+            wachtrij: [{ question: "hello", answer: "hallo" }],
           }),
         ).rejects.toThrow("Sessie bestaat niet!");
       });
@@ -579,21 +579,21 @@ describe("tRPC endpoints (integration)", () => {
             wachtrij: {
               create: [
                 {
-                  vraag: "sun",
-                  antwoord: "zon",
-                  fase: 0,
-                  metaData: { difficulty: 1 },
-                  methode: "simple",
-                  lastReview: new Date(),
+                  question: "sun",
+                  answer: "zon",
+                  phase: 0,
+                  metadata: { difficulty: 1 },
+                  methodId: "simple",
+                  lastReviewed: new Date(),
                   nextReview: new Date(),
                 },
                 {
-                  vraag: "moon",
-                  antwoord: "maan",
-                  fase: 0,
-                  metaData: {},
-                  methode: "simple",
-                  lastReview: new Date(),
+                  question: "moon",
+                  answer: "maan",
+                  phase: 0,
+                  metadata: {},
+                  methodId: "simple",
+                  lastReviewed: new Date(),
                   nextReview: new Date(),
                 },
               ],
@@ -611,12 +611,12 @@ describe("tRPC endpoints (integration)", () => {
         expect(retrieved.userId).toBe(user.id);
         expect(retrieved.wachtrij.length).toBe(2);
 
-        const firstItem = retrieved.wachtrij.find((i) => i.vraag === "sun");
+        const firstItem = retrieved.wachtrij.find((i) => i.question === "sun");
         expect(firstItem).toBeDefined();
-        expect(firstItem?.antwoord).toBe("zon");
-        expect(firstItem?.methodeId).toBe("simple");
+        expect(firstItem?.answer).toBe("zon");
+        expect(firstItem?.methodId).toBe("simple");
         expect(firstItem?.lastReviewed).toBeInstanceOf(Date);
-        expect(firstItem?.metaData).toEqual({ difficulty: 1 });
+        expect(firstItem?.metadata).toEqual({ difficulty: 1 });
       });
 
       it("prevents retrieving a learnSession owned by another user", async () => {
@@ -634,12 +634,12 @@ describe("tRPC endpoints (integration)", () => {
             wachtrij: {
               create: [
                 {
-                  vraag: "secret",
-                  antwoord: "geheim",
-                  fase: 0,
-                  metaData: {},
-                  methode: "",
-                  lastReview: new Date(),
+                  question: "secret",
+                  answer: "geheim",
+                  phase: 0,
+                  metadata: {},
+                  methodId: "",
+                  lastReviewed: new Date(),
                   nextReview: new Date(),
                 },
               ],
@@ -681,12 +681,12 @@ describe("tRPC endpoints (integration)", () => {
           wachtrij: {
             create: [
               {
-                vraag: "apple",
-                antwoord: "appel",
-                fase: 0,
-                metaData: {},
-                methode: "",
-                lastReview: new Date(),
+                question: "apple",
+                answer: "appel",
+                phase: 0,
+                metadata: {},
+                methodId: "",
+                lastReviewed: new Date(),
                 nextReview: new Date(),
               },
             ],

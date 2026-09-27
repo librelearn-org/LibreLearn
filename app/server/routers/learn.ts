@@ -1,43 +1,71 @@
 import type { TRPCRouterRecord } from "@trpc/server";
+import { type CardState, Grade, Phase } from "@siemsiem/learnlib";
 import { z } from "zod";
 import { protectedProcedure } from "~/server/trpc";
 import { taalSlugsList } from "~/components/Icons";
 import { TRPCError } from "@trpc/server/unstable-core-do-not-import";
 import { learnFormat } from "../../../generated/prisma/enums";
 
-function mapItemToKaartStaat(item: {
+function mapItemToCardState(item: {
   id: string;
-  vraag: string;
-  antwoord: string;
-  fase: number;
-  methode: string;
-  lastReview: Date;
+  question: string;
+  answer: string;
+  phase: Phase;
+  methodId: string;
+  lastReviewed: Date;
   nextReview: Date;
-  metaData: unknown;
+  metadata: unknown;
   history?: Array<{
-    kaartId?: string | null;
+    cardId: string | null;
     date: Date;
-    antwoord: string;
-    goed: number;
+    answer: string;
+    grade: Grade;
   }>;
-}) {
+}): CardState {
   return {
-    ...item,
-    methodeId: item.methode,
-    lastReviewed: item.lastReview,
+    id: item.id,
+    question: item.question,
+    answer: item.answer,
+    phase: item.phase,
+    methodId: item.methodId,
+    lastReviewed: item.lastReviewed,
+    nextReview: item.nextReview,
     history: (item.history ?? []).map((h) => ({
-      kaartId: h.kaartId ?? item.id,
+      cardId: h.cardId ?? item.id,
       date: h.date,
-      antwoord: h.antwoord,
-      goed: h.goed,
+      answer: h.answer,
+      grade: h.grade,
     })),
-    metaData: (item.metaData &&
-    typeof item.metaData === "object" &&
-    !Array.isArray(item.metaData)
-      ? (item.metaData as Record<string, any>)
-      : {}) as Record<string, any>,
+    metadata:
+      item.metadata &&
+      typeof item.metadata === "object" &&
+      !Array.isArray(item.metadata)
+        ? (item.metadata as Record<string, any>)
+        : {},
   };
 }
+
+const cardStateSchema = z.object({
+  id: z.string().optional(),
+  question: z.string().min(1),
+  answer: z.string().min(1),
+  phase: z.enum(Phase).optional().default(Phase.Learning),
+  methodId: z.string().optional().default("simple"),
+  lastReviewed: z.coerce.date().optional(),
+  nextReview: z.coerce.date().optional(),
+  history: z
+    .array(
+      z.object({
+        cardId: z.string().optional(),
+        date: z.coerce.date().optional(),
+        answer: z.string(),
+        grade: z.enum(Grade),
+      }),
+    )
+    .optional()
+    .default([]),
+  metadata: z.record(z.string(), z.any()).optional().default({}),
+});
 
 export const learnRouting = {
   upsertList: protectedProcedure
@@ -232,66 +260,16 @@ export const learnRouting = {
       });
       return {
         ...session,
-        wachtrij: session.wachtrij.map(mapItemToKaartStaat),
-        lijst: session.lijst.map(mapItemToKaartStaat),
+        wachtrij: session.wachtrij.map(mapItemToCardState),
+        lijst: session.lijst.map(mapItemToCardState),
       };
     }),
   upsertLearnSession: protectedProcedure
     .input(
       z.object({
         id: z.string().optional(),
-        wachtrij: z.array(
-          z.object({
-            id: z.string().optional(),
-            vraag: z.string().min(1),
-            antwoord: z.string().min(1),
-            fase: z.number().int().optional().default(0),
-            methodeId: z.string().optional(),
-            methode: z.string().optional(),
-            lastReviewed: z.coerce.date().optional(),
-            lastReview: z.coerce.date().optional(),
-            nextReview: z.coerce.date().optional(),
-            history: z
-              .array(
-                z.object({
-                  kaartId: z.string().optional(),
-                  date: z.coerce.date().optional(),
-                  antwoord: z.string(),
-                  goed: z.number().int(),
-                }),
-              )
-              .optional()
-              .default([]),
-            metaData: z.record(z.string(), z.any()).optional().default({}),
-          }),
-        ),
-        lijst: z
-          .array(
-            z.object({
-              id: z.string().optional(),
-              vraag: z.string().min(1),
-              antwoord: z.string().min(1),
-              fase: z.number().int().optional().default(0),
-              methodeId: z.string().optional(),
-              methode: z.string().optional(),
-              lastReviewed: z.coerce.date().optional(),
-              lastReview: z.coerce.date().optional(),
-              nextReview: z.coerce.date().optional(),
-              history: z
-                .array(
-                  z.object({
-                    kaartId: z.string().optional(),
-                    date: z.coerce.date().optional(),
-                    antwoord: z.string(),
-                    goed: z.number().int(),
-                  }),
-                )
-                .optional()
-                .default([]),
-              metaData: z.record(z.string(), z.any()).optional().default({}),
-            }),
-          )
-          .optional(),
+        wachtrij: z.array(cardStateSchema),
+        lijst: z.array(cardStateSchema).optional(),
         listId: z.uuidv4().optional(),
         methode: z.enum(learnFormat).optional(),
       }),
@@ -320,8 +298,8 @@ export const learnRouting = {
         } else {
           const match = masterItems.find(
             (m) =>
-              m.vraag === wItem.vraag &&
-              m.antwoord === wItem.antwoord &&
+              m.question === wItem.question &&
+              m.answer === wItem.answer &&
               !wachtrijIds.includes(m.id),
           );
           if (match) {
@@ -334,21 +312,21 @@ export const learnRouting = {
 
       const createItemData = (item: (typeof masterItems)[0]) => ({
         id: item.id,
-        vraag: item.vraag,
-        antwoord: item.antwoord,
-        fase: item.fase ?? 0,
-        methode: item.methodeId ?? item.methode ?? "simple",
-        lastReview: item.lastReviewed ?? item.lastReview ?? new Date(),
+        question: item.question,
+        answer: item.answer,
+        phase: item.phase,
+        methodId: item.methodId,
+        lastReviewed: item.lastReviewed ?? new Date(),
         nextReview: item.nextReview ?? new Date(),
-        metaData: item.metaData ?? {},
+        metadata: item.metadata,
         history:
-          item.history && item.history.length > 0
+          item.history.length > 0
             ? {
                 create: item.history.map((h) => ({
-                  kaartId: h.kaartId ?? item.id,
+                  cardId: h.cardId ?? item.id,
                   date: h.date ?? new Date(),
-                  antwoord: h.antwoord,
-                  goed: h.goed,
+                  answer: h.answer,
+                  grade: h.grade,
                 })),
               }
             : undefined,
@@ -407,8 +385,8 @@ export const learnRouting = {
 
         return {
           ...session,
-          wachtrij: sortedWachtrij.map(mapItemToKaartStaat),
-          lijst: sortedLijst.map(mapItemToKaartStaat),
+          wachtrij: sortedWachtrij.map(mapItemToCardState),
+          lijst: sortedLijst.map(mapItemToCardState),
         };
       }
 
@@ -505,8 +483,8 @@ export const learnRouting = {
 
       return {
         ...session,
-        wachtrij: sortedWachtrij.map(mapItemToKaartStaat),
-        lijst: sortedLijst.map(mapItemToKaartStaat),
+        wachtrij: sortedWachtrij.map(mapItemToCardState),
+        lijst: sortedLijst.map(mapItemToCardState),
       };
     }),
   getUserLearnSessions: protectedProcedure.query(async ({ ctx }) => {

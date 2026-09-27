@@ -1,60 +1,37 @@
-import type { KaartStaat } from "@siemsiem/learnlib";
+import { type KaartStaat, Phase } from "@siemsiem/learnlib";
 
-export interface RuwKaartSnapshot {
-  kaartId?: string;
-  date?: string | Date;
-  antwoord?: string;
-  goed?: number;
-}
-
-export interface RuwKaartItem {
+export interface LijstItem {
   id?: string;
   vraag: string;
   antwoord: string;
-  fase?: number;
-  methodeId?: string;
-  methode?: string;
-  lastReviewed?: string | Date;
-  lastReview?: string | Date;
-  nextReview?: string | Date;
-  history?: RuwKaartSnapshot[];
-  metaData?: unknown;
 }
 
 /**
- * Converteert een ruw kaart-item (uit een lijst of leersessie) naar een volwaardige `KaartStaat` voor Learnlib.
+ * Converteert een lijst-item naar een nieuwe `KaartStaat` voor Learnlib.
  */
 export function omzetNaarKaartStaat(
-  item: RuwKaartItem,
+  item: LijstItem,
   defaultMethodeId: string = "simple",
 ): KaartStaat {
   const now = new Date();
   return {
     id: item.id ?? "",
-    vraag: item.vraag,
-    antwoord: item.antwoord,
-    fase: typeof item.fase === "number" ? item.fase : 0,
-    methodeId: item.methodeId ?? item.methode ?? defaultMethodeId,
-    lastReviewed: item.lastReviewed
-      ? new Date(item.lastReviewed)
-      : item.lastReview
-        ? new Date(item.lastReview)
-        : now,
-    nextReview: item.nextReview ? new Date(item.nextReview) : now,
-    metaData:
-      item.metaData &&
-      typeof item.metaData === "object" &&
-      !Array.isArray(item.metaData)
-        ? (item.metaData as Record<string, any>)
-        : {},
+    question: item.vraag,
+    answer: item.antwoord,
+    phase: Phase.Learning,
+    methodId: defaultMethodeId,
+    lastReviewed: now,
+    nextReview: now,
+    history: [],
+    metadata: {},
   };
 }
 
 /**
- * Converteert een lijst van ruwe kaart-items naar een array van `KaartStaat`.
+ * Converteert een lijst van lijst-items naar een array van `KaartStaat`.
  */
 export function omzetLijstNaarKaartStaten(
-  items: RuwKaartItem[],
+  items: LijstItem[],
   defaultMethodeId: string = "simple",
 ): KaartStaat[] {
   return items.map((item) => omzetNaarKaartStaat(item, defaultMethodeId));

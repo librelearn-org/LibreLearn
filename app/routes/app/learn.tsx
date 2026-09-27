@@ -12,8 +12,8 @@ import Learnlib, {
   Grade,
   gradeMakers,
   type LearnlibState,
-  methodes,
-  wachtrijUpdaters,
+  methods,
+  queueUpdaters,
 } from "@siemsiem/learnlib";
 import { useMutation } from "@tanstack/react-query";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -94,18 +94,18 @@ export default function LearnPage({ loaderData }: Route.ComponentProps) {
       if (fullList.length > 0) {
         return new Learnlib(
           fullList,
-          methodes[0],
+          methods[0],
           gradeMakers[0],
-          wachtrijUpdaters[0],
+          queueUpdaters[0],
         );
       }
     }
     if (rawWachtrij && rawWachtrij.length > 0) {
       return new Learnlib(
         rawWachtrij,
-        methodes[0],
+        methods[0],
         gradeMakers[0],
-        wachtrijUpdaters[0],
+        queueUpdaters[0],
       );
     }
     return null;
@@ -135,10 +135,7 @@ export default function LearnPage({ loaderData }: Route.ComponentProps) {
   }, [feedback]);
 
   const syncProgress = useCallback(
-    (
-      wachtrij: LearnlibState["wachtrij"],
-      lijst?: LearnlibState["wachtrij"],
-    ) => {
+    (wachtrij: LearnlibState["queue"], lijst?: LearnlibState["queue"]) => {
       if (sessionId && wachtrij) {
         saveSession.mutate({
           id: sessionId,
@@ -154,20 +151,20 @@ export default function LearnPage({ loaderData }: Route.ComponentProps) {
 
   useEffect(() => {
     if (resetKey > 0 && lib) {
-      syncProgress(lib.wachtrij, rawLijst ?? lib.wachtrij);
+      syncProgress(lib.queue, rawLijst ?? lib.queue);
     }
   }, [resetKey, lib, rawLijst, syncProgress]);
 
   const handleSubmit = (e?: React.FormEvent) => {
     if (e) e.preventDefault();
-    if (!lib || !state?.current || feedback) return;
+    if (!lib || !state?.queueState.current || feedback) return;
 
     const antwoordVal = veld.current?.value ?? "";
-    const expected = state.current.antwoord;
+    const expected = state.queueState.current.answer;
     const isCorrect = checkAnswer(expected, antwoordVal);
 
     setFeedback({
-      question: state.current.vraag,
+      question: state.queueState.current.question,
       expectedAnswer: expected,
       userAnswer: antwoordVal,
       isCorrect,
@@ -179,29 +176,29 @@ export default function LearnPage({ loaderData }: Route.ComponentProps) {
       if (!lib || !feedback) return;
 
       if (overrideGrade !== undefined) {
-        lib.antwoord(feedback.userAnswer, overrideGrade);
+        lib.answer(feedback.userAnswer, overrideGrade);
       } else {
-        lib.antwoord(feedback.userAnswer);
+        lib.answer(feedback.userAnswer);
       }
 
       if (veld.current) {
         veld.current.value = "";
       }
       setFeedback(null);
-      syncProgress(lib.wachtrij, rawLijst);
+      syncProgress(lib.queue, rawLijst);
     },
     [lib, feedback, rawLijst, syncProgress],
   );
 
   const handleOverride = useCallback(() => {
-    handleContinue(Grade.GoedPrima);
+    handleContinue(Grade.Good);
   }, [handleContinue]);
 
   const handleFlashcardGrade = (grade: Grade) => {
-    if (!lib || !state?.current) return;
-    lib.antwoord(state.current.antwoord, grade);
+    if (!lib || !state?.queueState.current) return;
+    lib.answer(state.queueState.current.answer, grade);
     setShowFlashcardAnswer(false);
-    syncProgress(lib.wachtrij, rawLijst);
+    syncProgress(lib.queue, rawLijst);
   };
 
   useEffect(() => {
@@ -233,10 +230,10 @@ export default function LearnPage({ loaderData }: Route.ComponentProps) {
   const totalCount =
     rawLijst && rawLijst.length > 0
       ? rawLijst.length
-      : (state?.initialCount ?? state?.wachtrij.length ?? 0);
-  const queueCount = state?.wachtrij.length ?? 0;
+      : (state?.queueState.initialCount ?? state?.queue.length ?? 0);
+  const queueCount = state?.queue.length ?? 0;
   const isKlaar =
-    state?.isKlaar ??
+    state?.queueState.isDone ??
     Boolean(
       rawWachtrij &&
         rawWachtrij.length === 0 &&
@@ -309,7 +306,9 @@ export default function LearnPage({ loaderData }: Route.ComponentProps) {
                 <p className="secondary-text small-text">
                   {t("learn:question")}
                 </p>
-                <h3 className={classNames.text.bold}>{state.current?.vraag}</h3>
+                <h3 className={classNames.text.bold}>
+                  {state.queueState.current?.question}
+                </h3>
 
                 <div className="space"></div>
                 {showFlashcardAnswer ? (
@@ -318,19 +317,19 @@ export default function LearnPage({ loaderData }: Route.ComponentProps) {
                       {t("learn:correctAnswer")}
                     </p>
                     <h4 className="green-text bold">
-                      {state.current?.antwoord}
+                      {state.queueState.current?.answer}
                     </h4>
                     <Space />
                     <nav className="responsive center-align">
                       <Button
-                        onClick={() => handleFlashcardGrade(Grade.Fout)}
+                        onClick={() => handleFlashcardGrade(Grade.Incorrect)}
                         icon="close"
                         className="error"
                       >
                         {t("learn:dontKnow")}
                       </Button>
                       <Button
-                        onClick={() => handleFlashcardGrade(Grade.GoedPrima)}
+                        onClick={() => handleFlashcardGrade(Grade.Good)}
                         icon="check"
                         className="primary"
                       >
@@ -436,7 +435,7 @@ export default function LearnPage({ loaderData }: Route.ComponentProps) {
                       {t("learn:question")}
                     </p>
                     <h3 className={classNames.text.bold}>
-                      {state.current?.vraag}
+                      {state.queueState.current?.question}
                     </h3>
 
                     <div className="space"></div>
