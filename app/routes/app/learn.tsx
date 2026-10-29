@@ -19,6 +19,7 @@ import { useMutation } from "@tanstack/react-query";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router";
+import { LearnSettings } from "~/components/LearnSettings";
 import { trpcClient } from "~/utils/trpc/client";
 import { useTRPC } from "~/utils/trpc/react";
 import { learnFormat } from "../../../generated/prisma/enums";
@@ -74,6 +75,7 @@ export default function LearnPage({ loaderData }: Route.ComponentProps) {
   const sessionId = loaderData.sessionData?.id;
   const rawWachtrij = loaderData.sessionData?.wachtrij;
   const rawLijst = loaderData.sessionData?.lijst;
+  const sessionConfig = loaderData.sessionData?.config;
   const currentFormat =
     loaderData.sessionData?.learnFormat ?? learnFormat.toets;
 
@@ -104,8 +106,10 @@ export default function LearnPage({ loaderData }: Route.ComponentProps) {
       methods[0],
       gradeMakers[0],
       queueUpdaters[0],
+      {},
+      sessionConfig ?? undefined,
     );
-  }, [rawWachtrij, rawLijst]);
+  }, [rawWachtrij, rawLijst, sessionConfig]);
 
   const [state, setState] = useState<LearnlibState | null>(
     () => lib?.getSnapshot() ?? null,
@@ -132,6 +136,7 @@ export default function LearnPage({ loaderData }: Route.ComponentProps) {
       lijst: lib.cards,
       listId,
       methode: currentFormat,
+      config: JSON.parse(lib.exportConfigJson()),
     });
   }, [sessionId, lib, listId, currentFormat, saveSession]);
 
@@ -141,7 +146,7 @@ export default function LearnPage({ loaderData }: Route.ComponentProps) {
 
     const antwoordVal = veld.current?.value ?? "";
     const expected = state.queueState.current.answer;
-    const isCorrect = checkAnswer(expected, antwoordVal);
+    const isCorrect = checkAnswer(expected, antwoordVal, lib.checkConfig);
 
     setFeedback({
       question: state.queueState.current.question,
@@ -203,6 +208,13 @@ export default function LearnPage({ loaderData }: Route.ComponentProps) {
     });
   };
 
+  const openSettings = () => {
+    pushDialog({
+      content: <LearnSettings lib={lib} onChange={syncProgress} />,
+      // pos: "right",
+    });
+  };
+
   const isTestOrLearnMode =
     currentFormat === learnFormat.toets || currentFormat === learnFormat.leren;
   const isFlashcardMode = currentFormat === learnFormat.gedachten;
@@ -212,9 +224,9 @@ export default function LearnPage({ loaderData }: Route.ComponentProps) {
   const isKlaar = state?.queueState.isDone ?? false;
 
   return (
-    <>
-      <div className="center middle absolute">
-        <div className="medium-width">
+    <main className="responsive">
+      <nav>
+        <div className="max">
           {lib && state && !isKlaar && !loaderData.error && (
             <>
               <nav className="no-space">
@@ -232,10 +244,15 @@ export default function LearnPage({ loaderData }: Route.ComponentProps) {
                 value={totalCount - queueCount}
                 max={totalCount}
               ></progress>
-              <div className="space"></div>
             </>
           )}
+        </div>
+        <Button onClick={dbg} icon="bug_report" shape="circle"></Button>
+        <Button onClick={openSettings} icon="settings" shape="circle"></Button>
+      </nav>
 
+      <div className="center middle absolute">
+        <div className="medium-width">
           <Card>
             {loaderData.error ? (
               <div className="center-align padding">
@@ -432,9 +449,7 @@ export default function LearnPage({ loaderData }: Route.ComponentProps) {
           </Card>
         </div>
       </div>
-
-      <Button onClick={dbg} icon="bug_report" shape="circle"></Button>
-    </>
+    </main>
   );
 }
 

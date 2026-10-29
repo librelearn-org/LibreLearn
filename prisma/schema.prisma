@@ -21,6 +21,7 @@ model User {
   banReason     String?
   banExpires    DateTime?
   theme         String    @default("023824")
+  learnConfig   Json      @default("{}")
 
   sessions      Session[]
   accounts      Account[]
@@ -120,22 +121,22 @@ model listItemSaved {
 }
 
 model learnSessionItemHistory {
-  id        String           @id @unique @default(uuid())
-  cardId    String?
-  date      DateTime         @default(now())
-  answer    String
-  grade     Int              // Grade enum: 0 (Incorrect), 1 (Hard), 2 (Good), 3 (Easy)
+  id     String   @id @unique @default(uuid())
+  cardId String?
+  date   DateTime @default(now())
+  answer String
+  grade  Int // Grade enum: 0 (Incorrect), 1 (Hard), 2 (Good), 3 (Easy)
 
-  item      learnSessionItem @relation(fields: [itemId], references: [id], onDelete: Cascade)
-  itemId    String
+  item   learnSessionItem @relation(fields: [itemId], references: [id], onDelete: Cascade)
+  itemId String
 
   @@index([itemId])
 }
 
 model learnSessionItem {
   id               String                    @id @unique @default(uuid())
-  question         String
-  answer           String
+  question         String                    @default("Niet goed dit")
+  answer           String                    @default("slecht")
   phase            Int                       @default(0)
   methodId         String                    @default("simple")
   lastReviewed     DateTime                  @default(now())
@@ -155,6 +156,7 @@ model learnSession {
   list        list?              @relation(fields: [listId], references: [id])
   listId      String?
   learnFormat learnFormat        @default(toets)
+  config      Json               @default("{}")
 }
 
 model flag {

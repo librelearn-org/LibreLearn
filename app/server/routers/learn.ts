@@ -1,9 +1,9 @@
-import type { TRPCRouterRecord } from "@trpc/server";
 import { type CardState, Grade, Phase } from "@siemsiem/learnlib";
-import { z } from "zod";
-import { protectedProcedure } from "~/server/trpc";
-import { taalSlugsList } from "~/components/Icons";
+import type { TRPCRouterRecord } from "@trpc/server";
 import { TRPCError } from "@trpc/server/unstable-core-do-not-import";
+import { z } from "zod";
+import { taalSlugsList } from "~/components/Icons";
+import { protectedProcedure } from "~/server/trpc";
 import { learnFormat } from "../../../generated/prisma/enums";
 
 function mapItemToCardState(item: {
@@ -256,10 +256,23 @@ export const learnRouting = {
               listItems: true,
             },
           },
+          owner: {
+            select: {
+              learnConfig: true,
+            },
+          },
         },
       });
+      const hasSessionConfig =
+        session.config &&
+        typeof session.config === "object" &&
+        !Array.isArray(session.config) &&
+        Object.keys(session.config).length > 0;
       return {
         ...session,
+        config: (hasSessionConfig
+          ? session.config
+          : session.owner.learnConfig) as Record<string, unknown>,
         wachtrij: session.wachtrij.map(mapItemToCardState),
         lijst: session.lijst.map(mapItemToCardState),
       };
@@ -272,6 +285,7 @@ export const learnRouting = {
         lijst: z.array(cardStateSchema).optional(),
         listId: z.uuidv4().optional(),
         methode: z.enum(learnFormat).optional(),
+        config: z.record(z.string(), z.any()).optional(),
       }),
     )
     .mutation(async ({ input, ctx }) => {
@@ -333,6 +347,10 @@ export const learnRouting = {
       });
 
       if (!input.id) {
+        const user = await ctx.prisma.user.findUnique({
+          where: { id: ctx.user.id },
+          select: { learnConfig: true },
+        });
         await Promise.all(
           masterItems.map((item) =>
             ctx.prisma.learnSessionItem.create({
@@ -346,6 +364,7 @@ export const learnRouting = {
             userId: ctx.user.id,
             listId: input.listId,
             learnFormat: input.methode,
+            config: input.config ?? user?.learnConfig ?? {},
             lijst: {
               connect: masterItems.map((item) => ({ id: item.id })),
             },
@@ -445,6 +464,7 @@ export const learnRouting = {
         },
         data: {
           ...(input.methode ? { learnFormat: input.methode } : {}),
+          ...(input.config ? { config: input.config } : {}),
           lijst: {
             set: masterItems.map((item) => ({ id: item.id })),
           },
@@ -497,4 +517,31 @@ export const learnRouting = {
       },
     });
   }),
+  getLearnConfig: protectedProcedure.query(async ({ ctx }) => {
+    const user = await ctx.prisma.user.findUnique({
+      where: { id: ctx.user.id },
+      select: { learnConfig: true },
+    });
+    return (user?.learnConfig ?? {}) as Record<string, unknown>;
+  }),
+  updateLearnConfig: protectedProcedure
+    .input(
+      z.object({
+        config: z.record(z.string(), z.any()),
+        sessionId: z.string().optional(),
+      }),
+    )
+    .mutation(async ({ input, ctx }) => {
+      await ctx.prisma.user.update({
+        where: { id: ctx.user.id },
+        data: { learnConfig: input.config },
+      });
+      if (input.sessionId) {
+        await ctx.prisma.learnSession.updateMany({
+          where: { id: input.sessionId, userId: ctx.user.id },
+          data: { config: input.config },
+        });
+      }
+      return input.config;
+    }),
 } satisfies TRPCRouterRecord;

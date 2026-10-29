@@ -6,7 +6,6 @@ export default [
   route("/app", "routes/app/layout.tsx", [
     route("", "routes/app/home.tsx"),
     route("profile", "routes/app/profile.tsx"),
-    route("learn/:id", "routes/app/learn.tsx"),
     route("sessionstart/:listId", "routes/app/sessionstart.tsx"),
     ...prefix("lists", [
       route("mylists", "routes/app/lists/mylists.tsx"),
@@ -14,6 +13,7 @@ export default [
       route(":listId", "routes/app/lists/view.tsx"),
     ]),
   ]),
+  route("/app/learn/:id", "routes/app/learn.tsx"),
 
   route("/admin", "routes/admin/layout.tsx", [
     route("", "routes/admin/home.tsx"),
