@@ -4,7 +4,83 @@ import { TRPCError } from "@trpc/server/unstable-core-do-not-import";
 import { z } from "zod";
 import { taalSlugsList } from "~/components/Icons";
 import { protectedProcedure } from "~/server/trpc";
+import type { prisma as prismaClient } from "~/utils/prisma";
 import { learnFormat } from "../../../generated/prisma/enums";
+
+function progressKey(question: string, answer: string): string {
+  return `${question}\0${answer}`;
+}
+
+/**
+ * Verwijdert sessie-specifieke vlaggen (zoals SimpleMethod's learned/geleerd)
+ * zodat langetermijn-metadata hergebruikt kan worden in een nieuwe sessie.
+ */
+function stripSessionFlags(metadata: unknown): Record<string, unknown> {
+  if (!metadata || typeof metadata !== "object" || Array.isArray(metadata)) {
+    return {};
+  }
+  const {
+    learned: _learned,
+    geleerd: _geleerd,
+    ...rest
+  } = metadata as Record<string, unknown>;
+  return rest;
+}
+
+function isPlainObject(val: unknown): val is Record<string, unknown> {
+  return Boolean(val) && typeof val === "object" && !Array.isArray(val);
+}
+
+function extractSessionMethodId(config: unknown): string | undefined {
+  if (!isPlainObject(config)) return undefined;
+  const modules = config.__modules;
+  if (!isPlainObject(modules)) return undefined;
+  return typeof modules.methodId === "string" ? modules.methodId : undefined;
+}
+
+/**
+ * Haalt metadata op voor een specifieke methode uit de opgeslagen per-methode structuur.
+ * Ondersteunt ook legacy platte metadata als fallback wanneer `savedMethodId` overeenkomt.
+ */
+function getMethodMetadata(
+  storedMetadata: unknown,
+  targetMethodId: string,
+  savedMethodId?: string,
+): Record<string, unknown> {
+  if (!isPlainObject(storedMetadata)) return {};
+  if (isPlainObject(storedMetadata.__byMethod)) {
+    const methodMeta = storedMetadata.__byMethod[targetMethodId];
+    return isPlainObject(methodMeta) ? methodMeta : {};
+  }
+  if (!savedMethodId || savedMethodId === targetMethodId) {
+    return storedMetadata;
+  }
+  return {};
+}
+
+/**
+ * Slaat metadata per methode op onder `__byMethod[methodId]` zodat metadata
+ * van verschillende leermethodes elkaar niet overschrijven.
+ */
+function mergeMethodMetadata(
+  existingStored: unknown,
+  existingMethodId: string | undefined,
+  methodId: string,
+  newMethodMeta: Record<string, unknown>,
+): Record<string, unknown> {
+  const byMethod: Record<string, Record<string, unknown>> = {};
+  if (isPlainObject(existingStored)) {
+    if (isPlainObject(existingStored.__byMethod)) {
+      for (const [k, v] of Object.entries(existingStored.__byMethod)) {
+        if (isPlainObject(v)) byMethod[k] = v;
+      }
+    } else if (existingMethodId && Object.keys(existingStored).length > 0) {
+      byMethod[existingMethodId] = existingStored;
+    }
+  }
+  byMethod[methodId] = newMethodMeta;
+  return { __byMethod: byMethod };
+}
 
 function mapItemToCardState(item: {
   id: string;
@@ -66,6 +142,121 @@ const cardStateSchema = z.object({
     .default([]),
   metadata: z.record(z.string(), z.any()).optional().default({}),
 });
+
+type ProgressSyncItem = {
+  id: string;
+  question: string;
+  answer: string;
+  phase: Phase;
+  methodId: string;
+  lastReviewed?: Date;
+  nextReview?: Date;
+  metadata: Record<string, unknown>;
+  history: Array<{
+    cardId?: string;
+    date?: Date;
+    answer: string;
+    grade: Grade;
+  }>;
+};
+
+async function syncUserCardProgress(
+  prisma: typeof prismaClient,
+  userId: string,
+  listId: string | null | undefined,
+  items: ProgressSyncItem[],
+  activeMethodId?: string,
+) {
+  const deduped = new Map<string, ProgressSyncItem>();
+  for (const item of items) {
+    const hasProgress =
+      item.history.length > 0 || Object.keys(item.metadata ?? {}).length > 0;
+    if (hasProgress) {
+      deduped.set(progressKey(item.question, item.answer), item);
+    }
+  }
+  const reviewedItems = Array.from(deduped.values());
+  if (reviewedItems.length === 0) return;
+
+  const existingRows = await prisma.userCardProgress.findMany({
+    where: {
+      userId,
+      OR: reviewedItems.map((item) => ({
+        question: item.question,
+        answer: item.answer,
+      })),
+    },
+    select: {
+      question: true,
+      answer: true,
+      listIds: true,
+      methodId: true,
+      metadata: true,
+    },
+  });
+  const existingMap = new Map(
+    existingRows.map((row) => [progressKey(row.question, row.answer), row]),
+  );
+
+  await Promise.all(
+    reviewedItems.map((item) => {
+      const existing = existingMap.get(progressKey(item.question, item.answer));
+      const listIds = Array.from(
+        new Set([...(existing?.listIds ?? []), ...(listId ? [listId] : [])]),
+      );
+      const historyCreate = item.history.map((h) => ({
+        cardId: h.cardId ?? item.id,
+        date: h.date ?? new Date(),
+        answer: h.answer,
+        grade: h.grade,
+      }));
+      const lastReviewed = item.lastReviewed ?? new Date();
+      const nextReview = item.nextReview ?? new Date();
+      const methodId = activeMethodId ?? item.methodId;
+      const metadata = mergeMethodMetadata(
+        existing?.metadata,
+        existing?.methodId,
+        methodId,
+        item.metadata,
+      ) as object;
+
+      return prisma.userCardProgress.upsert({
+        where: {
+          userId_question_answer: {
+            userId,
+            question: item.question,
+            answer: item.answer,
+          },
+        },
+        create: {
+          userId,
+          listIds,
+          question: item.question,
+          answer: item.answer,
+          phase: item.phase,
+          methodId,
+          lastReviewed,
+          nextReview,
+          metadata,
+          history:
+            historyCreate.length > 0 ? { create: historyCreate } : undefined,
+        },
+        update: {
+          listIds,
+          phase: item.phase,
+          methodId,
+          lastReviewed,
+          nextReview,
+          metadata,
+          history: {
+            deleteMany: {},
+            ...(historyCreate.length > 0 ? { create: historyCreate } : {}),
+          },
+        },
+      });
+    }),
+  );
+}
 
 export const learnRouting = {
   upsertList: protectedProcedure
@@ -228,6 +419,98 @@ export const learnRouting = {
       }
       return list;
     }),
+  getListProgress: protectedProcedure
+    .input(
+      z.object({
+        id: z.string().min(1),
+      }),
+    )
+    .query(async ({ input, ctx }) => {
+      const list = await ctx.prisma.list.findFirst({
+        where: { id: input.id },
+        select: {
+          listItems: {
+            select: { vraag: true, antwoord: true },
+          },
+        },
+      });
+      if (!list) {
+        throw new TRPCError({ code: "NOT_FOUND", message: "List not found" });
+      }
+      if (list.listItems.length === 0) {
+        return { totalCount: 0, learnedCount: 0 };
+      }
+      const saved = await ctx.prisma.userCardProgress.findMany({
+        where: {
+          userId: ctx.user.id,
+          OR: list.listItems.map((item) => ({
+            question: item.vraag,
+            answer: item.antwoord,
+          })),
+        },
+        select: { question: true, answer: true },
+      });
+      const savedKeys = new Set(
+        saved.map((s) => progressKey(s.question, s.answer)),
+      );
+      const learnedCount = list.listItems.filter((item) =>
+        savedKeys.has(progressKey(item.vraag, item.antwoord)),
+      ).length;
+      return {
+        totalCount: list.listItems.length,
+        learnedCount,
+      };
+    }),
+  getUserCardProgress: protectedProcedure.query(async ({ ctx }) => {
+    return await ctx.prisma.userCardProgress.findMany({
+      where: {
+        userId: ctx.user.id,
+      },
+      include: {
+        history: {
+          orderBy: { date: "asc" },
+        },
+      },
+      orderBy: { updatedAt: "desc" },
+    });
+  }),
+  getListCardProgress: protectedProcedure
+    .input(
+      z.object({
+        id: z.string().min(1),
+      }),
+    )
+    .query(async ({ input, ctx }) => {
+      const list = await ctx.prisma.list.findFirst({
+        where: { id: input.id },
+        select: {
+          listItems: {
+            select: { vraag: true, antwoord: true },
+          },
+        },
+      });
+      if (!list) {
+        throw new TRPCError({ code: "NOT_FOUND", message: "List not found" });
+      }
+      if (list.listItems.length === 0) {
+        return [];
+      }
+      return await ctx.prisma.userCardProgress.findMany({
+        where: {
+          userId: ctx.user.id,
+          OR: list.listItems.map((item) => ({
+            question: item.vraag,
+            answer: item.antwoord,
+          })),
+        },
+        include: {
+          history: {
+            orderBy: { date: "asc" },
+          },
+        },
+        orderBy: { updatedAt: "desc" },
+      });
+    }),
   getLearnSession: protectedProcedure
     .input(
       z.object({
@@ -286,6 +569,7 @@ export const learnRouting = {
         listId: z.uuidv4().optional(),
         methode: z.enum(learnFormat).optional(),
         config: z.record(z.string(), z.any()).optional(),
+        useSavedProgress: z.boolean().optional().default(true),
       }),
     )
     .mutation(async ({ input, ctx }) => {
@@ -351,8 +635,66 @@ export const learnRouting = {
           where: { id: ctx.user.id },
           select: { learnConfig: true },
         });
+
+        let itemsToCreate = masterItems;
+        if (input.useSavedProgress !== false && masterItems.length > 0) {
+          const savedRows = await ctx.prisma.userCardProgress.findMany({
+            where: {
+              userId: ctx.user.id,
+              OR: masterItems.map((item) => ({
+                question: item.question,
+                answer: item.answer,
+              })),
+            },
+            include: {
+              history: {
+                orderBy: { date: "asc" },
+              },
+            },
+          });
+          const savedMap = new Map(
+            savedRows.map((row) => [
+              progressKey(row.question, row.answer),
+              row,
+            ]),
+          );
+          const sessionMethodId = extractSessionMethodId(
+            input.config ?? user?.learnConfig,
+          );
+          itemsToCreate = masterItems.map((item) => {
+            const saved = savedMap.get(progressKey(item.question, item.answer));
+            if (!saved) return item;
+            const targetMethodId = sessionMethodId ?? item.methodId;
+            const savedMethodMeta = getMethodMetadata(
+              saved.metadata,
+              targetMethodId,
+              saved.methodId,
+            );
+            return {
+              ...item,
+              phase: saved.phase as Phase,
+              methodId: targetMethodId,
+              lastReviewed: saved.lastReviewed,
+              nextReview: saved.nextReview,
+              metadata: {
+                ...stripSessionFlags(savedMethodMeta),
+                ...item.metadata,
+              },
+              history:
+                item.history.length > 0
+                  ? item.history
+                  : saved.history.map((h) => ({
+                      cardId: item.id,
+                      date: h.date,
+                      answer: h.answer,
+                      grade: h.grade as Grade,
+                    })),
+            };
+          });
+        }
+
         await Promise.all(
-          masterItems.map((item) =>
+          itemsToCreate.map((item) =>
             ctx.prisma.learnSessionItem.create({
               data: createItemData(item),
             }),
@@ -456,6 +798,14 @@ export const learnRouting = {
             data: createItemData(item),
           }),
         ),
+      );
+
+      await syncUserCardProgress(
+        ctx.prisma,
+        ctx.user.id,
+        existingSession.listId,
+        masterItems,
+        extractSessionMethodId(input.config ?? existingSession.config),
       );
 
       const session = await ctx.prisma.learnSession.update({

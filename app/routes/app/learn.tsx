@@ -92,6 +92,15 @@ export default function LearnPage({ loaderData }: Route.ComponentProps) {
     const cards = rawLijst?.length ? rawLijst : (rawWachtrij ?? []);
     if (cards.length === 0) return null;
     const queue = rawWachtrij ?? [];
+    const savedModules = (
+      sessionConfig as {
+        __modules?: {
+          methodId?: string;
+          graderId?: string;
+          queueUpdaterId?: string;
+        };
+      } | null
+    )?.__modules;
     return new Learnlib(
       {
         cards,
@@ -103,9 +112,9 @@ export default function LearnPage({ loaderData }: Route.ComponentProps) {
           progress: 0,
         },
       },
-      methods[0],
-      gradeMakers[0],
-      queueUpdaters[0],
+      savedModules?.methodId ?? methods[0],
+      savedModules?.graderId ?? gradeMakers[0],
+      savedModules?.queueUpdaterId ?? queueUpdaters[0],
       {},
       sessionConfig ?? undefined,
     );
@@ -136,7 +145,14 @@ export default function LearnPage({ loaderData }: Route.ComponentProps) {
       lijst: lib.cards,
       listId,
       methode: currentFormat,
-      config: JSON.parse(lib.exportConfigJson()),
+      config: {
+        ...JSON.parse(lib.exportConfigJson()),
+        __modules: {
+          methodId: lib.method.id,
+          graderId: lib.grader.id,
+          queueUpdaterId: lib.queueUpdater.id,
+        },
+      },
     });
   }, [sessionId, lib, listId, currentFormat, saveSession]);
 
@@ -210,7 +226,9 @@ export default function LearnPage({ loaderData }: Route.ComponentProps) {
 
   const openSettings = () => {
     pushDialog({
-      content: <LearnSettings lib={lib} onChange={syncProgress} isActive={true} />,
+      content: (
+        <LearnSettings lib={lib} onChange={syncProgress} isActive={true} />
+      ),
       // pos: "right",
     });
   };
@@ -348,7 +366,6 @@ export default function LearnPage({ loaderData }: Route.ComponentProps) {
                       {/* <article className="border left-align round surface-container fill max"> */}
                       <div className="responsive row">
                         <nav className="vertical center-align max">
-
                           <p className="secondary-text medium-text">
                             {t("learn:question")}
                           </p>
@@ -382,17 +399,19 @@ export default function LearnPage({ loaderData }: Route.ComponentProps) {
                       <i className="extra error-text">cancel</i>
                       <h3 className="error-text">{t("learn:incorrect")}</h3>
                       <nav className="responsive row">
-
                         <nav className="vertical center-align max">
                           <p className="secondary-text medium-text">
                             {t("learn:yourAnswer")}
                           </p>
                           <h5 className="error-text">
-                            {feedback.userAnswer || <span className="small-text">{t("learn:noAnswer")}</span>}
+                            {feedback.userAnswer || (
+                              <span className="small-text">
+                                {t("learn:noAnswer")}
+                              </span>
+                            )}
                           </h5>
                         </nav>
                         <nav className="vertical center-align max">
-
                           <p className="secondary-text medium-text">
                             {t("learn:correctAnswer")}
                           </p>
@@ -453,7 +472,7 @@ export default function LearnPage({ loaderData }: Route.ComponentProps) {
           </Card>
         </div>
       </div>
-    </main >
+    </main>
   );
 }
 
@@ -463,9 +482,9 @@ function debugPopup(
   inputFound: boolean,
 ) {
   const mount = () => {
-    alert("mounted window.LIB")
+    alert("mounted window.LIB");
     globalThis.LIB = lib;
-  }
+  };
   return (
     <>
       <button onClick={mount}>Mount</button>

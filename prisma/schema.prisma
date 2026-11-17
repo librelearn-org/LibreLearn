@@ -26,9 +26,10 @@ model User {
   sessions      Session[]
   accounts      Account[]
   lists         list[]
-  trueFlags     flag[]         @relation("trueUser")
-  falseFlags    flag[]         @relation("falseUser")
+  trueFlags     flag[]             @relation("trueUser")
+  falseFlags    flag[]             @relation("falseUser")
   learnSessions learnSession[]
+  cardProgress  userCardProgress[]
 
   @@unique([email])
   @@map("user")
@@ -127,10 +128,31 @@ model learnSessionItemHistory {
   answer String
   grade  Int // Grade enum: 0 (Incorrect), 1 (Hard), 2 (Good), 3 (Easy)
 
-  item   learnSessionItem @relation(fields: [itemId], references: [id], onDelete: Cascade)
-  itemId String
+  item           learnSessionItem? @relation(fields: [itemId], references: [id], onDelete: Cascade)
+  itemId         String?
+  userProgress   userCardProgress? @relation(fields: [userProgressId], references: [id], onDelete: Cascade)
+  userProgressId String?
 
   @@index([itemId])
+  @@index([userProgressId])
+}
+
+model userCardProgress {
+  id           String                    @id @default(uuid())
+  user         User                      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId       String
+  listIds      String[]                  @default([])
+  question     String
+  answer       String
+  phase        Int                       @default(0)
+  methodId     String                    @default("simple")
+  lastReviewed DateTime                  @default(now())
+  nextReview   DateTime                  @default(now())
+  metadata     Json                      @default("{}")
+  history      learnSessionItemHistory[]
+  updatedAt    DateTime                  @updatedAt
+
+  @@unique([userId, question, answer])
 }
 
 model learnSessionItem {

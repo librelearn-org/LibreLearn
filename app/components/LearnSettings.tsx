@@ -17,20 +17,84 @@ function loc(val: string | multiLangString | undefined, lang: string): string {
   );
 }
 
+export interface SelectedLearnModules {
+  methodId: string;
+  graderId: string;
+  queueUpdaterId: string;
+}
+
 export function LearnSettings({
   lib,
   onChange,
   isActive,
+  selectedModules,
+  onModulesChange,
 }: {
   lib?: Learnlib | null;
   onChange?: (configJson: string) => void;
   isActive?: boolean;
+  selectedModules?: SelectedLearnModules;
+  onModulesChange?: (modules: SelectedLearnModules) => void;
 }) {
   const { i18n } = useTranslation();
   const lang = i18n.language || "nl";
   const [sections, setSections] = useState<GuiConfigSection[]>(() =>
     globalModuleTracker.getGuiConfigList(),
   );
+
+  const availableMethods = useMemo(() => globalModuleTracker.getMethods(), []);
+  const availableGraders = useMemo(
+    () => globalModuleTracker.getGradeMakers(),
+    [],
+  );
+  const availableQueueUpdaters = useMemo(
+    () => globalModuleTracker.getQueueUpdaters(),
+    [],
+  );
+
+  const [localModules, setLocalModules] = useState<SelectedLearnModules>(
+    () => ({
+      methodId:
+        selectedModules?.methodId ??
+        lib?.method.id ??
+        availableMethods[0]?.id ??
+        "simple",
+      graderId:
+        selectedModules?.graderId ??
+        lib?.grader.id ??
+        availableGraders[0]?.id ??
+        "basic",
+      queueUpdaterId:
+        selectedModules?.queueUpdaterId ??
+        lib?.queueUpdater.id ??
+        availableQueueUpdaters[0]?.id ??
+        "simple",
+    }),
+  );
+
+  const currentModules = selectedModules ?? localModules;
+
+  const updateModuleSelection = (
+    key: keyof SelectedLearnModules,
+    value: string,
+  ) => {
+    const next = { ...currentModules, [key]: value };
+    setLocalModules(next);
+    if (lib) {
+      if (key === "methodId") {
+        const mod = globalModuleTracker.getMethod(value);
+        if (mod) lib.method = mod;
+      } else if (key === "graderId") {
+        const mod = globalModuleTracker.getGradeMaker(value);
+        if (mod) lib.grader = mod;
+      } else if (key === "queueUpdaterId") {
+        const mod = globalModuleTracker.getQueueUpdater(value);
+        if (mod) lib.queueUpdater = mod;
+      }
+    }
+    onModulesChange?.(next);
+    onChange?.(globalModuleTracker.exportConfigJson());
+  };
 
   const updateField = (
     section: GuiConfigSection,
@@ -60,19 +124,21 @@ export function LearnSettings({
     if (lib) {
       lib.reset();
     }
-  }
+  };
 
   const configurable = sections.filter(
     (s) =>
       Object.keys(s.schema).length > 0 &&
-      // (s.type !== "method" || !lib || s.id === lib.method.id),
-      (s.type == "preprocessor" || s.type == "checker" || lib?.method.id == s.id || lib?.grader.id == s.id || lib?.queueUpdater.id == s.id), // enkel preprocessors en de selected modules.
+      (s.type === "preprocessor" ||
+        s.type === "checker" ||
+        (s.type === "method" && currentModules.methodId === s.id) ||
+        (s.type === "gradeMaker" && currentModules.graderId === s.id) ||
+        (s.type === "queueUpdater" && currentModules.queueUpdaterId === s.id)),
   );
 
   return (
     <nav className="vertical left-align">
       <div>
-
         {/* <article className="max"> */}
         <nav className="no-space max">
           <h3 className="max">
@@ -85,12 +151,52 @@ export function LearnSettings({
           >
             Reset
           </Button>
-          {isActive && <Button
-            onClick={reset}>
-            Herstart leren
-          </Button>}
+          {isActive && <Button onClick={reset}>Herstart leren</Button>}
         </nav>
         <Space></Space>
+        <div className="small-padding">
+          <Select
+            label={lang.startsWith("nl") ? "Leermethode" : "Learning Method"}
+            value={currentModules.methodId}
+            onChange={(e) =>
+              updateModuleSelection("methodId", e.currentTarget.value)
+            }
+          >
+            {availableMethods.map((m) => (
+              <option key={m.id} value={m.id}>
+                {loc(m.name, lang) || m.id}
+              </option>
+            ))}
+          </Select>
+          <Space size="small-space" />
+          <Select
+            label={lang.startsWith("nl") ? "Beoordelaar (Grader)" : "Grader"}
+            value={currentModules.graderId}
+            onChange={(e) =>
+              updateModuleSelection("graderId", e.currentTarget.value)
+            }
+          >
+            {availableGraders.map((g) => (
+              <option key={g.id} value={g.id}>
+                {loc(g.name, lang) || g.id}
+              </option>
+            ))}
+          </Select>
+          <Space size="small-space" />
+          <Select
+            label={lang.startsWith("nl") ? "Wachtrij-updater" : "Queue Updater"}
+            value={currentModules.queueUpdaterId}
+            onChange={(e) =>
+              updateModuleSelection("queueUpdaterId", e.currentTarget.value)
+            }
+          >
+            {availableQueueUpdaters.map((q) => (
+              <option key={q.id} value={q.id}>
+                {loc(q.name, lang) || q.id}
+              </option>
+            ))}
+          </Select>
+        </div>
         {configurable.map((sec) => (
           <>
             <hr />
@@ -108,7 +214,9 @@ export function LearnSettings({
                       <div className="max">
                         <div>{label}</div>
                         {desc && (
-                          <div className="secondary-text small-text">{desc}</div>
+                          <div className="secondary-text small-text">
+                            {desc}
+                          </div>
                         )}
                       </div>
                       <Switch
@@ -173,7 +281,9 @@ export function LearnSettings({
                     type="text"
                     label={label}
                     value={String(val ?? "")}
-                    onChange={(e) => updateField(sec, key, e.currentTarget.value)}
+                    onChange={(e) =>
+                      updateField(sec, key, e.currentTarget.value)
+                    }
                   />
                   {desc && (
                     <div className="secondary-text small-text">{desc}</div>
@@ -185,7 +295,6 @@ export function LearnSettings({
         ))}
         {/* </article> */}
       </div>
-
     </nav>
   );
 }

@@ -1,9 +1,19 @@
-import { Button, Card, Progress, Select, Space } from "@siemsiem/beerreact";
+import {
+  Button,
+  Card,
+  Progress,
+  Select,
+  Space,
+  Switch,
+} from "@siemsiem/beerreact";
 import { globalModuleTracker } from "@siemsiem/learnlib";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useCallback, useEffect, useState } from "react";
 import { useNavigate, useParams, useSearchParams } from "react-router";
-import { LearnSettings } from "~/components/LearnSettings";
+import {
+  LearnSettings,
+  type SelectedLearnModules,
+} from "~/components/LearnSettings";
 import { omzetLijstNaarKaartStaten } from "~/utils/learn/omzet";
 import { useTRPC } from "~/utils/trpc/react";
 import { learnFormat } from "../../../generated/prisma/enums";
@@ -19,10 +29,18 @@ export default function SessionStartPage() {
     searchParams.get("type");
   const initialFormat =
     initialFormatParam &&
-      Object.values(learnFormat).includes(initialFormatParam as learnFormat)
+    Object.values(learnFormat).includes(initialFormatParam as learnFormat)
       ? (initialFormatParam as learnFormat)
       : learnFormat.toets;
   const [format, setformat] = useState<learnFormat>(initialFormat);
+  const [useSavedProgress, setUseSavedProgress] = useState(true);
+  const [selectedModules, setSelectedModules] = useState<SelectedLearnModules>(
+    () => ({
+      methodId: globalModuleTracker.getMethods()[0]?.id ?? "simple",
+      graderId: globalModuleTracker.getGradeMakers()[0]?.id ?? "basic",
+      queueUpdaterId: globalModuleTracker.getQueueUpdaters()[0]?.id ?? "simple",
+    }),
+  );
   const [configJson, setConfigJson] = useState<string>(() =>
     globalModuleTracker.exportConfigJson(),
   );
@@ -49,6 +67,13 @@ export default function SessionStartPage() {
     ),
   );
 
+  const listProgress = useQuery(
+    trpc.learn.getListProgress.queryOptions(
+      { id: listId },
+      { enabled: Boolean(listId) },
+    ),
+  );
+
   const handleCreateSession = useCallback(() => {
     setError(null);
     try {
@@ -58,13 +83,18 @@ export default function SessionStartPage() {
       ) {
         const kaartStaten = omzetLijstNaarKaartStaten(
           loadListData.data.listItems,
+          selectedModules.methodId,
         );
         make.mutate({
           listId: loadListData.data.id,
           wachtrij: kaartStaten,
           lijst: kaartStaten,
           methode: format,
-          config: JSON.parse(configJson),
+          config: {
+            ...JSON.parse(configJson),
+            __modules: selectedModules,
+          },
+          useSavedProgress,
         });
       } else {
         throw new Error(
@@ -78,7 +108,14 @@ export default function SessionStartPage() {
           : "Er is een fout opgetreden bij het aanmaken van de sessie.",
       );
     }
-  }, [loadListData.data, format, configJson, make]);
+  }, [
+    loadListData.data,
+    format,
+    configJson,
+    selectedModules,
+    useSavedProgress,
+    make,
+  ]);
 
   useEffect(() => {
     const auto =
@@ -171,6 +208,29 @@ export default function SessionStartPage() {
                 <option value={learnFormat.gedachten}>Gedachten</option>
               </Select>
 
+              {listProgress.data && listProgress.data.learnedCount > 0 && (
+                <>
+                  <Space size="small-space" />
+                  <nav className="no-space">
+                    <div className="max">
+                      <div>Eerdere voortgang meenemen</div>
+                      <div className="secondary-text small-text">
+                        {listProgress.data.learnedCount} van{" "}
+                        {listProgress.data.totalCount} kaarten hebben eerdere
+                        leervoortgang
+                      </div>
+                    </div>
+                    <Switch
+                      checked={useSavedProgress}
+                      onChange={(e) =>
+                        setUseSavedProgress(e.currentTarget.checked)
+                      }
+                      icon=""
+                    />
+                  </nav>
+                </>
+              )}
+
               <Space />
 
               <Button
@@ -205,7 +265,11 @@ export default function SessionStartPage() {
             <Space />
 
             <Card>
-              <LearnSettings onChange={setConfigJson} />
+              <LearnSettings
+                selectedModules={selectedModules}
+                onModulesChange={setSelectedModules}
+                onChange={setConfigJson}
+              />
             </Card>
           </>
         )}
