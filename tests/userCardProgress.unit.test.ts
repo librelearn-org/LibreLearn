@@ -64,6 +64,19 @@ function createInMemoryPrisma() {
     }
   >();
 
+  const listSettings = new Map<
+    string,
+    {
+      id: string;
+      userId: string;
+      listId: string;
+      learnFormat: learnFormat;
+      methodId: string;
+      graderId: string;
+      queueUpdaterId: string;
+    }
+  >();
+
   const progressKey = (userId: string, question: string, answer: string) =>
     `${userId}\0${question}\0${answer}`;
 
@@ -77,6 +90,17 @@ function createInMemoryPrisma() {
     user: {
       findUnique: async ({ where }: { where: { id: string } }) =>
         users.get(where.id) ?? { id: where.id, learnConfig: {} },
+      update: async ({
+        where,
+        data,
+      }: {
+        where: { id: string };
+        data: { learnConfig: object };
+      }) => {
+        const updated = { id: where.id, learnConfig: data.learnConfig };
+        users.set(where.id, updated);
+        return updated;
+      },
     },
     list: {
       findFirst: async ({ where }: { where: { id: string } }) =>
@@ -303,6 +327,64 @@ function createInMemoryPrisma() {
           })),
         };
         userProgress.set(k, row);
+        return row;
+      },
+    },
+    userListSettings: {
+      findUnique: async ({
+        where,
+      }: {
+        where: { userId_listId: { userId: string; listId: string } };
+      }) =>
+        listSettings.get(
+          `${where.userId_listId.userId}\0${where.userId_listId.listId}`,
+        ) ?? null,
+      upsert: async ({
+        where,
+        create,
+        update,
+      }: {
+        where: { userId_listId: { userId: string; listId: string } };
+        create: {
+          userId: string;
+          listId: string;
+          learnFormat?: learnFormat;
+          methodId?: string;
+          graderId?: string;
+          queueUpdaterId?: string;
+        };
+        update: {
+          learnFormat?: learnFormat;
+          methodId?: string;
+          graderId?: string;
+          queueUpdaterId?: string;
+        };
+      }) => {
+        const k = `${where.userId_listId.userId}\0${where.userId_listId.listId}`;
+        const existing = listSettings.get(k);
+        const row = {
+          id: existing?.id ?? crypto.randomUUID(),
+          userId: where.userId_listId.userId,
+          listId: where.userId_listId.listId,
+          learnFormat:
+            update.learnFormat ??
+            create.learnFormat ??
+            existing?.learnFormat ??
+            learnFormat.toets,
+          methodId:
+            update.methodId ??
+            create.methodId ??
+            existing?.methodId ??
+            "simple",
+          graderId:
+            update.graderId ?? create.graderId ?? existing?.graderId ?? "basic",
+          queueUpdaterId:
+            update.queueUpdaterId ??
+            create.queueUpdaterId ??
+            existing?.queueUpdaterId ??
+            "simple",
+        };
+        listSettings.set(k, row);
         return row;
       },
     },
@@ -598,5 +680,35 @@ describe("userCardProgress persistence", () => {
     expect(listAProgress).toHaveLength(1);
     expect(listAProgress[0].question).toBe("boom");
     expect(listAProgress[0].history).toHaveLength(1);
+  });
+
+  it("remembers last selected format and modules per list in userListSettings", async () => {
+    const { prismaMock } = createInMemoryPrisma();
+    const listId = crypto.randomUUID();
+    const caller = appRouter.createCaller({
+      prisma: prismaMock,
+      user: { id: "user-1", role: "user" },
+    } as unknown as CallerContext);
+
+    await caller.learn.upsertLearnSession({
+      listId,
+      methode: learnFormat.leren,
+      config: {
+        __modules: {
+          methodId: "fsrs",
+          graderId: "basic",
+          queueUpdaterId: "simple",
+        },
+      },
+      lijst: [{ question: "zon", answer: "sun" }],
+      wachtrij: [{ question: "zon", answer: "sun" }],
+    });
+
+    const settings = await caller.learn.getListSettings({ id: listId });
+    expect(settings).not.toBeNull();
+    expect(settings?.learnFormat).toBe(learnFormat.leren);
+    expect(settings?.methodId).toBe("fsrs");
+    expect(settings?.graderId).toBe("basic");
+    expect(settings?.queueUpdaterId).toBe("simple");
   });
 });

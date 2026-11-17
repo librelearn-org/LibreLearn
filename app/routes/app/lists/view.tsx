@@ -45,6 +45,13 @@ export default function view({ params }: Route.ComponentProps) {
     ),
   );
 
+  const listLearnHistData = useQuery(
+    trpc.learn.getListCardProgress.queryOptions(
+      { id: listId || params.listId },
+      { enabled: !!(listId || params.listId) },
+    )
+  )
+
   const startSession = useMutation({
     ...trpc.learn.upsertLearnSession.mutationOptions(),
     onSuccess(session) {

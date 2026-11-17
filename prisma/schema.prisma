@@ -30,6 +30,7 @@ model User {
   falseFlags    flag[]             @relation("falseUser")
   learnSessions learnSession[]
   cardProgress  userCardProgress[]
+  listSettings  userListSettings[]
 
   @@unique([email])
   @@map("user")
@@ -104,6 +105,7 @@ model list {
   fromLanguage  String
   toLanguage    String
   learnSessions learnSession[]
+  userSettings  userListSettings[]
 }
 
 enum learnFormat {
@@ -153,6 +155,21 @@ model userCardProgress {
   updatedAt    DateTime                  @updatedAt
 
   @@unique([userId, question, answer])
+}
+
+model userListSettings {
+  id             String      @id @default(uuid())
+  user           User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId         String
+  list           list        @relation(fields: [listId], references: [id], onDelete: Cascade)
+  listId         String
+  learnFormat    learnFormat @default(toets)
+  methodId       String      @default("simple")
+  graderId       String      @default("basic")
+  queueUpdaterId String      @default("simple")
+  updatedAt      DateTime    @updatedAt
+
+  @@unique([userId, listId])
 }
 
 model learnSessionItem {

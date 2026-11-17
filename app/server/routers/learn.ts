@@ -31,11 +31,23 @@ function isPlainObject(val: unknown): val is Record<string, unknown> {
   return Boolean(val) && typeof val === "object" && !Array.isArray(val);
 }
 
-function extractSessionMethodId(config: unknown): string | undefined {
+function extractSessionModules(
+  config: unknown,
+): Record<string, string> | undefined {
   if (!isPlainObject(config)) return undefined;
   const modules = config.__modules;
   if (!isPlainObject(modules)) return undefined;
-  return typeof modules.methodId === "string" ? modules.methodId : undefined;
+  const result: Record<string, string> = {};
+  if (typeof modules.methodId === "string") result.methodId = modules.methodId;
+  if (typeof modules.graderId === "string") result.graderId = modules.graderId;
+  if (typeof modules.queueUpdaterId === "string") {
+    result.queueUpdaterId = modules.queueUpdaterId;
+  }
+  return Object.keys(result).length > 0 ? result : undefined;
+}
+
+function extractSessionMethodId(config: unknown): string | undefined {
+  return extractSessionModules(config)?.methodId;
 }
 
 /**
@@ -511,6 +523,22 @@ export const learnRouting = {
         orderBy: { updatedAt: "desc" },
       });
     }),
+  getListSettings: protectedProcedure
+    .input(
+      z.object({
+        id: z.string().min(1),
+      }),
+    )
+    .query(async ({ input, ctx }) => {
+      return await ctx.prisma.userListSettings.findUnique({
+        where: {
+          userId_listId: {
+            userId: ctx.user.id,
+            listId: input.id,
+          },
+        },
+      });
+    }),
   getLearnSession: protectedProcedure
     .input(
       z.object({
@@ -635,6 +663,36 @@ export const learnRouting = {
           where: { id: ctx.user.id },
           select: { learnConfig: true },
         });
+
+        if (input.listId) {
+          const modules = extractSessionModules(input.config);
+          await ctx.prisma.userListSettings.upsert({
+            where: {
+              userId_listId: {
+                userId: ctx.user.id,
+                listId: input.listId,
+              },
+            },
+            create: {
+              userId: ctx.user.id,
+              listId: input.listId,
+              ...(input.methode ? { learnFormat: input.methode } : {}),
+              ...(modules?.methodId ? { methodId: modules.methodId } : {}),
+              ...(modules?.graderId ? { graderId: modules.graderId } : {}),
+              ...(modules?.queueUpdaterId
+                ? { queueUpdaterId: modules.queueUpdaterId }
+                : {}),
+            },
+            update: {
+              ...(input.methode ? { learnFormat: input.methode } : {}),
+              ...(modules?.methodId ? { methodId: modules.methodId } : {}),
+              ...(modules?.graderId ? { graderId: modules.graderId } : {}),
+              ...(modules?.queueUpdaterId
+                ? { queueUpdaterId: modules.queueUpdaterId }
+                : {}),
+            },
+          });
+        }
 
         let itemsToCreate = masterItems;
         if (input.useSavedProgress !== false && masterItems.length > 0) {

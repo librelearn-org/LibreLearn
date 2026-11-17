@@ -7,8 +7,8 @@ import {
   Switch,
 } from "@siemsiem/beerreact";
 import { globalModuleTracker } from "@siemsiem/learnlib";
-import { useMutation, useQuery } from "@tanstack/react-query";
-import { useCallback, useEffect, useState } from "react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useNavigate, useParams, useSearchParams } from "react-router";
 import {
   LearnSettings,
@@ -49,9 +49,16 @@ export default function SessionStartPage() {
     params.listId || searchParams.get("listId") || searchParams.get("id") || "";
 
   const trpc = useTRPC();
+  const queryClient = useQueryClient();
   const make = useMutation(
     trpc.learn.upsertLearnSession.mutationOptions({
       onSuccess: (createdSession) => {
+        queryClient.invalidateQueries(
+          trpc.learn.getListSettings.queryFilter({ id: listId }),
+        );
+        queryClient.invalidateQueries(
+          trpc.learn.getListProgress.queryFilter({ id: listId }),
+        );
         navigate(`/app/learn/${createdSession.id}?type=session`);
       },
       onError: (myError) => {
@@ -70,9 +77,34 @@ export default function SessionStartPage() {
   const listProgress = useQuery(
     trpc.learn.getListProgress.queryOptions(
       { id: listId },
-      { enabled: Boolean(listId) },
+      { enabled: Boolean(listId), staleTime: 0 },
     ),
   );
+
+  const listSettingsQuery = useQuery(
+    trpc.learn.getListSettings.queryOptions(
+      { id: listId },
+      { enabled: Boolean(listId), staleTime: 0 },
+    ),
+  );
+  const hasRestoredDefaults = useRef(false);
+
+  useEffect(() => {
+    if (hasRestoredDefaults.current || !listId || !listSettingsQuery.data) {
+      return;
+    }
+    hasRestoredDefaults.current = true;
+    const saved = listSettingsQuery.data;
+
+    if (!initialFormatParam && saved.learnFormat) {
+      setformat(saved.learnFormat);
+    }
+    setSelectedModules({
+      methodId: saved.methodId,
+      graderId: saved.graderId,
+      queueUpdaterId: saved.queueUpdaterId,
+    });
+  }, [listId, listSettingsQuery.data, initialFormatParam]);
 
   const handleCreateSession = useCallback(() => {
     setError(null);

@@ -78,6 +78,7 @@ export function LearnSettings({
     key: keyof SelectedLearnModules,
     value: string,
   ) => {
+    if (isActive && key === "methodId") return;
     const next = { ...currentModules, [key]: value };
     setLocalModules(next);
     if (lib) {
@@ -158,6 +159,7 @@ export function LearnSettings({
           <Select
             label={lang.startsWith("nl") ? "Leermethode" : "Learning Method"}
             value={currentModules.methodId}
+            disabled={isActive}
             onChange={(e) =>
               updateModuleSelection("methodId", e.currentTarget.value)
             }
