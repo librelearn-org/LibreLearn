@@ -210,7 +210,7 @@ export default function LearnPage({ loaderData }: Route.ComponentProps) {
 
   const openSettings = () => {
     pushDialog({
-      content: <LearnSettings lib={lib} onChange={syncProgress} />,
+      content: <LearnSettings lib={lib} onChange={syncProgress} isActive={true} />,
       // pos: "right",
     });
   };
@@ -293,9 +293,9 @@ export default function LearnPage({ loaderData }: Route.ComponentProps) {
               </div>
             ) : isFlashcardMode ? (
               <nav className="vertical center-align no-space">
-                <p className="secondary-text small-text">
+                {/* <p className="secondary-text small-text">
                   {t("learn:question")}
-                </p>
+                </p> */}
                 <h3 className={classNames.text.bold}>
                   {state.queueState.current?.question}
                 </h3>
@@ -342,24 +342,30 @@ export default function LearnPage({ loaderData }: Route.ComponentProps) {
               feedback ? (
                 <nav className="vertical center-align no-space">
                   {feedback.isCorrect ? (
-                    <div className="center-align">
+                    <div className="center-align responsive">
                       <i className="extra green-text">check_circle</i>
                       <h3 className="green-text">{t("learn:correct")}</h3>
-                      <article className="border left-align round surface-container fill">
-                        <p className="secondary-text medium-text">
-                          {t("learn:question")}
-                        </p>
-                        <h5 className={classNames.text.bold}>
-                          {feedback.question}
-                        </h5>
-                        <div className="small-space"></div>
-                        <p className="secondary-text medium-text">
-                          {t("learn:yourAnswer")}
-                        </p>
-                        <h5 className="green-text bold">
-                          {feedback.userAnswer}
-                        </h5>
-                      </article>
+                      {/* <article className="border left-align round surface-container fill max"> */}
+                      <div className="responsive row">
+                        <nav className="vertical center-align max">
+
+                          <p className="secondary-text medium-text">
+                            {t("learn:question")}
+                          </p>
+                          <h5 className={classNames.text.bold}>
+                            {feedback.question}
+                          </h5>
+                        </nav>
+                        <nav className="vertical center-align max">
+                          <p className="secondary-text medium-text">
+                            {t("learn:yourAnswer")}
+                          </p>
+                          <h5 className="green-text bold">
+                            {feedback.userAnswer}
+                          </h5>
+                        </nav>
+                      </div>
+                      {/* </article> */}
                       <Space />
                       <Button
                         autoFocus
@@ -372,31 +378,29 @@ export default function LearnPage({ loaderData }: Route.ComponentProps) {
                       </Button>
                     </div>
                   ) : (
-                    <div className="center-align">
+                    <div className="center-align responsive">
                       <i className="extra error-text">cancel</i>
                       <h3 className="error-text">{t("learn:incorrect")}</h3>
-                      <article className="border left-align round surface-container fill">
-                        <p className="secondary-text medium-text">
-                          {t("learn:question")}
-                        </p>
-                        <h5 className={classNames.text.bold}>
-                          {feedback.question}
-                        </h5>
-                        <div className="small-space"></div>
-                        <p className="secondary-text medium-text">
-                          {t("learn:yourAnswer")}
-                        </p>
-                        <h5 className="error-text bold">
-                          {feedback.userAnswer || <i>{t("learn:noAnswer")}</i>}
-                        </h5>
-                        <div className="small-space"></div>
-                        <p className="secondary-text medium-text">
-                          {t("learn:correctAnswer")}
-                        </p>
-                        <h5 className="green-text bold">
-                          {feedback.expectedAnswer}
-                        </h5>
-                      </article>
+                      <nav className="responsive row">
+
+                        <nav className="vertical center-align max">
+                          <p className="secondary-text medium-text">
+                            {t("learn:yourAnswer")}
+                          </p>
+                          <h5 className="error-text">
+                            {feedback.userAnswer || <span className="small-text">{t("learn:noAnswer")}</span>}
+                          </h5>
+                        </nav>
+                        <nav className="vertical center-align max">
+
+                          <p className="secondary-text medium-text">
+                            {t("learn:correctAnswer")}
+                          </p>
+                          <h5 className="green-text">
+                            {feedback.expectedAnswer}
+                          </h5>
+                        </nav>
+                      </nav>
                       <Space />
                       <nav className="responsive center-align">
                         <Button
@@ -421,9 +425,9 @@ export default function LearnPage({ loaderData }: Route.ComponentProps) {
               ) : (
                 <form onSubmit={handleSubmit}>
                   <nav className="vertical center-align no-space">
-                    <p className="secondary-text small-text">
+                    {/* <p className="secondary-text small-text">
                       {t("learn:question")}
-                    </p>
+                    </p> */}
                     <h3 className={classNames.text.bold}>
                       {state.queueState.current?.question}
                     </h3>
@@ -449,7 +453,7 @@ export default function LearnPage({ loaderData }: Route.ComponentProps) {
           </Card>
         </div>
       </div>
-    </main>
+    </main >
   );
 }
 
@@ -458,8 +462,13 @@ function debugPopup(
   lib: Learnlib | null | undefined,
   inputFound: boolean,
 ) {
+  const mount = () => {
+    alert("mounted window.LIB")
+    globalThis.LIB = lib;
+  }
   return (
     <>
+      <button onClick={mount}>Mount</button>
       <nav className="row items-center">
         <h2 className="max">Leersessie</h2>
       </nav>

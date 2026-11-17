@@ -6,7 +6,7 @@ import {
   type multiLangString,
   type SchemaField,
 } from "@siemsiem/learnlib";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 function loc(val: string | multiLangString | undefined, lang: string): string {
@@ -20,9 +20,11 @@ function loc(val: string | multiLangString | undefined, lang: string): string {
 export function LearnSettings({
   lib,
   onChange,
+  isActive,
 }: {
   lib?: Learnlib | null;
   onChange?: (configJson: string) => void;
+  isActive?: boolean;
 }) {
   const { i18n } = useTranslation();
   const lang = i18n.language || "nl";
@@ -54,11 +56,17 @@ export function LearnSettings({
     setSections(globalModuleTracker.getGuiConfigList());
     onChange?.(globalModuleTracker.exportConfigJson());
   };
+  const reset = () => {
+    if (lib) {
+      lib.reset();
+    }
+  }
 
   const configurable = sections.filter(
     (s) =>
       Object.keys(s.schema).length > 0 &&
-      (s.type !== "method" || !lib || s.id === lib.method.id),
+      // (s.type !== "method" || !lib || s.id === lib.method.id),
+      (s.type == "preprocessor" || s.type == "checker" || lib?.method.id == s.id || lib?.grader.id == s.id || lib?.queueUpdater.id == s.id), // enkel preprocessors en de selected modules.
   );
 
   return (
@@ -77,6 +85,10 @@ export function LearnSettings({
           >
             Reset
           </Button>
+          {isActive && <Button
+            onClick={reset}>
+            Herstart leren
+          </Button>}
         </nav>
         <Space></Space>
         {configurable.map((sec) => (

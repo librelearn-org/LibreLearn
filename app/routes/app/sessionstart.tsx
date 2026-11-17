@@ -1,8 +1,10 @@
-import { useState, useEffect, useCallback } from "react";
-import { useNavigate, useSearchParams, useParams } from "react-router";
-import { Button, Card, Progress, Select } from "@siemsiem/beerreact";
-import { omzetLijstNaarKaartStaten } from "~/utils/learn/omzet";
+import { Button, Card, Progress, Select, Space } from "@siemsiem/beerreact";
+import { globalModuleTracker } from "@siemsiem/learnlib";
 import { useMutation, useQuery } from "@tanstack/react-query";
+import { useCallback, useEffect, useState } from "react";
+import { useNavigate, useParams, useSearchParams } from "react-router";
+import { LearnSettings } from "~/components/LearnSettings";
+import { omzetLijstNaarKaartStaten } from "~/utils/learn/omzet";
 import { useTRPC } from "~/utils/trpc/react";
 import { learnFormat } from "../../../generated/prisma/enums";
 
@@ -17,10 +19,13 @@ export default function SessionStartPage() {
     searchParams.get("type");
   const initialFormat =
     initialFormatParam &&
-    Object.values(learnFormat).includes(initialFormatParam as any)
+      Object.values(learnFormat).includes(initialFormatParam as learnFormat)
       ? (initialFormatParam as learnFormat)
       : learnFormat.toets;
   const [format, setformat] = useState<learnFormat>(initialFormat);
+  const [configJson, setConfigJson] = useState<string>(() =>
+    globalModuleTracker.exportConfigJson(),
+  );
 
   const listId =
     params.listId || searchParams.get("listId") || searchParams.get("id") || "";
@@ -38,7 +43,10 @@ export default function SessionStartPage() {
   );
 
   const loadListData = useQuery(
-    trpc.learn.getList.queryOptions({ id: listId }),
+    trpc.learn.getList.queryOptions(
+      { id: listId },
+      { enabled: Boolean(listId) },
+    ),
   );
 
   const handleCreateSession = useCallback(() => {
@@ -56,19 +64,21 @@ export default function SessionStartPage() {
           wachtrij: kaartStaten,
           lijst: kaartStaten,
           methode: format,
+          config: JSON.parse(configJson),
         });
       } else {
         throw new Error(
           "Geen geldige lijst gevonden of de lijst heeft geen vragen.",
         );
       }
-    } catch (e: any) {
+    } catch (e: unknown) {
       setError(
-        e?.message ||
-          "Er is een fout opgetreden bij het aanmaken van de sessie.",
+        e instanceof Error
+          ? e.message
+          : "Er is een fout opgetreden bij het aanmaken van de sessie.",
       );
     }
-  }, [loadListData.data, format, make]);
+  }, [loadListData.data, format, configJson, make]);
 
   useEffect(() => {
     const auto =
@@ -94,25 +104,60 @@ export default function SessionStartPage() {
   ]);
 
   return (
-    <div style={{ padding: "1.5rem", maxWidth: "600px", margin: "0 auto" }}>
-      {!listId ? (
-        <Card>
-          <p style={{ color: "red" }}>Geen lijst ID opgegeven.</p>
-        </Card>
-      ) : loadListData.isPending ? (
-        <Progress />
-      ) : (
-        <Card>
-          <h3>Sessie Starten</h3>
-          {loadListData.data ? (
-            <>
-              <p>
-                <strong>Lijst:</strong> {loadListData.data.name}
-              </p>
-              <p>
-                <strong>Aantal vragen:</strong>{" "}
-                {loadListData.data.listItems.length}
-              </p>
+    <main className="responsive">
+      <div className="large-width" style={{ margin: "0 auto" }}>
+        <nav>
+          <Button
+            variant="transparent"
+            icon="arrow_back"
+            onClick={() =>
+              navigate(listId ? `/app/lists/${listId}` : "/app/lists/mylists")
+            }
+          >
+            Terug naar lijst
+          </Button>
+        </nav>
+
+        <Space size="small-space" />
+
+        {!listId ? (
+          <Card>
+            <div className="center-align padding">
+              <i className="extra error-text">error</i>
+              <p className="error-text">Geen lijst ID opgegeven.</p>
+            </div>
+          </Card>
+        ) : loadListData.isPending ? (
+          <Card>
+            <div className="center-align padding">
+              <Progress />
+              <Space size="small-space" />
+              <p className="secondary-text">Lijst laden...</p>
+            </div>
+          </Card>
+        ) : !loadListData.data ? (
+          <Card>
+            <div className="center-align padding">
+              <i className="extra error-text">search_off</i>
+              <p className="error-text">Lijst niet gevonden.</p>
+            </div>
+          </Card>
+        ) : (
+          <>
+            <Card>
+              <nav className="no-space">
+                <div className="max">
+                  <h2 style={{ margin: "0.25rem 0 0" }}>
+                    {loadListData.data.name}
+                  </h2>
+                </div>
+                <span className="chip small">
+                  <i>quiz</i>
+                  <span>{loadListData.data.listItems.length} vragen</span>
+                </span>
+              </nav>
+
+              <Space />
 
               <Select
                 label="Leermethode"
@@ -126,37 +171,45 @@ export default function SessionStartPage() {
                 <option value={learnFormat.gedachten}>Gedachten</option>
               </Select>
 
+              <Space />
+
               <Button
                 onClick={handleCreateSession}
                 disabled={
                   make.isPending || loadListData.data.listItems.length === 0
                 }
-                icon="add"
+                icon="play_arrow"
+                size="large"
+                responsive
               >
-                {make.isPending ? "Sessie aanmaken..." : "Start!"}
+                {make.isPending ? "Sessie aanmaken..." : "Start sessie"}
               </Button>
-            </>
-          ) : (
-            <>
-              <p style={{ color: "red" }}>Lijst niet gevonden.</p>
-            </>
-          )}
 
-          {make.isPending && (
-            <div style={{ marginTop: "1rem" }}>
-              <Progress />
-            </div>
-          )}
+              {make.isPending && (
+                <>
+                  <Space size="small-space" />
+                  <Progress />
+                </>
+              )}
 
-          {error && (
-            <div style={{ color: "red", marginTop: "1rem" }}>
-              <p>
-                <strong>Fout:</strong> {error}
-              </p>
-            </div>
-          )}
-        </Card>
-      )}
-    </div>
+              {error && (
+                <>
+                  <Space size="small-space" />
+                  <p className="error-text">
+                    <strong>Fout:</strong> {error}
+                  </p>
+                </>
+              )}
+            </Card>
+
+            <Space />
+
+            <Card>
+              <LearnSettings onChange={setConfigJson} />
+            </Card>
+          </>
+        )}
+      </div>
+    </main>
   );
 }
