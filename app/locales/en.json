@@ -85,7 +85,11 @@
     "onlyTestSupported": "Only test mode works for now",
     "showAnswer": "Show answer",
     "know": "I knew it",
-    "dontKnow": "Did not know"
+    "dontKnow": "Did not know",
+    "howWellDidYouKnow": "How well did you know it?",
+    "gradeHard": "Hard",
+    "gradeGood": "Good",
+    "gradeEasy": "Easy"
   },
   "icons": {
     "from": "From",
@@ -132,7 +136,7 @@
     "greetingMorning": "Good morning, {{name}}!",
     "greetingEvening": "Good evening, {{name}}!",
     "description": "This is not the complete version of Librelearn yet. This is only the beta version.",
-    "openSessions": "Open sessions",
+    "openSessions": "Continue where you left off",
     "noOpenSessions": "No open sessions.",
     "itemsRemaining": "{{count}} remaining",
     "unnamedSession": "Learn session"

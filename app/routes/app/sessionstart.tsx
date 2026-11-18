@@ -13,7 +13,7 @@ import { useNavigate, useParams, useSearchParams } from "react-router";
 import {
   LearnSettings,
   type SelectedLearnModules,
-} from "~/components/LearnSettings";
+} from "~/components/learn/LearnSettings";
 import { omzetLijstNaarKaartStaten } from "~/utils/learn/omzet";
 import { useTRPC } from "~/utils/trpc/react";
 import { learnFormat } from "../../../generated/prisma/enums";
@@ -29,7 +29,7 @@ export default function SessionStartPage() {
     searchParams.get("type");
   const initialFormat =
     initialFormatParam &&
-    Object.values(learnFormat).includes(initialFormatParam as learnFormat)
+      Object.values(learnFormat).includes(initialFormatParam as learnFormat)
       ? (initialFormatParam as learnFormat)
       : learnFormat.toets;
   const [format, setformat] = useState<learnFormat>(initialFormat);

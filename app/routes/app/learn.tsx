@@ -19,7 +19,7 @@ import { useMutation } from "@tanstack/react-query";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router";
-import { LearnSettings } from "~/components/LearnSettings";
+import { LearnSettings } from "~/components/learn/LearnSettings";
 import { trpcClient } from "~/utils/trpc/client";
 import { useTRPC } from "~/utils/trpc/react";
 import { learnFormat } from "../../../generated/prisma/enums";
@@ -70,6 +70,7 @@ export default function LearnPage({ loaderData }: Route.ComponentProps) {
   const { pushDialog } = useDialog();
   const veld = useRef<HTMLInputElement>(null);
   const [feedback, setFeedback] = useState<FeedbackState | null>(null);
+  const [isOverridden, setIsOverridden] = useState(false);
   const [showFlashcardAnswer, setShowFlashcardAnswer] = useState(false);
 
   const sessionId = loaderData.sessionData?.id;
@@ -186,14 +187,24 @@ export default function LearnPage({ loaderData }: Route.ComponentProps) {
         veld.current.value = "";
       }
       setFeedback(null);
+      setIsOverridden(false);
       syncProgress();
     },
     [lib, feedback, syncProgress],
   );
 
+  const isAskMeGrader = lib?.grader.id === "noGradeMaker";
+  const needsGradeInput = Boolean(
+    feedback && isAskMeGrader && (feedback.isCorrect || isOverridden),
+  );
+
   const handleOverride = useCallback(() => {
+    if (isAskMeGrader) {
+      setIsOverridden(true);
+      return;
+    }
     handleContinue(Grade.Good);
-  }, [handleContinue]);
+  }, [handleContinue, isAskMeGrader]);
 
   const handleFlashcardGrade = (grade: Grade) => {
     if (!lib || !state?.queueState.current) return;
@@ -203,7 +214,7 @@ export default function LearnPage({ loaderData }: Route.ComponentProps) {
   };
 
   useEffect(() => {
-    if (!feedback) return;
+    if (!feedback || needsGradeInput) return;
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Enter") {
         if (document.activeElement?.getAttribute("data-override") === "true") {
@@ -215,7 +226,7 @@ export default function LearnPage({ loaderData }: Route.ComponentProps) {
     };
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [feedback, handleContinue]);
+  }, [feedback, needsGradeInput, handleContinue]);
 
   const dbg = () => {
     pushDialog({
@@ -240,6 +251,38 @@ export default function LearnPage({ loaderData }: Route.ComponentProps) {
   const totalCount = state?.queueState.initialCount ?? 0;
   const queueCount = state?.queue.length ?? 0;
   const isKlaar = state?.queueState.isDone ?? false;
+
+  const gradeButtons = (
+    <>
+      <p className="secondary-text small-text">
+        {t("learn:howWellDidYouKnow")}
+      </p>
+      <nav className="responsive center-align">
+        <Button
+          onClick={() => handleContinue(Grade.Hard)}
+          icon="sentiment_neutral"
+          variant="transparent"
+        >
+          {t("learn:gradeHard")}
+        </Button>
+        <Button
+          autoFocus
+          onClick={() => handleContinue(Grade.Good)}
+          icon="check"
+          className="primary"
+        >
+          {t("learn:gradeGood")}
+        </Button>
+        <Button
+          onClick={() => handleContinue(Grade.Easy)}
+          icon="bolt"
+          variant="transparent"
+        >
+          {t("learn:gradeEasy")}
+        </Button>
+      </nav>
+    </>
+  );
 
   return (
     <main className="responsive">
@@ -384,15 +427,19 @@ export default function LearnPage({ loaderData }: Route.ComponentProps) {
                       </div>
                       {/* </article> */}
                       <Space />
-                      <Button
-                        autoFocus
-                        onClick={() => handleContinue()}
-                        icon="arrow_forward"
-                        size="large"
-                        responsive
-                      >
-                        {t("learn:continue")}
-                      </Button>
+                      {isAskMeGrader ? (
+                        gradeButtons
+                      ) : (
+                        <Button
+                          autoFocus
+                          onClick={() => handleContinue()}
+                          icon="arrow_forward"
+                          size="large"
+                          responsive
+                        >
+                          {t("learn:continue")}
+                        </Button>
+                      )}
                     </div>
                   ) : (
                     <div className="center-align responsive">
@@ -421,23 +468,27 @@ export default function LearnPage({ loaderData }: Route.ComponentProps) {
                         </nav>
                       </nav>
                       <Space />
-                      <nav className="responsive center-align">
-                        <Button
-                          autoFocus
-                          onClick={() => handleContinue()}
-                          icon="arrow_forward"
-                        >
-                          {t("learn:continue")}
-                        </Button>
-                        <Button
-                          data-override="true"
-                          variant="transparent"
-                          onClick={handleOverride}
-                          icon="check"
-                        >
-                          {t("learn:overrideCorrect")}
-                        </Button>
-                      </nav>
+                      {isOverridden ? (
+                        gradeButtons
+                      ) : (
+                        <nav className="responsive center-align">
+                          <Button
+                            autoFocus
+                            onClick={() => handleContinue()}
+                            icon="arrow_forward"
+                          >
+                            {t("learn:continue")}
+                          </Button>
+                          <Button
+                            data-override="true"
+                            variant="transparent"
+                            onClick={handleOverride}
+                            icon="check"
+                          >
+                            {t("learn:overrideCorrect")}
+                          </Button>
+                        </nav>
+                      )}
                     </div>
                   )}
                 </nav>

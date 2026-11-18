@@ -4,7 +4,7 @@
     "greetingMorning": "Goedemorgen, {{name}}!",
     "greetingEvening": "Goedenavond, {{name}}!",
     "description": "Librelearn is een gratis en open-source leerplatform.",
-    "openSessions": "Openstaande sessies",
+    "openSessions": "Hervat leren",
     "noOpenSessions": "Geen openstaande sessies.",
     "itemsRemaining": "{{count}} over",
     "unnamedSession": "Leersessie"
@@ -128,7 +128,11 @@
     "onlyTestSupported": "Alleen toets werkt voor nu",
     "showAnswer": "Toon antwoord",
     "know": "Ik wist het",
-    "dontKnow": "Niet geweten"
+    "dontKnow": "Niet geweten",
+    "howWellDidYouKnow": "Hoe goed wist je het?",
+    "gradeHard": "Moeilijk",
+    "gradeGood": "Goed",
+    "gradeEasy": "Makkelijk"
   },
   "icons": {
     "from": "Van",

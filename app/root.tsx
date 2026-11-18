@@ -17,6 +17,11 @@ import "./app.css";
 import ui from "beercss";
 import { BeerProviders } from "@siemsiem/beerreact";
 
+// we importen dit zodat het altijd geladen is
+// mogelijk bad practice maar het maakt ons leven makkelijker
+import { noGradeMaker } from "~/components/learn/graderExtension";
+
+
 initI18n();
 
 export const links: Route.LinksFunction = () => [
@@ -39,7 +44,7 @@ export async function clientLoader() {
   };
 }
 
-export function meta({}: Route.MetaArgs) {
+export function meta({ }: Route.MetaArgs) {
   return [
     { title: "Librelearn" },
     {
@@ -78,9 +83,9 @@ export function Layout({ children }: { children: React.ReactNode }) {
     UI_KLEUR_BEWERKBAAR:
       typeof process !== "undefined"
         ? process.env.UI_KLEUR_BEWERKBAAR !== "false" &&
-          process.env.UI_KLEUR_BEWERKBAAR !== "0" &&
-          process.env.UI_KLEUR_BEWERKBAAR !== "no" &&
-          process.env.UI_KLEUR_BEWERKBAAR !== "False"
+        process.env.UI_KLEUR_BEWERKBAAR !== "0" &&
+        process.env.UI_KLEUR_BEWERKBAAR !== "no" &&
+        process.env.UI_KLEUR_BEWERKBAAR !== "False"
         : true,
   };
 

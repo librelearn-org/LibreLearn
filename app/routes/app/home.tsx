@@ -38,17 +38,17 @@ export default function Home() {
 
           <p>{t("startPage:description")}</p>
 
-          <section style={{ marginTop: "2rem" }}>
-            <nav>
+          {openSessions.isPending ? (
+            <Progress />
+          ) : openSessions.data?.length ? (
+            <section style={{ marginTop: "2rem" }}>
+              <nav>
 
-              <h4>{t("startPage:openSessions")}</h4>
-              <div className="max"></div>
-              <Button onClick={() => { prugeAll.mutate() }} icon="delete">Purge</Button>
-            </nav>
+                <h4>{t("startPage:openSessions")}</h4>
+                <div className="max"></div>
+                <Button onClick={() => { prugeAll.mutate() }} icon="delete">Purge</Button>
+              </nav>
 
-            {openSessions.isPending ? (
-              <Progress />
-            ) : openSessions.data?.length ? (
               <List>
                 {openSessions.data.map((session) => {
                   const subjectIcon = session.list?.toLanguage
@@ -81,10 +81,8 @@ export default function Home() {
                   );
                 })}
               </List>
-            ) : (
-              <p>{t("startPage:noOpenSessions")}</p>
-            )}
-          </section>
+            </section>
+          ) : ""}
 
           <details style={{ marginTop: "1.5rem" }}>
             <summary>Meer info</summary>
