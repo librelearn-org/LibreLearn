@@ -8,6 +8,7 @@
 
   Een FOSS alternatief voor Studygo (WRTS) en soortgelijken platformen.
 </div>
+Librelearn is een FOSS alternatief voor Studygo (WRTS) en soortgelijken platformen. Het is gemaakt met privacy in het achterhoofd, en is volledig open source.
 
 ## Functies
 

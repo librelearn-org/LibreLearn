@@ -126,8 +126,8 @@ function mapItemToCardState(item: {
     })),
     metadata:
       item.metadata &&
-      typeof item.metadata === "object" &&
-      !Array.isArray(item.metadata)
+        typeof item.metadata === "object" &&
+        !Array.isArray(item.metadata)
         ? (item.metadata as Record<string, any>)
         : {},
   };
@@ -648,13 +648,13 @@ export const learnRouting = {
         history:
           item.history.length > 0
             ? {
-                create: item.history.map((h) => ({
-                  cardId: h.cardId ?? item.id,
-                  date: h.date ?? new Date(),
-                  answer: h.answer,
-                  grade: h.grade,
-                })),
-              }
+              create: item.history.map((h) => ({
+                cardId: h.cardId ?? item.id,
+                date: h.date ?? new Date(),
+                answer: h.answer,
+                grade: h.grade,
+              })),
+            }
             : undefined,
       });
 
@@ -742,11 +742,11 @@ export const learnRouting = {
                 item.history.length > 0
                   ? item.history
                   : saved.history.map((h) => ({
-                      cardId: item.id,
-                      date: h.date,
-                      answer: h.answer,
-                      grade: h.grade as Grade,
-                    })),
+                    cardId: item.id,
+                    date: h.date,
+                    answer: h.answer,
+                    grade: h.grade as Grade,
+                  })),
             };
           });
         }
@@ -919,11 +919,25 @@ export const learnRouting = {
     return await ctx.prisma.learnSession.findMany({
       where: {
         userId: ctx.user.id,
+        wachtrij: { some: {} },
       },
       include: {
         list: true,
+        _count: {
+          select: {
+            wachtrij: true,
+            lijst: true,
+          },
+        },
       },
     });
+  }),
+  removeAllUserLearnSessiosn: protectedProcedure.mutation(async ({ ctx }) => {
+    return await ctx.prisma.learnSession.deleteMany({
+      where: {
+        userId: ctx.user.id,
+      }
+    })
   }),
   getLearnConfig: protectedProcedure.query(async ({ ctx }) => {
     const user = await ctx.prisma.user.findUnique({

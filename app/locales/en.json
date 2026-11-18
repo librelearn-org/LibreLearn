@@ -131,7 +131,11 @@
     "welcome": "Welcome to",
     "greetingMorning": "Good morning, {{name}}!",
     "greetingEvening": "Good evening, {{name}}!",
-    "description": "This is not the complete version of Librelearn yet. This is only the beta version."
+    "description": "This is not the complete version of Librelearn yet. This is only the beta version.",
+    "openSessions": "Open sessions",
+    "noOpenSessions": "No open sessions.",
+    "itemsRemaining": "{{count}} remaining",
+    "unnamedSession": "Learn session"
   },
   "home": {
     "nav": {

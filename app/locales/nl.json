@@ -3,7 +3,11 @@
     "welcome": "Welkom op",
     "greetingMorning": "Goedemorgen, {{name}}!",
     "greetingEvening": "Goedenavond, {{name}}!",
-    "description": "Librelearn is een gratis en open-source leerplatform."
+    "description": "Librelearn is een gratis en open-source leerplatform.",
+    "openSessions": "Openstaande sessies",
+    "noOpenSessions": "Geen openstaande sessies.",
+    "itemsRemaining": "{{count}} over",
+    "unnamedSession": "Leersessie"
   },
   "home": {
     "nav": {
