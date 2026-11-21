@@ -16,6 +16,11 @@ Librelearn is een FOSS alternatief voor Studygo (WRTS) en soortgelijken platform
 - Lijsten leren
 - Binnenkort FSRS
 
+## issues
+
+Probleem gevonden?
+[Maak een issue aan op onze issue tracker!](https://github.com/librelearn-org/issues)
+
 ## Hosted versie
 
 Ben je niet van plan om zelf te hosten? Gebruik dan gewoon de hosted versie op [https://librelearn.nl](https://librelearn.nl).
