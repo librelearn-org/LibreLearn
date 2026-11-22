@@ -44,37 +44,37 @@ export const auth = betterAuth({
     genericOAuth({
       config: [
         ...(process.env.HACKCLUBAUTH_CLIENT_ID &&
-        process.env.HACKCLUBAUTH_CLIENT_SECRET
+          process.env.HACKCLUBAUTH_CLIENT_SECRET
           ? [
-              {
-                providerId: "Hackclub",
-                discoveryUrl:
-                  "https://auth.hackclub.com/.well-known/openid-configuration",
-                clientId: process.env.HACKCLUBAUTH_CLIENT_ID || "",
-                clientSecret: process.env.HACKCLUBAUTH_CLIENT_SECRET || "",
-                scopes: ["openid", "email", "profile"],
-                mapProfileToUser: (profile: Record<string, any>) => ({
-                  name: getFirstName(
-                    profile.name ?? profile.given_name ?? profile.family_name,
-                  ),
-                }),
-              },
-            ]
+            {
+              providerId: "Hackclub",
+              discoveryUrl:
+                "https://auth.hackclub.com/.well-known/openid-configuration",
+              clientId: process.env.HACKCLUBAUTH_CLIENT_ID || "",
+              clientSecret: process.env.HACKCLUBAUTH_CLIENT_SECRET || "",
+              scopes: ["openid", "email", "profile"],
+              mapProfileToUser: (profile: Record<string, any>) => ({
+                name: getFirstName(
+                  profile.name ?? profile.given_name ?? profile.family_name,
+                ),
+              }),
+            },
+          ]
           : [
-              {
-                providerId: "Hackclub",
-                discoveryUrl:
-                  "http://localhost:8092/.well-known/openid-configuration",
-                clientId: "",
-                clientSecret: "",
-                scopes: ["openid", "email", "profile"],
-                mapProfileToUser: (profile: Record<string, any>) => ({
-                  name: getFirstName(
-                    profile.name ?? profile.given_name ?? profile.family_name,
-                  ),
-                }),
-              },
-            ]),
+            {
+              providerId: "Hackclub",
+              discoveryUrl:
+                process.env.TESTING_AUTH || "http://localhost:8092/.well-known/openid-configuration",
+              clientId: "",
+              clientSecret: "",
+              scopes: ["openid", "email", "profile"],
+              mapProfileToUser: (profile: Record<string, any>) => ({
+                name: getFirstName(
+                  profile.name ?? profile.given_name ?? profile.family_name,
+                ),
+              }),
+            },
+          ]),
       ],
     }),
     admin(),

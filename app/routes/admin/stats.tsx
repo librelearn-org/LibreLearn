@@ -30,12 +30,6 @@ const COLORS = [
   "#64748b",
 ];
 
-const FORMAT_LABELS: Record<string, string> = {
-  toets: "Toets",
-  leren: "Leren",
-  gedachten: "Gedachten",
-};
-
 export default function AdminStats() {
   const trpc = useTRPC();
   const { t } = useTranslation();
@@ -66,12 +60,6 @@ export default function AdminStats() {
         woorden: item.woorden ?? item.wordsCount ?? 0,
       };
     }) ?? [];
-
-  const formatChartData =
-    stats?.learnFormats?.map((item) => ({
-      name: FORMAT_LABELS[item.format] ?? item.format,
-      sessies: item.count,
-    })) ?? [];
 
   const activeUsers = Math.max(
     0,
@@ -240,45 +228,6 @@ export default function AdminStats() {
               </Card>
             </div>
 
-            <div className="s12 m6">
-              <Card className="padding">
-                <h4>Leersessie formats</h4>
-                {formatChartData.length > 0 ? (
-                  <div
-                    style={{ width: "100%", height: 260, marginTop: "1rem" }}
-                  >
-                    <ResponsiveContainer width="100%" height="100%">
-                      <BarChart
-                        data={formatChartData}
-                        margin={{ top: 10, right: 20, left: 0, bottom: 10 }}
-                      >
-                        <CartesianGrid strokeDasharray="3 3" opacity={0.2} />
-                        <XAxis dataKey="name" />
-                        <YAxis allowDecimals={false} />
-                        <Bar
-                          dataKey="sessies"
-                          name="Sessies"
-                          fill="#3b82f6"
-                          radius={[6, 6, 0, 0]}
-                        >
-                          {formatChartData.map((_, index) => (
-                            <Cell
-                              key={`format-${index}`}
-                              fill={COLORS[(index + 2) % COLORS.length]}
-                            />
-                          ))}
-                        </Bar>
-                      </BarChart>
-                    </ResponsiveContainer>
-                  </div>
-                ) : (
-                  <p className="opacity-70 padding">
-                    Geen leersessies geregistreerd.
-                  </p>
-                )}
-              </Card>
-            </div>
-
             {/* User Status Chart */}
             <div className="s12 m6">
               <Card className="padding">
@@ -365,15 +314,6 @@ export default function AdminStats() {
             </div>
 
             <div className="grid l8 m6">
-              <div className="s12 l6">
-                <Card className="padding">
-                  <div className="row vertical center-align">
-                    <i className="extra">school</i>
-                    <h6 className="opacity-70">Leersessies</h6>
-                    <h3>{stats?.totalLearnSessions ?? 0}</h3>
-                  </div>
-                </Card>
-              </div>
               <div className="s12 l6">
                 <Card className="padding">
                   <div className="row vertical center-align">

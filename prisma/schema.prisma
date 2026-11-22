@@ -21,16 +21,12 @@ model User {
   banReason     String?
   banExpires    DateTime?
   theme         String    @default("023824")
-  learnConfig   Json      @default("{}")
 
   sessions      Session[]
   accounts      Account[]
   lists         list[]
-  trueFlags     flag[]             @relation("trueUser")
-  falseFlags    flag[]             @relation("falseUser")
-  learnSessions learnSession[]
-  cardProgress  userCardProgress[]
-  listSettings  userListSettings[]
+  trueFlags     flag[]    @relation("trueUser")
+  falseFlags    flag[]    @relation("falseUser")
 
   @@unique([email])
   @@map("user")
@@ -96,22 +92,14 @@ model config {
 }
 
 model list {
-  id            String          @id @unique @default(uuid())
-  name          String
-  listItems     listItemSaved[]
-  owner         User            @relation(fields: [ownerId], references: [id])
-  ownerId       String
-  language      String          @default("NL")
-  fromLanguage  String
-  toLanguage    String
-  learnSessions learnSession[]
-  userSettings  userListSettings[]
-}
-
-enum learnFormat {
-  toets
-  leren
-  gedachten
+  id           String          @id @unique @default(uuid())
+  name         String
+  listItems    listItemSaved[]
+  owner        User            @relation(fields: [ownerId], references: [id])
+  ownerId      String
+  language     String          @default("NL")
+  fromLanguage String
+  toLanguage   String
 }
 
 model listItemSaved {
@@ -121,81 +109,6 @@ model listItemSaved {
 
   list   list?   @relation(fields: [listId], references: [id])
   listId String?
-}
-
-model learnSessionItemHistory {
-  id     String   @id @unique @default(uuid())
-  cardId String?
-  date   DateTime @default(now())
-  answer String
-  grade  Int // Grade enum: 0 (Incorrect), 1 (Hard), 2 (Good), 3 (Easy)
-
-  item           learnSessionItem? @relation(fields: [itemId], references: [id], onDelete: Cascade)
-  itemId         String?
-  userProgress   userCardProgress? @relation(fields: [userProgressId], references: [id], onDelete: Cascade)
-  userProgressId String?
-
-  @@index([itemId])
-  @@index([userProgressId])
-}
-
-model userCardProgress {
-  id           String                    @id @default(uuid())
-  user         User                      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId       String
-  listIds      String[]                  @default([])
-  question     String
-  answer       String
-  phase        Int                       @default(0)
-  methodId     String                    @default("simple")
-  lastReviewed DateTime                  @default(now())
-  nextReview   DateTime                  @default(now())
-  metadata     Json                      @default("{}")
-  history      learnSessionItemHistory[]
-  updatedAt    DateTime                  @updatedAt
-
-  @@unique([userId, question, answer])
-}
-
-model userListSettings {
-  id             String      @id @default(uuid())
-  user           User        @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId         String
-  list           list        @relation(fields: [listId], references: [id], onDelete: Cascade)
-  listId         String
-  learnFormat    learnFormat @default(toets)
-  methodId       String      @default("simple")
-  graderId       String      @default("basic")
-  queueUpdaterId String      @default("simple")
-  updatedAt      DateTime    @updatedAt
-
-  @@unique([userId, listId])
-}
-
-model learnSessionItem {
-  id               String                    @id @unique @default(uuid())
-  question         String                    @default("Niet goed dit")
-  answer           String                    @default("slecht")
-  phase            Int                       @default(0)
-  methodId         String                    @default("simple")
-  lastReviewed     DateTime                  @default(now())
-  nextReview       DateTime                  @default(now())
-  metadata         Json                      @default("{}") // zucht
-  history          learnSessionItemHistory[]
-  wachtrijSessions learnSession[]            @relation("sessionWachtrij")
-  lijstSessions    learnSession[]            @relation("sessionLijst")
-}
-
-model learnSession {
-  id          String             @id @unique @default(uuid())
-  owner       User               @relation(fields: [userId], references: [id])
-  userId      String
-  wachtrij    learnSessionItem[] @relation("sessionWachtrij")
-  lijst       learnSessionItem[] @relation("sessionLijst")
-  list        list?              @relation(fields: [listId], references: [id])
-  listId      String?
-  learnFormat learnFormat        @default(toets)
-  config      Json               @default("{}")
 }
 
 model flag {

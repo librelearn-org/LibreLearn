@@ -12,10 +12,8 @@ import {
   classNames,
   Flex,
   List,
-  menuHelper,
   Progress,
   Space,
-  SplitButton,
   useDialog,
   useToast,
 } from "@siemsiem/beerreact";
@@ -44,25 +42,6 @@ export default function view({ params }: Route.ComponentProps) {
       { enabled: !!(listId || params.listId) },
     ),
   );
-
-  const listLearnHistData = useQuery(
-    trpc.learn.getListCardProgress.queryOptions(
-      { id: listId || params.listId },
-      { enabled: !!(listId || params.listId) },
-    )
-  )
-
-  const startSession = useMutation({
-    ...trpc.learn.upsertLearnSession.mutationOptions(),
-    onSuccess(session) {
-      navigate(`/app/learn/${session.id}`);
-    },
-  });
-
-  const handleStartLearn = () => {
-    if (!list.data) return;
-    navigate("/app/sessionstart/" + list.data.id);
-  };
 
   const verwijder = useMutation({
     ...trpc.learn.removeList.mutationOptions(),
@@ -141,13 +120,6 @@ export default function view({ params }: Route.ComponentProps) {
         </h5>
         <Space />
         <nav className="scroll">
-          <SplitButton
-            menu={menuHelper({ menuData: [] })}
-            disabled={startSession.isPending || !list.data?.listItems.length}
-            onClick={handleStartLearn}
-          >
-            {t("learn:learnBtn")}
-          </SplitButton>
           {(user.id === list.data?.ownerId || user.role === "admin") && (
             <>
               <Button

@@ -107,8 +107,6 @@ export const adminRouter = {
       totalUsers,
       activeUsersCount,
       bannedUsers,
-      totalLearnSessions,
-      learnFormatGrouped,
     ] = await Promise.all([
       ctx.prisma.list.findMany({
         select: {
@@ -146,13 +144,6 @@ export const adminRouter = {
           banned: true,
         },
       }),
-      ctx.prisma.learnSession.count(),
-      ctx.prisma.learnSession.groupBy({
-        by: ["learnFormat"],
-        _count: {
-          id: true,
-        },
-      }),
     ]);
 
     const inactiveUsersCount = Math.max(0, totalUsers - activeUsersCount);
@@ -181,11 +172,6 @@ export const adminRouter = {
       }))
       .sort((a, b) => b.count - a.count);
 
-    const learnFormats = learnFormatGrouped.map((f) => ({
-      format: f.learnFormat,
-      count: f._count.id,
-    }));
-
     return {
       vakkenData,
       totalLists,
@@ -195,8 +181,6 @@ export const adminRouter = {
       inactiveUsers: inactiveUsersCount,
       bannedUsers,
       activeUserSessions,
-      totalLearnSessions,
-      learnFormats,
     };
   }),
 } satisfies TRPCRouterRecord;

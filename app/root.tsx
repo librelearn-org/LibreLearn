@@ -16,11 +16,7 @@ import type { Route } from "./+types/root";
 import "./app.css";
 import ui from "beercss";
 import { BeerProviders } from "@siemsiem/beerreact";
-
-// we importen dit zodat het altijd geladen is
-// mogelijk bad practice maar het maakt ons leven makkelijker
-import { noGradeMaker } from "~/components/learn/graderExtension";
-
+import "~/components/learn/graderExtension";
 
 initI18n();
 
