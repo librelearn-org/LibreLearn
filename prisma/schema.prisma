@@ -22,11 +22,14 @@ model User {
   banExpires    DateTime?
   theme         String    @default("023824")
 
-  sessions      Session[]
-  accounts      Account[]
-  lists         list[]
-  trueFlags     flag[]    @relation("trueUser")
-  falseFlags    flag[]    @relation("falseUser")
+  sessions               Session[]
+  accounts               Account[]
+  lists                  list[]
+  trueFlags              flag[]                  @relation("trueUser")
+  falseFlags             flag[]                  @relation("falseUser")
+  learnSessions          learnSession[]
+  userPermanentCardDatas userPermanentCardData[]
+  listSettings           userListSettings[]
 
   @@unique([email])
   @@map("user")
@@ -92,14 +95,16 @@ model config {
 }
 
 model list {
-  id           String          @id @unique @default(uuid())
-  name         String
-  listItems    listItemSaved[]
-  owner        User            @relation(fields: [ownerId], references: [id])
-  ownerId      String
-  language     String          @default("NL")
-  fromLanguage String
-  toLanguage   String
+  id            String             @id @unique @default(uuid())
+  name          String
+  listItems     listItemSaved[]
+  owner         User               @relation(fields: [ownerId], references: [id])
+  ownerId       String
+  language      String             @default("NL")
+  fromLanguage  String
+  toLanguage    String
+  learnSessions learnSession[]
+  userSettings  userListSettings[]
 }
 
 model listItemSaved {
@@ -107,8 +112,116 @@ model listItemSaved {
   vraag    String
   antwoord String
 
-  list   list?   @relation(fields: [listId], references: [id])
+  list   list?   @relation(fields: [listId], references: [id], onDelete: Cascade)
   listId String?
+}
+
+enum learnSessionTypes {
+  SESSION
+  SPACED
+}
+
+enum learnFormat {
+  toets
+  leren
+  gedachten
+}
+
+model learnSession {
+  id             String             @id @default(uuid())
+  type           learnSessionTypes
+  learnFormat    learnFormat        @default(gedachten)
+  owner          User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId         String
+  list           list?              @relation(fields: [listId], references: [id], onDelete: SetNull)
+  listId         String?
+  config         Json               @default("{}")
+  cards          learnSessionCard[]
+  createdAt      DateTime           @default(now())
+  updatedAt      DateTime           @updatedAt
+  methodId       String             @default("simple")
+  graderId       String             @default("basic")
+  queueUpdaterId String             @default("simple")
+
+  @@index([userId, learnFormat, listId])
+}
+
+model learnSessionCard {
+  id             String        @id @default(uuid())
+  question       String
+  answer         String
+  phase          Int           @default(2) // Phase.NotIntroduced
+  queueIndex     Int? // null = klaar, 0..n = exacte volgorde in wachtrij
+  lastReviewed   DateTime?
+  nextReview     DateTime      @default(now())
+  metaData       Json          @default("{}")
+  history        cardHistory[]
+  learnSession   learnSession  @relation(fields: [learnSessionId], references: [id], onDelete: Cascade)
+  learnSessionId String
+  methodId       String        @default("simple")
+
+  @@index([learnSessionId, queueIndex])
+}
+
+// deze voegt same met de linked metadata om een idee van hoe je een kaart moet onthouden en hoe je het hebt geleerd te behouden na het verwijderen van de session
+model userPermanentCardData {
+  id        String           @id @default(uuid())
+  owner     User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    String
+  question  String
+  answer    String
+  metaData  linkedMetaData[]
+  history   cardHistory[]
+  updatedAt DateTime         @updatedAt
+
+  @@unique([userId, question, answer])
+  @@index([userId])
+}
+
+model linkedMetaData {
+  id                      String                @id @default(uuid())
+  method                  String
+  phase                   Int                   @default(2) // Phase.NotIntroduced
+  lastReviewed            DateTime?
+  nextReview              DateTime              @default(now())
+  data                    Json                  @default("{}")
+  userPermanentCardData   userPermanentCardData @relation(fields: [userPermanentCardDataId], references: [id], onDelete: Cascade)
+  userPermanentCardDataId String
+
+  @@unique([userPermanentCardDataId, method])
+  @@index([method, nextReview])
+}
+
+model userListSettings {
+  id          String            @id @default(uuid())
+  user        User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId      String
+  list        list              @relation(fields: [listId], references: [id], onDelete: Cascade)
+  listId      String
+  type        learnSessionTypes @default(SESSION)
+  learnFormat learnFormat       @default(gedachten)
+
+  targetDate DateTime?
+  config     Json      @default("{}")
+  updatedAt  DateTime  @updatedAt
+
+  @@unique([userId, listId])
+}
+
+model cardHistory {
+  id                      String                 @id @default(uuid())
+  cardId                  String?
+  date                    DateTime               @default(now())
+  answer                  String
+  grade                   Int // Grade enum: 0 (Incorrect), 1 (Hard), 2 (Good), 3 (Easy)
+  userPermanentCardData   userPermanentCardData? @relation(fields: [userPermanentCardDataId], references: [id], onDelete: Cascade)
+  userPermanentCardDataId String?
+  learnSessionCard        learnSessionCard?      @relation(fields: [learnSessionCardId], references: [id], onDelete: SetNull)
+  learnSessionCardId      String?
+
+  @@index([userPermanentCardDataId])
+  @@index([learnSessionCardId])
+  @@map("learnSessionItemHistory")
 }
 
 model flag {
