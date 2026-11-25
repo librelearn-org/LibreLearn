@@ -129,7 +129,7 @@ enum learnFormat {
 
 model learnSession {
   id             String             @id @default(uuid())
-  type           learnSessionTypes
+  type           learnSessionTypes  @default(SESSION)
   learnFormat    learnFormat        @default(gedachten)
   owner          User               @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId         String
@@ -138,7 +138,7 @@ model learnSession {
   config         Json               @default("{}")
   cards          learnSessionCard[]
   createdAt      DateTime           @default(now())
-  updatedAt      DateTime           @updatedAt
+  updatedAt      DateTime           @default(now()) @updatedAt
   methodId       String             @default("simple")
   graderId       String             @default("basic")
   queueUpdaterId String             @default("simple")
